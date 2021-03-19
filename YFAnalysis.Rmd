@@ -1,10 +1,11 @@
 ---
-title: 'Machine Learning and Market Data: An Exercise In Predictive Modelling'
-author: "Trevor Drees"
-date: "18 March 2021"
+title: 'Machine Learning and Stock Market Data'
+subtitle: \textit{An Exercise In Predictive Modelling}
+author: "Trevor H. Drees"
 output:
   pdf_document:
     fig_caption: yes
+    toc: true
 editor_options: 
   chunk_output_type: console
 header-includes:
@@ -32,3 +33,57 @@ library(pROC)
 library(car)
 
 ```
+
+# Disclaimer
+
+# Introduction
+
+# Predictive Analysis: S&P 500
+
+## Data
+
+## Parametric Methods
+
+### Logistic Regression
+
+### Discriminant Analysis
+
+## Non-Parametric Methods
+
+### K-Nearest Neighbours
+
+### Support Vector Machines
+
+# Predictive Analysis: NASDAQ Composite
+
+## Data
+
+## Parametric Methods
+
+### Logistic Regression
+
+### Discriminant Analysis
+
+## Non-Parametric Methods
+
+### K-Nearest Neighbours
+
+### Support Vector Machines
+
+# Predictive Analysis: Dow Jones Industrial Average
+
+## Data
+
+## Parametric Methods
+
+### Logistic Regression
+
+### Discriminant Analysis
+
+## Non-Parametric Methods
+
+### K-Nearest Neighbours
+
+### Support Vector Machines
+
+# Conclusions
