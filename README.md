@@ -20,4 +20,8 @@ An exploration of using machine learning for predictive modelling on three major
 
 ## Scripts
 
-**YFData** *(.py)* - Script that extracts index data from Yahoo Finance, adds lage variables, and saves it as a CSV file.
+**YFanalysis** *(.Rmd)* Script and markdown for conducting analyses and rendering output to PDF.
+
+**YFData** *(.py)* - Script that extracts index data from Yahoo Finance, adds lag variables, and saves it as a CSV file.
+
+**YFData** *(.R)* - Script that cleans the index data prior to analysis.
