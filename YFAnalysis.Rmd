@@ -1,0 +1,34 @@
+---
+title: 'Machine Learning and Market Data: An Exercise In Predictive Modelling'
+author: "Trevor Drees"
+date: "18 March 2021"
+output:
+  pdf_document:
+    fig_caption: yes
+editor_options: 
+  chunk_output_type: console
+header-includes:
+- \usepackage{float}
+- \usepackage{booktabs}
+- \usepackage[width = 0.96\textwidth]{caption}
+- \usepackage[hang, flushmargin]{footmisc}
+urlcolor: blue
+---
+
+\setlength{\skip\footins}{0.35in}
+
+```{r setup, include = FALSE}
+
+knitr::opts_chunk$set(include = FALSE)
+
+# Load libraries
+library(MASS)
+library(corrplot)
+library(plyr)
+library(tidyverse)
+library(reshape2)
+library(knitr)
+library(pROC)
+library(car)
+
+```
