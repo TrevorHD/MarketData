@@ -20,7 +20,7 @@ urlcolor: blue
 
 ```{r setup, include = FALSE}
 
-knitr::opts_chunk$set(include = FALSE)
+knitr::opts_chunk$set(echo = FALSE)
 
 # Load libraries
 library(MASS)
@@ -32,6 +32,13 @@ library(knitr)
 library(pROC)
 library(car)
 
+# Tidy data
+source("https://raw.githubusercontent.com/TrevorHD/MarketData/master/YFData.R")
+
+# Set seed for (pseudo) RNG so results can be replicated
+RNGkind(sample.kind = "Rounding")
+set.seed(93742)
+
 ```
 
 # Disclaimer
@@ -42,9 +49,152 @@ library(car)
 
 ## Data
 
+``` {r}
+
+# Split data into training and test set
+trainVec <- sample(1:nrow(SPWeekly), size = nrow(SPWeekly)*0.7, replace = FALSE)
+SPWeekly <- SPWeekly[SPWeekly$Direction != "Zero", ]
+SPWeekly$Direction <- factor(SPWeekly$Direction)
+SPWeeklyTrain <- SPWeekly[trainVec, ]
+SPWeeklyTest <- SPWeekly[-trainVec, ]
+
+```
+
+``` {r Figure1, fig.height = 4.4, fig.cap = "\\label{fig:Figure1} Correlations bewteen year, volume, percent change, and the various lag variables for the `Weekly` data on the S&P 500. The area of squares below the diagonal are proportional to the absolute value of the corresponding correlation coefficients."}
+
+# Plots of correlations between variables
+SPWeekly %>% mutate(Direction = ifelse(Direction == "Up", 1, 0)) %>% cor() %>% 
+corrplot(method = "square", type = "lower", win.asp = 0.7,
+         tl.pos = "tp", tl.col = "black")
+SPWeekly %>% mutate(Direction = ifelse(Direction == "Up", 1, 0)) %>% cor() %>% 
+corrplot(add = TRUE, method = "number", type = "upper", 
+         number.cex = 0.8, col = "black", tl.pos = "n", cl.pos = "n")
+
+```
+
+``` {r Figure2, fig.height = 8, fig.cap = "\\label{fig:Figure2} Plots of S&P 500 weekly percent change against percent change of up to 5 weeks prior. Autocorrelation in weekly percent change corresponding to 1-5 week lag times is shown in the bottom-right panel; dashed blue lines represent the 95% confidence interval for the autocorrelation."}
+
+# Note: excludes the 1 week where market dropped almost 40%
+par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
+plot(SPWeekly$PctChange, SPWeekly$Lag1, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(20, -20),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (1-Week Lag)")
+plot(SPWeekly$PctChange, SPWeekly$Lag2, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(20, -20),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (2-Week Lag)")
+plot(SPWeekly$PctChange, SPWeekly$Lag3, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(20, -20),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (3-Week Lag)")
+plot(SPWeekly$PctChange, SPWeekly$Lag4, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(20, -20),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (4-Week Lag)")
+plot(SPWeekly$PctChange, SPWeekly$Lag5, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(20, -20),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (5-Week Lag)")
+acf(SPWeekly$PctChange, lag.max = 5, lwd = 4, main = NA, xlab = "Lag (Weeks)",
+    ylab = "Autocorrelation")
+par(mfrow = c(1, 1))
+
+```
+
+``` {r Figure3, fig.height = 3.9, fig.cap = "\\label{fig:Figure3} Relative value of the S&P 500 over time compared to its 1990 value, as indicated by the black line. The chart on the bottom represents positive (green) and negative (red) weekly percent changes."}
+
+# Plot total return as function of time; include candlestick diagram
+par(mar = c(5, 4, 2, 2) + 0.1)
+colourList <- replace(rep("green", nrow(SPWeekly)), which(SPWeekly$PctChange < 0), "red")
+barplot(abs(SPWeekly$PctChange), col = colourList, border = colourList, ylim = c(0, 50), axes = FALSE)
+par(new = TRUE)
+totalReturn <- c()
+for(i in 1:nrow(SPWeekly)){
+  totalReturn <- c(totalReturn, prod((SPWeekly$PctChange[1:i]/100)+1))}
+plot(1:nrow(SPWeekly), totalReturn, type = "l", ylim = c(0, 5), xaxt = "n", 
+     xlab = NA, ylab = "Proportion of Initial Value")
+axis(1, at = 1773*(0:7)/7, labels = seq(1986, 2021, length.out = 8))
+title(xlab = "Year")
+
+```
+
 ## Parametric Methods
 
 ### Logistic Regression
+
+``` {r}
+
+# Function to perform logistic regression and output predictive accuracy
+logreg <- function(formula, dataTrain, dataTest, output){
+  
+  # Fit logistic regression using training data
+  glm.fit <- glm(formula, data = dataTrain, family = binomial)
+  
+  # Classify test data; get posterior probabilities
+  glm.probs <- predict(glm.fit, dataTest, type = "response")
+  glm.pred <- rep("Down", length(glm.probs))
+  glm.pred[glm.probs >= 0.5] <- "Up"
+  
+  # Confusion matrix of classified observations
+  # Must manually add Down row if model never predicts Down
+  confMatrix <- table(glm.pred, dataTest$Direction)
+  if(nrow(confMatrix) == 1){
+    confMatrix <- rbind(c(0, 0), confMatrix)}
+  rownames(confMatrix) <- c("[P]Down", "[P]Up")
+  colnames(confMatrix) <- c("[O]Down", "[O]Up")
+  
+  # Overall predictive accuracy
+  accuracy <- sum(diag(confMatrix)/sum(confMatrix))
+  
+  # Sensitivity and specificity
+  specificity <- confMatrix[1, 1]/sum(confMatrix[, 1])
+  sensitivity <- confMatrix[2, 2]/sum(confMatrix[, 2])
+  
+  # Positive and negative predictive value
+  npv <- confMatrix[1, 1]/sum(confMatrix[1, ])
+  ppv <- confMatrix[2, 2]/sum(confMatrix[2, ])
+  
+  # Return individual outputs or list of all outputs
+  if(output == "all"){
+    return(list(confMatrix = confMatrix, accuracy = accuracy, specificity = specificity,
+              sensitivity = sensitivity, npv = npv, ppv = ppv))}
+  if(output == "confMatrix"){
+    return(confMatrix)}
+  if(output == "accuracy"){
+    return(accuracy)}
+  if(output == "specificity"){
+    return(specificity)}
+  if(output == "sensitivity"){
+    return(sensitivity)}
+  if(output == "npv"){
+    return(npv)}
+  if(output == "ppv"){
+    return(ppv)}}
+
+```
+
+``` {r}
+
+# Function to fit logistic regression to all possible combinations of n variables
+# Outputs value and combination of variables for desired prediction metric
+logreg.comb <- function(dataTrain, dataTest, output, n){
+  combn(names(dataTrain)[-c(1:2)], n) %>% 
+    apply(FUN = paste0, MARGIN = 2, collapse = "+") %>% 
+    paste0("Direction~", .) %>% 
+    sapply(FUN = logreg, dataTrain = dataTrain, dataTest = dataTest, output = output) %>% 
+    sort() %>%
+    return()}
+
+# Best models for accuracy, sensitivity, specificity, PPV, and NPV
+# will clean this section to make it look nicer
+test <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain,
+              dataTest = SPWeeklyTest, output = "accuracy"))
+test[test == max(test)]
+test <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain,
+              dataTest = SPWeeklyTest, output = "sensitivity"))
+test[test == max(test)]
+test <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain,
+              dataTest = SPWeeklyTest, output = "specificity"))
+test[test == max(test)]
+test <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain,
+              dataTest = SPWeeklyTest, output = "ppv"))
+test[test == max(test)]
+test <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain,
+              dataTest = SPWeeklyTest, output = "npv"))
+test[test == max(test)]
+
+```
 
 ### Discriminant Analysis
 
