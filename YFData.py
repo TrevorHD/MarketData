@@ -14,7 +14,7 @@ def getData(ticker, interval):
 
 # Define function to calculate percent change on up to 5-week lag
 def pctChange(data):
-    data["PctChange"] = (data.Close - data.Open)/data.Close*100  
+    data["PctChange"] = (data.Close - data.Open)/data.Open*100  
     for i in [1, 2, 3, 4, 5]:
        data["Lag" + str(i)] = data.PctChange.shift(i)
     cons = [data.PctChange > 0, data.PctChange < 0, data.PctChange == 0]
