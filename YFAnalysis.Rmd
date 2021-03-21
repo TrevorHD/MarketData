@@ -43,7 +43,13 @@ set.seed(93742)
 
 # Disclaimer
 
+Trading stocks, ETFs, options, futures, or any other financial assets or derivatives has inherent risks that should be understood before making any substantial investments; it is the investor's responsibility to determine the appropriate level of risk they can safely subject themself to. The contents of this work are not, in any form, meant to serve as investment advice, but rather as exploratory analysis of stock market data with the goal being able to predict changes in future conditions based solely off of conditions at a prior date. As such, the author bears no liability for any damages or losses, realised or unrealised, incurred by the reader should they choose to use the models in these analyses for any sort of investment guidance.
+
 # Introduction
+
+Stock market data can be incredibly difficult to predict from just stock prices alone; changes in value of a particular stock or ETF today, last week, or last month do not necessarily dictate how it will move today. Often, fluctuations in value are instead driven by shifts in investor confidence due to changes in government monetary policy, outlook on a company's so-called "fundamentals", or disruptions in activity of a particular company or sector, among many other possible factors. While a well-diversified portfolio will almost certainly increase in value over the long run without frequent intervention, the ability to predict short-term changes and fluctuations based off market data is incredibly useful to active traders that are less concerned with holding long positions. For investors that hold particular investments over the course of only days or weeks, short-term changes are much more important for deciding when to buy and sell a stock or whether to make a put or call when running options.
+
+Here, we seek to create models that can predict short-term behaviour and whether the market will increase or decrease a) in a given day, using the performance of the previous 5 days and b) in a given week, using the performance of the previous 5 weeks. To inform inform our models, we use data from three major U.S. stock market indices: the S&P 500, NASDAQ Composite, and Dow Jones Industrial Average. For each index and each time interval (daily or weekly), we compare models derived from a variety of classification frameworks, including parametric methods such as logistic regression and discriminant analysis as well as non-parametric methods such as $k$-nearest neighbours and support vector machines.
 
 # Predictive Analysis: S&P 500
 
@@ -94,7 +100,7 @@ par(mfrow = c(1, 1))
 
 ``` {r Figure3, fig.height = 3.9, fig.cap = "\\label{fig:Figure3} Relative value of the S&P 500 over time compared to its 1990 value, as indicated by the black line. The chart on the bottom represents positive (green) and negative (red) weekly percent changes."}
 
-# Plot total return as function of time; include candlestick diagram
+# Check this chart for accuracy, as it doesn't quite match up with the YF chart
 par(mar = c(5, 4, 2, 2) + 0.1)
 colourList <- replace(rep("green", nrow(SPWeekly)), which(SPWeekly$PctChange < 0), "red")
 barplot(abs(SPWeekly$PctChange), col = colourList, border = colourList, ylim = c(0, 50), axes = FALSE)
