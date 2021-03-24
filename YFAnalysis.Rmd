@@ -226,19 +226,70 @@ logreg.comb <- function(dataTrain, dataTest, output, n){
 # will clean this section to make it look nicer
 test <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain,
               dataTest = SPWeeklyTest, output = "accuracy"))
-test[test == max(test)]
-test <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain,
-              dataTest = SPWeeklyTest, output = "sensitivity"))
-test[test == max(test)]
-test <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain,
-              dataTest = SPWeeklyTest, output = "specificity"))
-test[test == max(test)]
+sort(test, decreasing = TRUE)[1:10]
+#test <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain,
+#              dataTest = SPWeeklyTest, output = "sensitivity"))
+#sort(test, decreasing = TRUE)[1:10]
+#test <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain,
+#              dataTest = SPWeeklyTest, output = "specificity"))
+#sort(test, decreasing = TRUE)[1:10]
+#test <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain,
+#              dataTest = SPWeeklyTest, output = "ppv"))
+#sort(test, decreasing = TRUE)[1:10]
+#test <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain,
+#              dataTest = SPWeeklyTest, output = "npv"))
+#sort(test, decreasing = TRUE)[1:10]
+
+testlist <- lapply(names(sort(test, decreasing = TRUE)[1:10]), FUN = glm, data = SPWeeklyTrain, family = binomial)
+
+lapply(testlist, FUN = coef) %>% 
+  lapply(FUN = as.list) -> coeflist
+
+# Create table of coefficients, AIC, max VIF, and accuracy
+meh <- cbind(do.call(rbind.fill, lapply(coeflist, as.data.frame)),
+             rep(0, 10),
+             sapply(testlist, FUN = AIC),
+             as.numeric(sort(test, decreasing = TRUE)[1:10]))
+names(meh)[c(1, 9, 10, 11)] <- c("Intercept", "Lag1", "AIC", "Accuracy")
+
+# max vif
+sapply(sapply(testlist, FUN = vif), FUN = max)
+
+# Reorder columns
+meh <- meh[, c(1, 9, 2:4, 8, 5:7, 10:11)]
+
+
+
 test <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain,
               dataTest = SPWeeklyTest, output = "ppv"))
-test[test == max(test)]
-test <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain,
-              dataTest = SPWeeklyTest, output = "npv"))
-test[test == max(test)]
+sort(test, decreasing = TRUE)[1:10]
+
+testlist <- lapply(names(sort(test, decreasing = TRUE)[1:10]), FUN = glm, data = SPWeeklyTrain, family = binomial)
+
+lapply(testlist, FUN = coef) %>% 
+  lapply(FUN = as.list) -> coeflist
+
+# Create table of coefficients, AIC, max VIF, and accuracy
+meh2 <- cbind(do.call(rbind.fill, lapply(coeflist, as.data.frame)),
+             sapply(testlist, FUN = AIC),
+             as.numeric(sort(test, decreasing = TRUE)[1:10]))
+names(meh2)[c(1, 10, 11)] <- c("Intercept", "AIC", "PPV")
+
+# max vif
+sapply(sapply(testlist, FUN = vif), FUN = max)
+
+# Reorder columns
+meh2 <- meh2[, c(1, 8, 2:3, 6:7, 9, 4, 5, 10:11)]
+
+```
+
+``` {r}
+
+options(knitr.kable.NA = '')
+kable(round(meh, 3))
+
+options(knitr.kable.NA = '')
+kable(round(meh2, 3))
 
 ```
 
