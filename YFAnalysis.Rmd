@@ -165,7 +165,7 @@ title(xlab = "Year")
 logreg <- function(formula, dataTrain, dataTest, output){
   
   # Fit logistic regression using training data
-  glm.fit <- glm(formula, data = dataTrain, family = binomial)
+  glm.fit <- glm(formula, data = dataTrain, family = "binomial")
   
   # Classify test data; get posterior probabilities
   glm.probs <- predict(glm.fit, dataTest, type = "response")
@@ -222,74 +222,101 @@ logreg.comb <- function(dataTrain, dataTest, output, n){
     sort() %>%
     return()}
 
-# Best models for accuracy, sensitivity, specificity, PPV, and NPV
-# will clean this section to make it look nicer
-test <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain,
-              dataTest = SPWeeklyTest, output = "accuracy"))
-sort(test, decreasing = TRUE)[1:10]
-#test <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain,
-#              dataTest = SPWeeklyTest, output = "sensitivity"))
-#sort(test, decreasing = TRUE)[1:10]
-#test <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain,
-#              dataTest = SPWeeklyTest, output = "specificity"))
-#sort(test, decreasing = TRUE)[1:10]
-#test <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain,
-#              dataTest = SPWeeklyTest, output = "ppv"))
-#sort(test, decreasing = TRUE)[1:10]
-#test <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain,
-#              dataTest = SPWeeklyTest, output = "npv"))
-#sort(test, decreasing = TRUE)[1:10]
+# Find top 10 models for accuracy
+SPWeeklyTop <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain,
+                      dataTest = SPWeeklyTest, output = "accuracy"))
+sort(SPWeeklyTop, decreasing = TRUE)[1:10]
 
-testlist <- lapply(names(sort(test, decreasing = TRUE)[1:10]), FUN = glm, data = SPWeeklyTrain, family = binomial)
+# Code above can be modified to get top 10 models for sensitivity, specificity, and NPV
+# Not particularly useful, so they won't be used much in our analyses
 
-lapply(testlist, FUN = coef) %>% 
+# Get statistics from top 10 models in terms of accuracy
+SPWeeklyTopA <- lapply(names(sort(SPWeeklyTop, decreasing = TRUE)[1:10]),
+                       FUN = glm, data = SPWeeklyTrain, family = "binomial")
+
+# Get coefficients from top 10 models
+lapply(SPWeeklyTopA, FUN = coef) %>% 
+  lapply(FUN = as.list) -> coeflist
+
+# Create table of coefficients, AIC, and accuracy
+SPWeeklyTopATab <- cbind(do.call(rbind.fill, lapply(coeflist, as.data.frame)),
+                         rep(0, 10),
+                         sapply(SPWeeklyTopA, FUN = AIC),
+                         as.numeric(sort(SPWeeklyTop, decreasing = TRUE)[1:10]))
+names(SPWeeklyTopATab)[c(1, 9, 10, 11)] <- c("Intercept", "Lag1", "AIC", "Accuracy")
+
+# Calculate maximum VIF for each model
+sapply(sapply(SPWeeklyTopA, FUN = vif), FUN = max)
+
+# Reorder table columns
+SPWeeklyTopATab <- SPWeeklyTopATab[, c(1, 9, 2:4, 8, 5:7, 10:11)]
+
+# Find top 10 models for PPV
+SPWeeklyTop <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain,
+                      dataTest = SPWeeklyTest, output = "ppv"))
+sort(SPWeeklyTop, decreasing = TRUE)[1:10]
+
+# Get statistics from top 10 models in terms of PPV
+SPWeeklyTopP <- lapply(names(sort(SPWeeklyTop, decreasing = TRUE)[1:10]),
+                       FUN = glm, data = SPWeeklyTrain, family = "binomial")
+
+# Get coefficients from top 10 models
+lapply(SPWeeklyTopP, FUN = coef) %>% 
   lapply(FUN = as.list) -> coeflist
 
 # Create table of coefficients, AIC, max VIF, and accuracy
-meh <- cbind(do.call(rbind.fill, lapply(coeflist, as.data.frame)),
-             rep(0, 10),
-             sapply(testlist, FUN = AIC),
-             as.numeric(sort(test, decreasing = TRUE)[1:10]))
-names(meh)[c(1, 9, 10, 11)] <- c("Intercept", "Lag1", "AIC", "Accuracy")
+SPWeeklyTopPTab <- cbind(do.call(rbind.fill, lapply(coeflist, as.data.frame)),
+                         sapply(SPWeeklyTopP, FUN = AIC),
+                         as.numeric(sort(SPWeeklyTop, decreasing = TRUE)[1:10]))
+names(SPWeeklyTopPTab)[c(1, 10, 11)] <- c("Intercept", "AIC", "PPV")
 
-# max vif
-sapply(sapply(testlist, FUN = vif), FUN = max)
+# Calculate maximum VIF for each model
+sapply(sapply(SPWeeklyTopP, FUN = vif), FUN = max)
 
-# Reorder columns
-meh <- meh[, c(1, 9, 2:4, 8, 5:7, 10:11)]
+# Reorder table columns
+SPWeeklyTopPTab <- SPWeeklyTopPTab[, c(1, 8, 2:3, 6:7, 9, 4, 5, 10:11)]
 
+# Remove unneeded variables
+remove(SPWeeklyTop, coeflist)
 
-
-test <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain,
-              dataTest = SPWeeklyTest, output = "ppv"))
-sort(test, decreasing = TRUE)[1:10]
-
-testlist <- lapply(names(sort(test, decreasing = TRUE)[1:10]), FUN = glm, data = SPWeeklyTrain, family = binomial)
-
-lapply(testlist, FUN = coef) %>% 
-  lapply(FUN = as.list) -> coeflist
-
-# Create table of coefficients, AIC, max VIF, and accuracy
-meh2 <- cbind(do.call(rbind.fill, lapply(coeflist, as.data.frame)),
-             sapply(testlist, FUN = AIC),
-             as.numeric(sort(test, decreasing = TRUE)[1:10]))
-names(meh2)[c(1, 10, 11)] <- c("Intercept", "AIC", "PPV")
-
-# max vif
-sapply(sapply(testlist, FUN = vif), FUN = max)
-
-# Reorder columns
-meh2 <- meh2[, c(1, 8, 2:3, 6:7, 9, 4, 5, 10:11)]
+# Direction ~ Lag2 + Lag3 + Prev5Pct + Volume seems like the best candidate
+# 2nd highest accuracy and highest PPV
 
 ```
 
 ``` {r}
 
+# Print tables of top 10 logistic models for accuracy and PPV
 options(knitr.kable.NA = '')
-kable(round(meh, 3))
+kable(round(SPWeeklyTopATab, 3))
+kable(round(SPWeeklyTopPTab, 3))
 
-options(knitr.kable.NA = '')
-kable(round(meh2, 3))
+```
+
+``` {r Figure4, fig.height = 8, fig.cap = "\\label{fig:Figure4} Standardised deviance residuals (top) and standardised Pearson residuals (bottom) for the best model in the logistic regression framework. Solid red lines represent a loess fit to the residuals and should be approximately horizontal at zero; dotted red lines represent $\\pm$ 2 standard deviations on the residuals."}
+
+# Re-fit best model for easy plotting
+glm.fit <- glm(Direction ~ Lag2 + Lag3 + Prev5Pct + Volume, data = SPWeeklyTrain, family = "binomial")
+
+# Calculate standardised deviance and Pearson residuals for logistic regression
+hvals <- influence(glm.fit)$hat
+SRDeviance <- rstandard(glm.fit)
+SRPearson <- residuals(glm.fit, "pearson")/sqrt(1 - hvals)
+
+# Plot standardised deviance residuals
+par(mfrow = c(2, 1), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
+plot(predict(glm.fit, type = "response"), SRDeviance, xlab = "Fitted Probability",
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylim = c(-3, 3),
+     ylab = "Standardised Deviance Residuals")
+lines(lowess(predict(glm.fit), residuals(glm.fit)), col = "red", lwd = 1.5)
+abline(h = c(-2, 2), col = "red", lty = 3, lwd = 1.5)
+
+# Plot standardised Pearson residuals
+plot(predict(glm.fit, type = "response"), SRPearson, xlab = "Fitted Probability",
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylim = c(-3, 3),
+     ylab = "Pearson Deviance Residuals")
+lines(lowess(predict(glm.fit), residuals(glm.fit, "pearson")), col = "red", lwd = 1.5)
+abline(h = c(-2, 2), col = "red", lty = 3, lwd = 1.5)
 
 ```
 
