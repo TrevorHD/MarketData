@@ -34,7 +34,7 @@ for(i in 1:6){
            Prev5Pct = ((100 + Lag1)*(100 + Lag2)*(100 + Lag3)*(100 + Lag4)*(100 + Lag5)/(100^5) - 1)*100) -> data
   
   # Reorder columns
-  data <- data[, c(2, 8, 3:7, 9:10, 1)]
+  data <- data[, c(2, 1, 13:15, 3, 5, 7, 9, 11, 4, 6, 8, 10, 12)]
   
   # Assign data to variable
   assign(names[i], data)}
