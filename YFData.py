@@ -8,7 +8,7 @@ def getData(ticker, interval):
         interval = "1wk"
     elif interval == "daily":
         interval = "1d"
-    data = yf.download(ticker, start = "1980-01-01", end = "2021-01-01",
+    data = yf.download(ticker, start = "1985-01-01", end = "2021-01-01",
                        progress = False, interval = interval)
     return(data)
 
