@@ -14,13 +14,15 @@ def getData(ticker, interval):
 
 # Define function to calculate percent change on up to 5-week lag
 def pctChange(data):
-    data["PctChange"] = (data.Close - data.Open)/data.Open*100  
+    data["PctChange"] = (data.Close - data.Open)/data.Open*100 
+    data["BVolume"] = data.Volume/(1e9)
     for i in [1, 2, 3, 4, 5]:
        data["Lag" + str(i)] = data.PctChange.shift(i)
+       data["VLag" + str(i)] = data.BVolume.shift(i)
     cons = [data.PctChange > 0, data.PctChange < 0, data.PctChange == 0]
     vals = ["Up", "Down", "Zero"]
     data["Direction"] = np.select(cons, vals)   
-    data = data.drop(columns = ["Open", "High", "Low", "Close", "Adj Close"], inplace = True)
+    data = data.drop(columns = ["Open", "High", "Low", "Close", "Adj Close", "Volume"], inplace = True)
 
 # Collect data and write data to csv
 SPDaily = getData("^GSPC", "daily"); pctChange(SPDaily)
