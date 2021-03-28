@@ -407,10 +407,10 @@ par(mfrow = c(1, 1))
 
 ```
 
-``` {r Figure16, fig.height = 3.9, fig.cap = "\\label{fig:Figure16} Relative value of the S&P 500 over time compared to its 1986 value, as indicated by the black line. The chart on the bottom represents positive (green) and negative (red) weekly percent changes."}
+``` {r Figure16, fig.height = 7.9, fig.cap = "\\label{fig:Figure16} Relative value of the S&P 500 over time compared to its 1986 value (top) and distribution of daily percent changes (bottom). Note that in the bottom panel, the leftmost bin represents all days with a percent change less than -5, and rightmost bin represents all days with a percent change greater than 5."}
 
 # Check this chart for accuracy, as it doesn't quite match up with the YF chart
-par(mar = c(5, 4, 2, 2) + 0.1)
+par(mfrow = c(2, 1), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
 colourList <- replace(rep("green", nrow(SPWeekly)), which(SPWeekly$PctChange < 0), "red")
 barplot(abs(SPWeekly$PctChange), col = colourList, border = colourList, ylim = c(0, 50), axes = FALSE)
 par(new = TRUE)
@@ -421,6 +421,79 @@ plot(1:nrow(SPWeekly), totalReturn, type = "l", ylim = c(0, 20), xaxt = "n",
      xlab = NA, ylab = "Proportion of Initial Value")
 axis(1, at = nrow(SPWeekly)*(0:7)/7, labels = seq(1986, 2021, length.out = 8))
 title(xlab = "Year")
+
+# Plot frequency of daily percent changes
+labelvec <- (-11:11)/2
+labelvec[labelvec %% 1 == 0.5] <- NA;
+SPDaily %>% mutate(PctChange = ifelse(PctChange < -5, -5.1,
+                                      ifelse(PctChange > 5, 5.1, PctChange))) %>%
+  select(PctChange) %>%
+  as.matrix() %>%
+  as.vector() %>% 
+  hist(x = ., breaks = (-11:11)/2, main = NA, xaxt = "n", xlab = "Daily Percent Change",
+       col = c(colorRampPalette(c("red4", "red"), 0.5)(11), colorRampPalette(c("green", "green4"))(11)))
+axis(1, at = (-11:11)/2, labels = labelvec)
+box()
+
+```
+
+``` {r Figure17, fig.height = 7.9, fig.cap = "\\label{fig:Figure17} Relative value of the NASDAQ Composite over time compared to its 1986 value (top) and distribution of daily percent changes (bottom). Note that in the bottom panel, the leftmost bin represents all days with a percent change less than -5, and rightmost bin represents all days with a percent change greater than 5."}
+
+# Check this chart for accuracy, as it doesn't quite match up with the YF chart
+par(mfrow = c(2, 1), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
+colourList <- replace(rep("green", nrow(NDWeekly)), which(NDWeekly$PctChange < 0), "red")
+barplot(abs(NDWeekly$PctChange), col = colourList, border = colourList, ylim = c(0, 50), axes = FALSE)
+par(new = TRUE)
+totalReturn <- c()
+for(i in 1:nrow(NDWeekly)){
+  totalReturn <- c(totalReturn, prod((NDWeekly$PctChange[1:i]/100)+1))}
+plot(1:nrow(NDWeekly), totalReturn, type = "l", ylim = c(0, 12), xaxt = "n", 
+     xlab = NA, ylab = "Proportion of Initial Value")
+axis(1, at = nrow(NDWeekly)*(0:7)/7, labels = seq(1986, 2021, length.out = 8))
+title(xlab = "Year")
+
+# Plot frequency of daily percent changes
+labelvec <- (-11:11)/2
+labelvec[labelvec %% 1 == 0.5] <- NA;
+NDDaily %>% mutate(PctChange = ifelse(PctChange < -5, -5.1,
+                                      ifelse(PctChange > 5, 5.1, PctChange))) %>%
+  select(PctChange) %>%
+  as.matrix() %>%
+  as.vector() %>% 
+  hist(x = ., breaks = (-11:11)/2, main = NA, xaxt = "n", xlab = "Daily Percent Change",
+       col = c(colorRampPalette(c("red4", "red"), 0.5)(11), colorRampPalette(c("green", "green4"))(11)))
+axis(1, at = (-11:11)/2, labels = labelvec)
+box()
+
+```
+
+``` {r Figure18, fig.height = 7.9, fig.cap = "\\label{fig:Figure18} Relative value of the Dow Jones Industrial Average over time compared to its 1992 value (top) and distribution of daily percent changes (bottom). Note that in the bottom panel, the leftmost bin represents all days with a percent change less than -5, and rightmost bin represents all days with a percent change greater than 5."}
+
+# Check this chart for accuracy, as it doesn't quite match up with the YF chart
+par(mfrow = c(2, 1), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
+colourList <- replace(rep("green", nrow(DJWeekly)), which(DJWeekly$PctChange < 0), "red")
+barplot(abs(c(rep(0, 316), DJWeekly$PctChange)), col = colourList, border = colourList, ylim = c(0, 50), axes = FALSE)
+par(new = TRUE)
+totalReturn <- c()
+for(i in 1:nrow(DJWeekly)){
+  totalReturn <- c(totalReturn, prod((DJWeekly$PctChange[1:i]/100)+1))}
+plot((nrow(SPWeekly) - nrow(DJWeekly) + 1):nrow(SPWeekly), totalReturn, type = "l", xlim = c(0, 1825), ylim = c(0, 12), xaxt = "n", 
+     xlab = NA, ylab = "Proportion of Initial Value")
+axis(1, at = nrow(SPWeekly)*(0:7)/7, labels = seq(1986, 2021, length.out = 8))
+title(xlab = "Year")
+
+# Plot frequency of daily percent changes
+labelvec <- (-11:11)/2
+labelvec[labelvec %% 1 == 0.5] <- NA;
+DJDaily %>% mutate(PctChange = ifelse(PctChange < -5, -5.1,
+                                      ifelse(PctChange > 5, 5.1, PctChange))) %>%
+  select(PctChange) %>%
+  as.matrix() %>%
+  as.vector() %>% 
+  hist(x = ., breaks = (-11:11)/2, main = NA, xaxt = "n", xlab = "Daily Percent Change",
+       col = c(colorRampPalette(c("red4", "red"), 0.5)(11), colorRampPalette(c("green", "green4"))(11)))
+axis(1, at = (-11:11)/2, labels = labelvec)
+box()
 
 ```
 
@@ -568,7 +641,7 @@ kable(round(SPWeeklyTopPTab, 3))
 
 ```
 
-``` {r Figure17, eval = FALSE, fig.height = 8, fig.cap = "\\label{fig:Figure17} Standardised deviance residuals (top) and standardised Pearson residuals (bottom) for the best model in the logistic regression framework. Solid red lines represent a loess fit to the residuals and should be approximately horizontal at zero; dotted red lines represent $\\pm$ 2 standard deviations on the residuals."}
+``` {r Figure19, eval = FALSE, fig.height = 8, fig.cap = "\\label{fig:Figure19} Standardised deviance residuals (top) and standardised Pearson residuals (bottom) for the best model in the logistic regression framework. Solid red lines represent a loess fit to the residuals and should be approximately horizontal at zero; dotted red lines represent $\\pm$ 2 standard deviations on the residuals."}
 
 # Re-fit best model for easy plotting
 glm.fit <- glm(Direction ~ Lag2 + Lag3 + Prev5Pct + Volume, data = SPWeeklyTrain, family = "binomial")
