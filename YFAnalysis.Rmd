@@ -36,7 +36,6 @@ library(car)
 source("https://raw.githubusercontent.com/TrevorHD/MarketData/master/YFData.R")
 
 # Set seed for (pseudo) RNG so results can be replicated
-#RNGkind(sample.kind = "Rounding")
 set.seed(18361)
 
 ```
@@ -169,7 +168,8 @@ corrplot(add = TRUE, method = "number", type = "upper",
 
 ``` {r Figure4, fig.height = 8, fig.cap = "\\label{fig:Figure4} Plots of S&P 500 weekly percent change against percent change of up to 5 weeks prior. Autocorrelation in weekly percent change corresponding to 1-5 week lag times is shown in the bottom-right panel; dashed blue lines represent the 95% confidence interval for the autocorrelation."}
 
-# Note: excludes the 1 week where market dropped almost 40%
+# Plot percent change for given week against percent change up to five weeks ago
+# Also plot autocorrelation in percent change
 par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
 plot(SPWeekly$PctChange, SPWeekly$Lag1, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
      col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (1-Week Lag)")
@@ -189,7 +189,8 @@ par(mfrow = c(1, 1))
 
 ``` {r Figure5, fig.height = 8, fig.cap = "\\label{fig:Figure5} Plots of S&P 500 weekly volume against volume of up to 5 weeks prior. Autocorrelation in volume corresponding to 1-5 week lag times is shown in the bottom-right panel; dashed blue lines represent the 95% confidence interval for the autocorrelation."}
 
-# Note: excludes the 1 week where market dropped almost 40%
+# Plot volume for given week against volume up to five weeks ago
+# Also plot autocorrelation in volume
 par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
 plot(SPWeekly$BVolume, SPWeekly$VLag1, xlim = c(0, 40), xlab = "Volume", ylim = c(0, 40),
      col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (1-Week Lag)")
@@ -209,7 +210,8 @@ par(mfrow = c(1, 1))
 
 ``` {r Figure6, fig.height = 8, fig.cap = "\\label{fig:Figure6} Plots of S&P 500 daily percent change against percent change of up to 5 days prior. Autocorrelation in daily percent change corresponding to 1-5 day lag times is shown in the bottom-right panel; dashed blue lines represent the 95% confidence interval for the autocorrelation."}
 
-# Note: excludes the 1 week where market dropped almost 40%
+# Plot percent change for given day against percent change up to five days ago
+# Also plot autocorrelation in percent change
 par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
 plot(SPDaily$PctChange, SPDaily$Lag1, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
      col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (1-Week Lag)")
@@ -229,7 +231,8 @@ par(mfrow = c(1, 1))
 
 ``` {r Figure7, fig.height = 8, fig.cap = "\\label{fig:Figure7} Plots of S&P 500 daily volume against volume of up to 5 days prior. Autocorrelation in volume corresponding to 1-5 day lag times is shown in the bottom-right panel; dashed blue lines represent the 95% confidence interval for the autocorrelation."}
 
-# Note: excludes the 1 week where market dropped almost 40%
+# Plot volume for given day against volume up to five days ago
+# Also plot autocorrelation in volume
 par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
 plot(SPDaily$BVolume, SPDaily$VLag1, xlim = c(0, 12), xlab = "Volume", ylim = c(0, 12),
      col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (1-Week Lag)")
@@ -249,7 +252,8 @@ par(mfrow = c(1, 1))
 
 ``` {r Figure8, fig.height = 8, fig.cap = "\\label{fig:Figure8} Plots of NASDAQ Composite weekly percent change against percent change of up to 5 weeks prior. Autocorrelation in weekly percent change corresponding to 1-5 week lag times is shown in the bottom-right panel; dashed blue lines represent the 95% confidence interval for the autocorrelation."}
 
-# Note: excludes the 1 week where market dropped almost 40%
+# Plot percent change for given week against percent change up to five weeks ago
+# Also plot autocorrelation in percent change
 par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
 plot(NDWeekly$PctChange, NDWeekly$Lag1, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
      col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (1-Week Lag)")
@@ -269,7 +273,8 @@ par(mfrow = c(1, 1))
 
 ``` {r Figure9, fig.height = 8, fig.cap = "\\label{fig:Figure9} Plots of NASDAQ Composite weekly volume against volume of up to 5 weeks prior. Autocorrelation in volume corresponding to 1-5 week lag times is shown in the bottom-right panel; dashed blue lines represent the 95% confidence interval for the autocorrelation."}
 
-# Note: excludes the 1 week where market dropped almost 40%
+# Plot volume for given week against volume up to five weeks ago
+# Also plot autocorrelation in volume
 par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
 plot(NDWeekly$BVolume, NDWeekly$VLag1, xlim = c(0, 28), xlab = "Volume", ylim = c(0, 28),
      col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (1-Week Lag)")
@@ -289,7 +294,8 @@ par(mfrow = c(1, 1))
 
 ``` {r Figure10, fig.height = 8, fig.cap = "\\label{fig:Figure10} Plots of NASDAQ Composite daily percent change against percent change of up to 5 days prior. Autocorrelation in daily percent change corresponding to 1-5 day lag times is shown in the bottom-right panel; dashed blue lines represent the 95% confidence interval for the autocorrelation."}
 
-# Note: excludes the 1 week where market dropped almost 40%
+# Plot percent change for given day against percent change up to five days ago
+# Also plot autocorrelation in percent change
 par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
 plot(NDDaily$PctChange, NDDaily$Lag1, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
      col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (1-Week Lag)")
@@ -309,7 +315,8 @@ par(mfrow = c(1, 1))
 
 ``` {r Figure11, fig.height = 8, fig.cap = "\\label{fig:Figure11} Plots of NASDAQ Composite daily volume against volume of up to 5 days prior. Autocorrelation in volume corresponding to 1-5 day lag times is shown in the bottom-right panel; dashed blue lines represent the 95% confidence interval for the autocorrelation."}
 
-# Note: excludes the 1 week where market dropped almost 40%
+# Plot volume for given day against volume up to five days ago
+# Also plot autocorrelation in volume
 par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
 plot(NDDaily$BVolume, NDDaily$VLag1, xlim = c(0, 8), xlab = "Volume", ylim = c(0, 8),
      col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (1-Week Lag)")
@@ -329,7 +336,8 @@ par(mfrow = c(1, 1))
 
 ``` {r Figure12, fig.height = 8, fig.cap = "\\label{fig:Figure12} Plots of Dow Jones Industrial Average weekly percent change against percent change of up to 5 weeks prior. Autocorrelation in weekly percent change corresponding to 1-5 week lag times is shown in the bottom-right panel; dashed blue lines represent the 95% confidence interval for the autocorrelation."}
 
-# Note: excludes the 1 week where market dropped almost 40%
+# Plot percent change for given week against percent change up to five weeks ago
+# Also plot autocorrelation in percent change
 par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
 plot(DJWeekly$PctChange, DJWeekly$Lag1, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
      col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (1-Week Lag)")
@@ -349,7 +357,8 @@ par(mfrow = c(1, 1))
 
 ``` {r Figure13, fig.height = 8, fig.cap = "\\label{fig:Figure13} Plots of Dow Jones Industrial Average weekly volume against volume of up to 5 weeks prior. Autocorrelation in volume corresponding to 1-5 week lag times is shown in the bottom-right panel; dashed blue lines represent the 95% confidence interval for the autocorrelation."}
 
-# Note: excludes the 1 week where market dropped almost 40%
+# Plot volume for given week against volume up to five weeks ago
+# Also plot autocorrelation in volume
 par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
 plot(DJWeekly$BVolume, DJWeekly$VLag1, xlim = c(0, 0.04), xlab = "Volume", ylim = c(0, 0.04),
      col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (1-Week Lag)")
@@ -369,7 +378,8 @@ par(mfrow = c(1, 1))
 
 ``` {r Figure14, fig.height = 8, fig.cap = "\\label{fig:Figure14} Plots of Dow Jones Industrial Average daily percent change against percent change of up to 5 days prior. Autocorrelation in daily percent change corresponding to 1-5 day lag times is shown in the bottom-right panel; dashed blue lines represent the 95% confidence interval for the autocorrelation."}
 
-# Note: excludes the 1 week where market dropped almost 40%
+# Plot percent change for given day against percent change up to five days ago
+# Also plot autocorrelation in percent change
 par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
 plot(DJDaily$PctChange, DJDaily$Lag1, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
      col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (1-Week Lag)")
@@ -389,7 +399,8 @@ par(mfrow = c(1, 1))
 
 ``` {r Figure15, fig.height = 8, fig.cap = "\\label{fig:Figure15} Plots of Dow Jones Industrial Average daily volume against volume of up to 5 days prior. Autocorrelation in volume corresponding to 1-5 day lag times is shown in the bottom-right panel; dashed blue lines represent the 95% confidence interval for the autocorrelation."}
 
-# Note: excludes the 1 week where market dropped almost 40%
+# Plot volume for given day against volume up to five days ago
+# Also plot autocorrelation in volume
 par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
 plot(DJDaily$BVolume, DJDaily$VLag1, xlim = c(0, 0.008), xlab = "Volume", ylim = c(0, 0.008),
      col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (1-Week Lag)")
@@ -409,7 +420,9 @@ par(mfrow = c(1, 1))
 
 ``` {r Figure16, fig.height = 7.9, fig.cap = "\\label{fig:Figure16} Relative value of the S&P 500 over time compared to its 1986 value (top) and distribution of daily percent changes (bottom). Note that in the bottom panel, the leftmost bin represents all days with a percent change less than -5, and rightmost bin represents all days with a percent change greater than 5."}
 
+# Plot value of S&P 500 over time relative to a 1986 baseline
 # Check this chart for accuracy, as it doesn't quite match up with the YF chart
+# Discrepancies possibly due to after-hours trading?
 par(mfrow = c(2, 1), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
 colourList <- replace(rep("green", nrow(SPWeekly)), which(SPWeekly$PctChange < 0), "red")
 barplot(abs(SPWeekly$PctChange), col = colourList, border = colourList, ylim = c(0, 50), axes = FALSE)
@@ -439,7 +452,9 @@ box()
 
 ``` {r Figure17, fig.height = 7.9, fig.cap = "\\label{fig:Figure17} Relative value of the NASDAQ Composite over time compared to its 1986 value (top) and distribution of daily percent changes (bottom). Note that in the bottom panel, the leftmost bin represents all days with a percent change less than -5, and rightmost bin represents all days with a percent change greater than 5."}
 
+# Plot value of NASDAQ over time relative to a 1986 baseline
 # Check this chart for accuracy, as it doesn't quite match up with the YF chart
+# Discrepancies possibly due to after-hours trading?
 par(mfrow = c(2, 1), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
 colourList <- replace(rep("green", nrow(NDWeekly)), which(NDWeekly$PctChange < 0), "red")
 barplot(abs(NDWeekly$PctChange), col = colourList, border = colourList, ylim = c(0, 50), axes = FALSE)
@@ -469,7 +484,9 @@ box()
 
 ``` {r Figure18, fig.height = 7.9, fig.cap = "\\label{fig:Figure18} Relative value of the Dow Jones Industrial Average over time compared to its 1992 value (top) and distribution of daily percent changes (bottom). Note that in the bottom panel, the leftmost bin represents all days with a percent change less than -5, and rightmost bin represents all days with a percent change greater than 5."}
 
+# Plot value of Dow Jones over time relative to a 1986 baseline
 # Check this chart for accuracy, as it doesn't quite match up with the YF chart
+# Discrepancies possibly due to after-hours trading?
 par(mfrow = c(2, 1), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
 colourList <- replace(rep("green", nrow(DJWeekly)), which(DJWeekly$PctChange < 0), "red")
 barplot(abs(c(rep(0, 316), DJWeekly$PctChange)), col = colourList, border = colourList, ylim = c(0, 50), axes = FALSE)
