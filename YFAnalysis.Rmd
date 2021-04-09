@@ -550,7 +550,7 @@ glm(Direction ~ Lag1 + Lag2 + Lag3 + Lag4 + Lag5 + BVolume + Prev5GM + Prev5Pct,
 
 ```
 
-This model contains the maximum number of non-interactive predictors and is only one of many models that we can make; we could fit a model with only seven of these eight terms, or six of these eight terms, and so on. It is easy to show that the total number of non-interactive models that we can form is \begin{equation} \sum_{i=1}^{8}\frac{8!}{k_{i}!(8-k_{i})}! \end{equation} which is equal to 255. Fitting these models individually like in the code above would be too time consuming, so we write a function `logreg.comb` to do it for us.
+This model contains the maximum number of non-interactive predictors and is only one of many models that we can make; we could fit a model with only seven of these eight terms, or six of these eight terms, and so on. It is easy to show that the total number of non-interactive models that we can form is \begin{equation} \sum_{i=1}^{8}\frac{8!}{i}!(8-i)}! \end{equation} which is equal to 255. Fitting these models individually like in the code above would be too time consuming, so we write a function `logreg.comb` to do it for us.
 
 ``` {r echo = TRUE, eval = FALSE}
 
@@ -565,6 +565,8 @@ logreg.comb <- function(dataTrain, dataTest, output, n){
 ```
 
 Here, we use the `combn` function to generate all 255 different combination of variables and then `paste0` to collapse them down into their individual formulas. We then use `sapply` to apply a custom function `logreg` to each of these formulas; this custom function fits a logistic regression using a given formula and training data set and returns a specified statistic such as accuracy, sensitivity, specificity, positive predictive value, or negative predictive value. Because this function is too long to properly include in a code snippet, we have not included it here and can instead be found in the markdown for this analysis. After using `logreg.comb` to find the model that maximises training set accuracy, we get the model \begin{equation} logit(\pi)=\beta_{0}+\beta_{1}x_{1}+\beta_{2}x_{2}+\beta_{3}x_{3}+\beta_{4}x_{4}+\beta_{5}x_{5} \end{equation} with the predictor variables `Prev5GM`, `Prev5Pct`, `Lag1`, `Lag2`, and `Lag4`. This model has an accuracy of approximately 58.26% on the training data which, while low, still seems to be slightly better than guessing. However, we see that this accuracy is highly skewed towards predicting increases; our model has a training sensitivity of 98.64% and correctly classified 724 out of 734 increases, but has an abysmal specificity of 3.68% and correctly classified only 20 out of 543 decreases. Sensitivity and specificiy may not be useful in the context of this problem, though; recall that they would interpreted such that given an increase (or decrease), the sensitivity (or specificity) is the probability of correctly identifying that increase (or decrease). However, if we are trying to predict the behaviour of a stock or ETF next week, then we are not given an increase or decrease then since that is what we are trying to predict in the first place! As such, it might make more sense to examine something like positive predictive value (PPV); that is, when the model predicts an increase, the percentage of times that an increase actually occurs. If we use `logreg.comb` again, but this time seeking to maximise the training PPV, we actually get the same model, with a PPV of 58.06% on the training data. We can also try and maximise negative predictive value (NPV); that is, when the model predicts a decrease, the percentage of times that a decrease actually occurs. Upon doing so, we get the model \begin{equation} logit(\pi)=\beta_{0}+\beta_{1}x_{1} \end{equation} with `Prev5GM` as the only predictor. This model has an NPV of 100%, meaning that every time a decrease is predicted, the markets actually decrease. This number is suspiciously high, and after checking the confusion matrix, it is clear why: the model only predicted a decrease once and got it right, while the other 542 decreases were incorrectly predicted as increases. Even looking at the next few highest models in terms of NPV, we see the same trend of high NPVs due to a extremely low number of decreases that just so happened to be correctly predicted. As such, it might be wise to stick with accuracy and PPV when choosing our models.
+
+We can also examine the training accuracy of models that include two-way interactions; the total number of two-way interaction terms plus single terms is 36, so thus the total number of interactive models that we can form is \begin{equation} \sum_{i=1}^{36}\frac{36!}{i}!(36-i)}! \end{equation} which is equal to 68719476735.
 
 ``` {r include = FALSE, eval = FALSE}
 
@@ -636,6 +638,20 @@ logreg.comb <- function(dataTrain, output, n){
     sort() %>%
     return()}
 
+# Function to fit logistic regression to all possible combinations of n variables AND interactions
+# Outputs value and combination of variables for desired prediction metric
+# This is way too large for n = 36; need to fix
+logreg.combInt <- function(dataTrain, output, n){
+  combn(names(dataTrain)[-c(2:3)], 2) %>%
+    apply(FUN = paste0, MARGIN = 2, collapse = ":") %>%
+    c(names(dataTrain)[-c(2:3)]) %>%
+    combn(n) %>% 
+      apply(FUN = paste0, MARGIN = 2, collapse = "+") %>%
+      paste0("Direction~", .) %>% 
+      sapply(FUN = logreg, dataTrain = dataTrain, output = output) %>% 
+      sort() %>%
+      return()}
+
 # Find top 10 models for accuracy
 SPWeeklyTop <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain, output = "accuracy"))
 sort(SPWeeklyTop, decreasing = TRUE)[1:10]
@@ -650,7 +666,8 @@ SPWeeklyTop <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain, 
 sort(SPWeeklyTop, decreasing = TRUE)[1:10]
 logreg(Direction~Prev5GM, dataTrain = SPWeeklyTrain, output = "confMatrix")
 
-
+SPWeeklyTopInt <- unlist(sapply(1:36, FUN = logreg.combInt, dataTrain = SPWeeklyTrain, output = "accuracy"))
+sort(SPWeeklyTopInt, decreasing = TRUE)[1:10]
 
 
 
