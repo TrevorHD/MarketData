@@ -54,12 +54,12 @@ Here, we seek to create models that can predict short-term market behaviour, as 
 
 # Data
 
-We first start by examining the data sets that will be used in these analyses. First, we have `SPDaily` and `SPWeekly`, which are daily and weekly data (respectively) on the S&P 500, a major stock market index consisting of 500 publicly-traded American companies. Next, we have `NDDaily` and `NDWeekly`, which are daily and weekly data (respectively) on the NASDAQ Composite, another major stock market index that is largely weighted on the information technology sector. Finally, we have `DJDaily` and `DJWeekly`, which are daily and weekly data (respectively) on the NASDAQ Composite, a major stock market index that consisting of 30 large American companies from a variety of different market sectors. All data, which are available online from Yahoo Finance[^FootNote1], were scraped in Python using the `yfinance` packeage and stored in six different CSV files; weekly/daily percent change was then calculated using the opening and closing prices for a particular week/day, and lagged up to 5 weeks/days. The total and average percent change over a 5-week or 5-day period were also calculated. The variables in our new datasets are listed below:
+We first start by introducing and briefly exploring the six data sets that will be used in these analyses. First, we have `SPDaily` and `SPWeekly`, which are daily and weekly data (respectively) on the S&P 500, a major stock market index consisting of 500 publicly-traded American companies. Next, we have `NDDaily` and `NDWeekly`, which are daily and weekly data (respectively) on the NASDAQ Composite, another major stock market index that is largely weighted on the information technology sector. Finally, we have `DJDaily` and `DJWeekly`, which are daily and weekly data (respectively) on the NASDAQ Composite, a major stock market index that consisting of 30 large American companies from a variety of different market sectors. All data, which are available online from Yahoo Finance[^FootNote1], were scraped in Python using the `yfinance` packeage and stored in six different CSV files; weekly/daily percent change was then calculated using the opening and closing prices for a particular week/day, and lagged up to 5 weeks/days. The total and average percent change over a 5-week or 5-day period were also calculated. The variables in our new datasets are listed below:
 
 * **BVolume**: average number of daily shares traded (billions)
 * **PctChange**: percent change for a given week/day
 * **Direction**: whether the percent change for a given week/day was negative or positive
-* **Prev5GM**: Average percent increase over the previous 5 weeks/days, calculated using the geometric mean
+* **Prev5GM**: Average ()geometric mean) percent increase over the previous 5 weeks/days
 * **Prev5Pct**: Total percent increase over the previous 5 weeks/days
 * **Lag1**: 1-week lag on percent change for a given week/day
 * **Lag2**: 2-week lag on percent change for a given week/day
@@ -72,19 +72,19 @@ We first start by examining the data sets that will be used in these analyses. F
 * **VLag4**: 4-week lag on volume for a given week/day
 * **VLag5**: 5-week lag on volume for a given week/day
 
-Note that for the `SPDaily`, `NDDaily`, and `DJDaily` datasets, all calculations and quantities are in terms of days; for the `SPWeekly`, `NDWeekly`, and `DJWeekly` datasets, all calculations and quantities are in terms of weeks. For example, the `Lag2` variable would represent the percent change two days ago in the `SPDaily` dataset, but would represent the percent change two weeks ago in the `SPWeekly` dataset.
+Note that for the `SPDaily`, `NDDaily`, and `DJDaily` datasets, all calculations and quantities are in terms of days rather than weeks; for the `SPWeekly`, `NDWeekly`, and `DJWeekly` datasets, all calculations and quantities are in terms of weeks rather than days. For example, the `Lag2` variable would represent the percent change two days ago in the `SPDaily` dataset, but would represent the percent change two weeks ago in the `SPWeekly` dataset.
 
-We first conduct some exploratory analyses of the data to see if there are any patterns that need attention or may be important for our analyses, starting with the S&P 500 daily and weekly data. Upon examining the correlation matrices and heatmaps shown in Figure \ref{fig:Figure1}, there seems to be several strong correlations. The strong positive correlation between `Direction` and `PctChange` is not surprising, given that `Direction` is literally defined by whether the percent change is negative or positive. Though we would thus expect there to be a perfect relationship between the two variables, and indeed there is, it does not translate well to a linear correlation. We also see that `Prev5GM` and `Prev5Pct` have a correlation of 1; this is because the total percent increase over the previous 5 weeks can also be found by exponentiating the average percent increase to the fifth power. Thus, there is an obvious relationship between the two variables, and any models containing the both may experience multicollinearity issues. These same trands can also be seen in the NASDAQ data (Figure \ref{fig:Figure2}) and the Dow Jones data (Figure \ref{fig:Figure3})
+We first conduct some exploratory analyses of the data to see if there are any patterns that need attention or may be important for our analyses, starting with the S&P 500 daily and weekly data. Upon examining the correlation matrices and heatmaps shown in Figure \ref{fig:Figure1}, there seems to be several strong correlations. The strong positive correlation between `Direction` and `PctChange` is not surprising, given that `Direction` is literally defined by whether the percent change is negative or positive. Though we would thus expect there to be a perfect relationship between the two variables, and indeed there is, it does not translate well to a linear correlation. We also see that `Prev5GM` and `Prev5Pct` have a correlation of 1; this is because the total percent increase over the previous 5 weeks can also be found by exponentiating the average percent increase to the fifth power. Thus, there is an obvious relationship between the two variables, and any models containing the both may experience multicollinearity issues. These same trends can also be seen in the NASDAQ data (Figure \ref{fig:Figure2}) and the Dow Jones data (Figure \ref{fig:Figure3}).
 
 Another thing worth pointing out in Figure \ref{fig:Figure1} is that `Direction`, the variable that we're interested in predicting, bears almost no correlation with `Prev5GM`, `Prev5Pct`, or any of the `Lag` variables; this may be problematic when trying to make predictions. Figure \ref{fig:Figure4} provides further evidence of this on the S&P 500 weekly data and Figure \ref{fig:Figure5} on the S&P 500 daily data, focusing specifically on the lack of correlation between percent change and the five lag variables. Here, we see that there is almost no autocorrelation of percent change in a given week; that is, percent change in a given week is not strongly correlated with percent change in any of the five weeks before. This observation may be bad news for our analyses later: if there is not much of an association between percent change in a given week and percent change in any of the weeks before it, then how can we use past weekly performance to accurately predict future weekly performance? While there is no apparent autocorrelation in returns for the S&P 500, there does seem to be an autocorrelation in trading volume, as is evident in Figures \ref{fig:Figure6} and \ref{fig:Figure7}.
 
-We also see the exact same lack of autocorrelation in returns and strong autocorrelation in trading volume for both the NASDAQ and Dow Jones data. Figures \ref{fig:Figure8} and \ref{fig:Figure9} demonstrate a lack of autocorrelation in NASDAQ daily and weekly returns, while Figures \ref{fig:Figure10} and \ref{fig:Figure11} show that daily and weekly volume is strongly autocorrelated; likewise, Figures \ref{fig:Figure12} and \ref{fig:Figure13} demonstrate a lack of autocorrelation in Dow Jones daily and weekly returns, while Figures \ref{fig:Figure14} and \ref{fig:Figure15} again show that daily and weekly volume is strongly autocorrelated.
+Unsurprisingly, we also see the exact same lack of autocorrelation in returns and strong autocorrelation in trading volume for both the NASDAQ and Dow Jones data. Figures \ref{fig:Figure8} and \ref{fig:Figure9} demonstrate a lack of autocorrelation in NASDAQ daily and weekly returns, while Figures \ref{fig:Figure10} and \ref{fig:Figure11} show that daily and weekly volume is strongly autocorrelated; likewise, Figures \ref{fig:Figure12} and \ref{fig:Figure13} also demonstrate a lack of autocorrelation in Dow Jones daily and weekly returns, while Figures \ref{fig:Figure14} and \ref{fig:Figure15} again show that daily and weekly volume is strongly autocorrelated.
 
 Separating the S&P 500 data based on the value of `Direction` allows us to further explore trends in increases and decreases. For example, upon doing so, we see that the mean weekly percent decrease on the S&P 500 is -1.81%, while the mean weekly increase is 1.67%; however, even though the average magnitude of weekly percent decreases is higher than that of weekly percent increases, the number of weeks in which there was an increase is greater than the number of weeks in which there was a decrease (1041 versus 784). If we look at the data in terms of days instead, we find that there are again more increases than decreases, with 4063 negative days with a mean daily decrease of -0.752% and 4750 positive days with a mean daily increase of 0.707%; this difference is noticable in the bottom panel of Figure \ref{fig:Figure16}. The fact that there are more positive than negative days/weeks is likely responsible for the trend shown in the top panel of Figure \ref{fig:Figure16} where, despite plummeting several times (e.g. two recessions in the 2000's and the COVID-related plunge in early 2020) and suffering numerous smaller drops, the S&P 500 was still almost 14 times as high in 2021 as it was in 1986.
 
-Again, we see the same trends in the NASDAQ and Dow Jones data if we separate it based on `Direction`. The NASDAQ has 772 negative weeks with a mean weekly decrease of -2.36% and 1052 positive weeks with a mean weekly increase of 2.04%; when broken into days, there 4000 negative days with a mean daily decrease of -0.849% and 4776 positive days with a mean daily increase of 0.724%. This difference is noticable in the bottom panel of Figure \ref{fig:Figure17} and is likely responsible for the increase in value over time, despite the massive crash in 2000 from the Dot-Com Bubble. If we look at the Dow Jones, we see that it has 643 negative weeks with a mean weekly decrease of -1.64% and 866 positive weeks with a mean weekly increase of 1.53%; when broken into days, there 3383 negative days with a mean daily decrease of -0.728% and 3913 positive days with a mean daily increase of 0.696%. This difference is again noticable in the bottom panel of Figure \ref{fig:Figure18} and is also likely responsible for the increase in value over time. Note that because the Yahoo Finance data on the Dow Jones starts in 1992, we have less data to work with than we do for the S&P 500 and NASDAQ.
+Again, we see the same trends in the NASDAQ and Dow Jones data if we separate it based on `Direction`. The NASDAQ has 772 negative weeks with a mean weekly decrease of -2.36% and 1052 positive weeks with a mean weekly increase of 2.04%; when broken into days, there 4000 negative days with a mean daily decrease of -0.849% and 4776 positive days with a mean daily increase of 0.724%. This difference is noticable in the bottom panel of Figure \ref{fig:Figure17} and is likely responsible for the increase in value over time, despite the massive crash in 2000 from the Dot-Com Bubble. If we look at the Dow Jones, we see that it has 643 negative weeks with a mean weekly decrease of -1.64% and 866 positive weeks with a mean weekly increase of 1.53%; when broken into days, there 3383 negative days with a mean daily decrease of -0.728% and 3913 positive days with a mean daily increase of 0.696%. This difference is again noticable in the bottom panel of Figure \ref{fig:Figure18} and is also likely responsible for the increase in value over time. Note that because the Yahoo Finance data on the Dow Jones only starts in 1992 (though the Dow Jones has been around much longer than that), we have less data to work with than we do for the S&P 500 and NASDAQ.
 
-We now move forward with our analyses, keeping in mind that the lack of autocorrelation in weekly percent change may make it difficult to accurately construct models that use past percentage changes to predict future S&P 500 movements. However, there is some good news: because there is only a slight difference in the number of positive and negative days/weeks, we do not have to worry about predicting a small number of observations in a highly-skewed data set, and thus face fewer restrictions with the tools and algorithms we plan on using.
+We now move forward with our analyses, keeping in mind that the lack of autocorrelation in weekly percent change may make it difficult to accurately construct models that use past percentage changes to predict future S&P 500 movements. However, there is some good news: because there is only a slight difference in the number of positive and negative days/weeks, we do not have to worry about predicting a small number of observations in a highly-skewed data set, and thus face fewer restrictions with the tools and algorithms we plan on using. Before we begin, we split each of our data sets into a training set with 70% of the observations and a test set with the remaining 30% of observations; this validation set approach will allows us to fit models on the training data and then examine their performance on the test data, reducing the chances of overfitting the data. We also drop the variables `VLag1` through `VLag5`, as preliminary analyses (not shown in this report) indicate that these variables make almost no difference when constructing our models.
 
 [^FootNote1]: S&P 500 data can be found [here](https://finance.yahoo.com/quote/%5EGSPC/history?p=%5EGSPC), NASDAQ Composite data can be found [here](https://finance.yahoo.com/quote/%5EIXIC/history?p=%5EIXIC), and Dow Jones Industrial Data can be found [here](https://finance.yahoo.com/quote/%5EDJI/history?p=%5EDJI). Data last accessed on 26 March 2021.
 
@@ -541,6 +541,31 @@ box()
 
 ## Logistic Regression
 
+We begin our analyses on the S&P 500 data by examine how accurate a logistic regression can be for predicting whether the S&P 500 will increase or decrease in value. We first consider a model such that `Direction` is the response and `BVolume`, `Prev5GM`, `Prev5Pct`, and`Lag1` through `Lag5` are predictors.
+
+``` {r, echo = TRUE, eval = FALSE}
+
+glm(Direction ~ Lag1 + Lag2 + Lag3 + Lag4 + Lag5 + BVolume + Prev5GM + Prev5Pct,
+    data = Weekly, family = binomial)
+
+```
+
+This model contains the maximum number of non-interactive predictors and is only one of many models that we can make; we could fit a model with only seven of these eight terms, or six of these eight terms, and so on. It is easy to show that the total number of non-interactive models that we can form is \begin{equation} \sum_{i=1}^{8}\frac{8!}{k_{i}!(8-k_{i})}! \end{equation} which is equal to 255. Fitting these models individually like in the code above would be too time consuming, so we write a function `logreg.comb` to do it for us.
+
+``` {r echo = TRUE, eval = FALSE}
+
+logreg.comb <- function(dataTrain, dataTest, output, n){
+  combn(names(dataTrain)[-c(2:3)], n) %>% 
+    apply(FUN = paste0, MARGIN = 2, collapse = "+") %>% 
+    paste0("Direction~", .) %>% 
+    sapply(FUN = logreg, dataTrain = dataTrain, output = output) %>% 
+    sort() %>%
+    return()}
+
+```
+
+Here, we use the `combn` function to generate all 255 different combination of variables and then `paste0` to collapse them down into their individual formulas. We then use `sapply` to apply a custom function `logreg` to each of these formulas; this custom function fits a logistic regression using a given formula and training data set and returns a specified statistic such as accuracy, sensitivity, specificity, positive predictive value, or negative predictive value. Because this function is too long to properly include in a code snippet, we have not included it here and can instead be found in the markdown for this analysis. After using `logreg.comb` to find the model that maximises training set accuracy, we get the model \begin{equation} logit(\pi)=\beta_{0}+\beta_{1}x_{1}+\beta_{2}x_{2}+\beta_{3}x_{3}+\beta_{4}x_{4}+\beta_{5}x_{5} \end{equation} with the predictor variables `Prev5GM`, `Prev5Pct`, `Lag1`, `Lag2`, and `Lag4`. This model has an accuracy of approximately 58.26% on the training data which, while low, still seems to be slightly better than guessing. However, we see that this accuracy is highly skewed towards predicting increases; our model has a training sensitivity of 98.64% and correctly classified 724 out of 734 increases, but has an abysmal specificity of 3.68% and correctly classified only 20 out of 543 decreases. Sensitivity and specificiy may not be useful in the context of this problem, though; recall that they would interpreted such that given an increase (or decrease), the sensitivity (or specificity) is the probability of correctly identifying that increase (or decrease). However, if we are trying to predict the behaviour of a stock or ETF next week, then we are not given an increase or decrease then since that is what we are trying to predict in the first place! As such, it might make more sense to examine something like positive predictive value (PPV); that is, when the model predicts an increase, the percentage of times that an increase actually occurs. If we use `logreg.comb` again, but this time seeking to maximise the training PPV, we actually get the same model, with a PPV of 58.06% on the training data. We can also try and maximise negative predictive value (NPV); that is, when the model predicts a decrease, the percentage of times that a decrease actually occurs. Upon doing so, we get the model \begin{equation} logit(\pi)=\beta_{0}+\beta_{1}x_{1} \end{equation} with `Prev5GM` as the only predictor. This model has an NPV of 100%, meaning that every time a decrease is predicted, the markets actually decrease. This number is suspiciously high, and after checking the confusion matrix, it is clear why: the model only predicted a decrease once and got it right, while the other 542 decreases were incorrectly predicted as increases. Even looking at the next few highest models in terms of NPV, we see the same trend of high NPVs due to a extremely low number of decreases that just so happened to be correctly predicted. As such, it might be wise to stick with accuracy and PPV when choosing our models.
+
 ``` {r include = FALSE, eval = FALSE}
 
 # Note: Our analyses show that VLag1 - VLag5 doesn't make much of a difference
@@ -549,19 +574,19 @@ select(SPWeeklyTrain, !(VLag1:VLag5)) -> SPWeeklyTrain
 select(SPWeeklyTest, !(VLag1:VLag5)) -> SPWeeklyTest
 
 # Function to perform logistic regression and output predictive accuracy
-logreg <- function(formula, dataTrain, dataTest, output){
+logreg <- function(formula, dataTrain, output){
   
   # Fit logistic regression using training data
   glm.fit <- glm(formula, data = dataTrain, family = "binomial")
   
   # Classify test data; get posterior probabilities
-  glm.probs <- predict(glm.fit, dataTest, type = "response")
+  glm.probs <- predict(glm.fit, dataTrain, type = "response")
   glm.pred <- rep("Down", length(glm.probs))
   glm.pred[glm.probs >= 0.5] <- "Up"
   
   # Confusion matrix of classified observations
   # Must manually add Down row if model never predicts Down
-  confMatrix <- table(glm.pred, dataTest$Direction)
+  confMatrix <- table(glm.pred, dataTrain$Direction)
   if(nrow(confMatrix) == 1){
     confMatrix <- rbind(c(0, 0), confMatrix)}
   rownames(confMatrix) <- c("[P]Down", "[P]Up")
@@ -603,18 +628,32 @@ logreg <- function(formula, dataTrain, dataTest, output){
 
 # Function to fit logistic regression to all possible combinations of n variables
 # Outputs value and combination of variables for desired prediction metric
-logreg.comb <- function(dataTrain, dataTest, output, n){
+logreg.comb <- function(dataTrain, output, n){
   combn(names(dataTrain)[-c(2:3)], n) %>% 
     apply(FUN = paste0, MARGIN = 2, collapse = "+") %>% 
     paste0("Direction~", .) %>% 
-    sapply(FUN = logreg, dataTrain = dataTrain, dataTest = dataTest, output = output) %>% 
+    sapply(FUN = logreg, dataTrain = dataTrain, output = output) %>% 
     sort() %>%
     return()}
 
 # Find top 10 models for accuracy
-SPWeeklyTop <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain,
-                      dataTest = SPWeeklyTest, output = "accuracy"))
+SPWeeklyTop <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain, output = "accuracy"))
 sort(SPWeeklyTop, decreasing = TRUE)[1:10]
+logreg(Direction~Prev5GM+Prev5Pct+Lag1+Lag2+Lag4, dataTrain = SPWeeklyTrain, output = "confMatrix")
+
+# Find top 10 models for ppv
+SPWeeklyTop <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain, output = "ppv"))
+sort(SPWeeklyTop, decreasing = TRUE)[1:10]
+
+# Find top 10 models for npv
+SPWeeklyTop <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain, output = "npv"))
+sort(SPWeeklyTop, decreasing = TRUE)[1:10]
+logreg(Direction~Prev5GM, dataTrain = SPWeeklyTrain, output = "confMatrix")
+
+
+
+
+
 
 # Code above can be modified to get top 10 models for sensitivity, specificity, and NPV
 # Not particularly useful, so they won't be used much in our analyses
