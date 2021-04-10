@@ -638,19 +638,42 @@ logreg.comb <- function(dataTrain, output, n){
     sort() %>%
     return()}
 
-# Function to fit logistic regression to all possible combinations of n variables AND interactions
-# Outputs value and combination of variables for desired prediction metric
-# This is way too large for n = 36; need to fix
-logreg.combInt <- function(dataTrain, output, n){
-  combn(names(dataTrain)[-c(2:3)], 2) %>%
+# Function to remove a term and find new accuracy
+logreg.lcv <- function(i, dataTrain, output){
+  predVec[-i] %>% 
+    paste0(., collapse = "+") %>% 
+    paste0("Direction~", .) %>% 
+    return(logreg(dataTrain = SPWeeklyTrain, output = "accuracy"))}
+
+# Function to return accuracy and new list of predictors after removing a predictor
+logreg.bwd <- function(predVec){
+  accs <- sapply(1:length(predVec), FUN = logreg.lcv, dataTrain = SPWeeklyTrain, output = "accuracy")
+  predVec <- predVec[-which.max(accs)]
+  return(list(predVec = predVec, maxacc = max(accs)))}
+
+# Forward step
+
+# Apply backward step algorithm
+combn(names(SPWeeklyTrain)[-c(2:3)], 2) %>%
     apply(FUN = paste0, MARGIN = 2, collapse = ":") %>%
-    c(names(dataTrain)[-c(2:3)]) %>%
-    combn(n) %>% 
-      apply(FUN = paste0, MARGIN = 2, collapse = "+") %>%
-      paste0("Direction~", .) %>% 
-      sapply(FUN = logreg, dataTrain = dataTrain, output = output) %>% 
-      sort() %>%
-      return()}
+    c(names(SPWeeklyTrain)[-c(2:3)]) -> predVec
+prevmaxacc <- c(0.5, 0.5)
+predVec <- logreg.bwd(predVec)$predVec
+maxacc <- logreg.bwd(predVec)$maxacc
+while(maxacc >= prevmaxacc[length(prevmaxacc) - 1]){
+  predVec <- logreg.bwd(predVec)$predVec
+  maxacc <- logreg.bwd(predVec)$maxacc
+  prevmaxacc <- c(prevmaxacc, maxacc)
+  if(length(predVec) == 1){
+    break}}
+prevmaxacc[length(prevmaxacc) - 1]
+
+
+
+
+
+
+
 
 # Find top 10 models for accuracy
 SPWeeklyTop <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain, output = "accuracy"))
@@ -666,8 +689,6 @@ SPWeeklyTop <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain, 
 sort(SPWeeklyTop, decreasing = TRUE)[1:10]
 logreg(Direction~Prev5GM, dataTrain = SPWeeklyTrain, output = "confMatrix")
 
-SPWeeklyTopInt <- unlist(sapply(1:36, FUN = logreg.combInt, dataTrain = SPWeeklyTrain, output = "accuracy"))
-sort(SPWeeklyTopInt, decreasing = TRUE)[1:10]
 
 
 
