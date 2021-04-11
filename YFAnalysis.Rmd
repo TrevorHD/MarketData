@@ -566,7 +566,50 @@ logreg.comb <- function(dataTrain, dataTest, output, n){
 
 Here, we use the `combn` function to generate all 255 different combination of variables and then `paste0` to collapse them down into their individual formulas. We then use `sapply` to apply a custom function `logreg` to each of these formulas; this custom function fits a logistic regression using a given formula and training data set and returns a specified statistic such as accuracy, sensitivity, specificity, positive predictive value, or negative predictive value. Because this function is too long to properly include in a code snippet, we have not included it here and can instead be found in the markdown for this analysis. After using `logreg.comb` to find the model that maximises training set accuracy, we get the model \begin{equation} logit(\pi)=\beta_{0}+\beta_{1}x_{1}+\beta_{2}x_{2}+\beta_{3}x_{3}+\beta_{4}x_{4}+\beta_{5}x_{5} \end{equation} with the predictor variables `Prev5GM`, `Prev5Pct`, `Lag1`, `Lag2`, and `Lag4`. This model has an accuracy of approximately 58.26% on the training data which, while low, still seems to be slightly better than guessing. However, we see that this accuracy is highly skewed towards predicting increases; our model has a training sensitivity of 98.64% and correctly classified 724 out of 734 increases, but has an abysmal specificity of 3.68% and correctly classified only 20 out of 543 decreases. Sensitivity and specificiy may not be useful in the context of this problem, though; recall that they would interpreted such that given an increase (or decrease), the sensitivity (or specificity) is the probability of correctly identifying that increase (or decrease). However, if we are trying to predict the behaviour of a stock or ETF next week, then we are not given an increase or decrease then since that is what we are trying to predict in the first place! As such, it might make more sense to examine something like positive predictive value (PPV); that is, when the model predicts an increase, the percentage of times that an increase actually occurs. If we use `logreg.comb` again, but this time seeking to maximise the training PPV, we actually get the same model, with a PPV of 58.06% on the training data. We can also try and maximise negative predictive value (NPV); that is, when the model predicts a decrease, the percentage of times that a decrease actually occurs. Upon doing so, we get the model \begin{equation} logit(\pi)=\beta_{0}+\beta_{1}x_{1} \end{equation} with `Prev5GM` as the only predictor. This model has an NPV of 100%, meaning that every time a decrease is predicted, the markets actually decrease. This number is suspiciously high, and after checking the confusion matrix, it is clear why: the model only predicted a decrease once and got it right, while the other 542 decreases were incorrectly predicted as increases. Even looking at the next few highest models in terms of NPV, we see the same trend of high NPVs due to a extremely low number of decreases that just so happened to be correctly predicted. As such, it might be wise to stick with accuracy and PPV when choosing our models.
 
-We can also examine the training accuracy of models that include two-way interactions; the total number of two-way interaction terms plus single terms is 36, so thus the total number of interactive models that we can form is \begin{equation} \sum_{i=1}^{36}\frac{36!}{i!(36-i)!} \end{equation} which is equal to 68719476735.
+We can also examine the training accuracy of models that include two-way interactions; the total number of two-way interaction terms plus single terms is 36, so thus the total number of interactive models that we can form is \begin{equation} \sum_{i=1}^{36}\frac{36!}{i!(36-i)!} \end{equation} which is equal to 68719476735. This would be far too computationally expensive for R, and we thus cannot calculate the accuracy of each model like we did when we only had 255 models. However, we can develop a heuristical solution that only searches through several of these possible models; we start with a backward step function that selects a model based on accuracy.
+
+``` {r eval = FALSE, echo = TRUE}
+
+# Function to remove a term and find new accuracy
+logreg.lcv <- function(i, dataTrain, output){
+  predVec[-i] %>% 
+    paste0(., collapse = "+") %>% 
+    paste0("Direction~", .) %>% 
+    logreg(dataTrain = SPWeeklyTrain, output = output) %>% 
+    return()}
+
+# Function to return accuracy and new list of predictors after removing a predictor
+logreg.bwd <- function(predVec, output){
+  accs <- sapply(1:length(predVec), FUN = logreg.lcv, dataTrain = SPWeeklyTrain,
+                 output = output)
+  predVec <- predVec[-which.max(accs)]
+  return(list(predVec = predVec, maxacc = max(accs)))}
+
+```
+
+Here, we start with the maximum number (36) of interactive and non-interactive terms, and use an `output` of `accuracy` to select our models based on overall prediction accuracy. We then calculate the new training accuracy after we remove a term, and do this for each term, then removing the term that results in the highest accuracy. We repeat this process until the model accuracy is maximised. Doing so results in a model with a training accuracy of 60.33% and 30 terms. We can also perform forward selection, starting with a null model and calculating the new training accuracy after adding a term, doing this for each term, and then adding the term that results in the highest accuracy.
+
+``` {r eval = FALSE, echo = TRUE}
+
+# Function to add a term and find new accuracy
+logreg.lcv2 <- function(i, dataTrain, output){
+  c(predVecFwd, predVecRemain[i]) %>% 
+  paste0(., collapse = "+") %>% 
+    paste0("Direction~", .) %>% 
+    logreg(dataTrain = SPWeeklyTrain, output = output) %>% 
+    return()}
+
+# Function to return accuracy and new list of predictors after adding a predictor
+logreg.fwd <- function(predVecRemain, predVecFwd, output){
+  accs <- sapply(1:length(predVecRemain), FUN = logreg.lcv2, dataTrain = SPWeeklyTrain,
+                 output = output)
+  pvf <- c(predVecFwd, predVecRemain[which.max(accs)])
+  pvr <- predVecRemain[-which.max(accs)]
+  return(list(predVecFwd = pvf, predVecRemain = pvr, maxacc = max(accs)))}
+
+```
+
+Doing so now results in a model with a training accuracy of 59.15% and 9 terms; while the training accuracy is lower, there are fewer terms than our model resulting from backward selection. We can also use the same forward and backward algorithms but select models using PPV instead of accuracy. If we do so using the backward step algorithm, we get a model with a PPV of 60.30% and 26 terms; using the forward step algorithm, we get a model with a PPV of 59.38% and 12 terms.
 
 ``` {r include = FALSE, eval = FALSE}
 
@@ -659,12 +702,12 @@ logreg.lcv <- function(i, dataTrain, output){
   predVec[-i] %>% 
     paste0(., collapse = "+") %>% 
     paste0("Direction~", .) %>% 
-    logreg(dataTrain = SPWeeklyTrain, output = "accuracy") %>% 
+    logreg(dataTrain = SPWeeklyTrain, output = output) %>% 
     return()}
 
 # Function to return accuracy and new list of predictors after removing a predictor
-logreg.bwd <- function(predVec){
-  accs <- sapply(1:length(predVec), FUN = logreg.lcv, dataTrain = SPWeeklyTrain, output = "accuracy")
+logreg.bwd <- function(predVec, output){
+  accs <- sapply(1:length(predVec), FUN = logreg.lcv, dataTrain = SPWeeklyTrain, output = output)
   predVec <- predVec[-which.max(accs)]
   return(list(predVec = predVec, maxacc = max(accs)))}
 
@@ -673,12 +716,12 @@ logreg.lcv2 <- function(i, dataTrain, output){
   c(predVecFwd, predVecRemain[i]) %>% 
   paste0(., collapse = "+") %>% 
     paste0("Direction~", .) %>% 
-    logreg(dataTrain = SPWeeklyTrain, output = "accuracy") %>% 
+    logreg(dataTrain = SPWeeklyTrain, output = output) %>% 
     return()}
 
 # Function to return accuracy and new list of predictors after adding a predictor
-logreg.fwd <- function(predVecRemain, predVecFwd){
-  accs <- sapply(1:length(predVecRemain), FUN = logreg.lcv2, dataTrain = SPWeeklyTrain, output = "accuracy")
+logreg.fwd <- function(predVecRemain, predVecFwd, output){
+  accs <- sapply(1:length(predVecRemain), FUN = logreg.lcv2, dataTrain = SPWeeklyTrain, output = output)
   pvf <- c(predVecFwd, predVecRemain[which.max(accs)])
   pvr <- predVecRemain[-which.max(accs)]
   return(list(predVecFwd = pvf, predVecRemain = pvr, maxacc = max(accs)))}
@@ -688,40 +731,82 @@ combn(names(SPWeeklyTrain)[-c(2:3)], 2) %>%
     apply(FUN = paste0, MARGIN = 2, collapse = ":") %>%
     c(names(SPWeeklyTrain)[-c(2:3)]) -> predVec
 prevmaxacc <- c(0.5, 0.5)
-maxacc <- logreg.bwd(predVec)$maxacc
-predVec <- logreg.bwd(predVec)$predVec
+maxacc <- logreg.bwd(predVec, "accuracy")$maxacc
+predVec <- logreg.bwd(predVec, "accuracy")$predVec
 prevmaxacc <- c(prevmaxacc, maxacc)
 while(length(predVec) > 1){
-  maxacc <- logreg.bwd(predVec)$maxacc
+  maxacc <- logreg.bwd(predVec, "accuracy")$maxacc
   if(maxacc < prevmaxacc[length(prevmaxacc) - 1]){
     break}
-  predVec <- logreg.bwd(predVec)$predVec
+  predVec <- logreg.bwd(predVec, "accuracy")$predVec
   prevmaxacc <- c(prevmaxacc, maxacc)}
 prevmaxacc[length(prevmaxacc)]
 
-# Apply foward step algorithm using accuracy
+# Apply forward step algorithm using accuracy
 combn(names(SPWeeklyTrain)[-c(2:3)], 2) %>%
     apply(FUN = paste0, MARGIN = 2, collapse = ":") %>%
     c(names(SPWeeklyTrain)[-c(2:3)]) -> predVecRemain
 prevmaxacc <- c(0.5, 0.5)
 predVecFwd <- c()
-maxacc <- logreg.fwd(predVecRemain, predVecFwd)$maxacc
-predVecFwd <- logreg.fwd(predVecRemain, predVecFwd)$predVecFwd
+maxacc <- logreg.fwd(predVecRemain, predVecFwd, "accuracy")$maxacc
+predVecFwd <- logreg.fwd(predVecRemain, predVecFwd, "accuracy")$predVecFwd
 predVecRemain <- predVecRemain[predVecRemain != predVecFwd[length(predVecFwd)]]
 prevmaxacc <- c(prevmaxacc, maxacc)
 while(length(predVecFwd) < 36){
-  maxacc <- logreg.fwd(predVecRemain, predVecFwd)$maxacc
+  maxacc <- logreg.fwd(predVecRemain, predVecFwd, "accuracy")$maxacc
   if(maxacc < prevmaxacc[length(prevmaxacc) - 1]){
     break}
-  predVecFwd <- logreg.fwd(predVecRemain, predVecFwd)$predVecFwd
+  predVecFwd <- logreg.fwd(predVecRemain, predVecFwd, "accuracy")$predVecFwd
   predVecRemain <- predVecRemain[predVecRemain != predVecFwd[length(predVecFwd)]]
   prevmaxacc <- c(prevmaxacc, maxacc)}
 prevmaxacc[length(prevmaxacc)]
 
+# Apply backward step algorithm using PPV
+combn(names(SPWeeklyTrain)[-c(2:3)], 2) %>%
+    apply(FUN = paste0, MARGIN = 2, collapse = ":") %>%
+    c(names(SPWeeklyTrain)[-c(2:3)]) -> predVec
+prevmaxacc <- c(0.5, 0.5)
+maxacc <- logreg.bwd(predVec, "ppv")$maxacc
+predVec <- logreg.bwd(predVec, "ppv")$predVec
+prevmaxacc <- c(prevmaxacc, maxacc)
+while(length(predVec) > 1){
+  maxacc <- logreg.bwd(predVec, "ppv")$maxacc
+  if(maxacc < prevmaxacc[length(prevmaxacc) - 1]){
+    break}
+  predVec <- logreg.bwd(predVec, "ppv")$predVec
+  prevmaxacc <- c(prevmaxacc, maxacc)}
+prevmaxacc[length(prevmaxacc)]
 
+# Apply forward step algorithm using PPV
+combn(names(SPWeeklyTrain)[-c(2:3)], 2) %>%
+    apply(FUN = paste0, MARGIN = 2, collapse = ":") %>%
+    c(names(SPWeeklyTrain)[-c(2:3)]) -> predVecRemain
+prevmaxacc <- c(0.5, 0.5)
+predVecFwd <- c()
+maxacc <- logreg.fwd(predVecRemain, predVecFwd, "ppv")$maxacc
+predVecFwd <- logreg.fwd(predVecRemain, predVecFwd, "ppv")$predVecFwd
+predVecRemain <- predVecRemain[predVecRemain != predVecFwd[length(predVecFwd)]]
+prevmaxacc <- c(prevmaxacc, maxacc)
+while(length(predVecFwd) < 36){
+  maxacc <- logreg.fwd(predVecRemain, predVecFwd, "ppv")$maxacc
+  if(maxacc < prevmaxacc[length(prevmaxacc) - 1]){
+    break}
+  predVecFwd <- logreg.fwd(predVecRemain, predVecFwd, "ppv")$predVecFwd
+  predVecRemain <- predVecRemain[predVecRemain != predVecFwd[length(predVecFwd)]]
+  prevmaxacc <- c(prevmaxacc, maxacc)}
+prevmaxacc[length(prevmaxacc)]
 
+```
 
+``` {r eval = FALSE}
 
+totalReturn <- c()
+for(i in 1:nrow(SPWeekly)){
+  totalReturn <- c(totalReturn, prod((SPWeekly$PctChange[1:i]/100)+1))}
+
+```
+
+``` {r eval = FALSE}
 
 # Code above can be modified to get top 10 models for sensitivity, specificity, and NPV
 # Not particularly useful, so they won't be used much in our analyses
