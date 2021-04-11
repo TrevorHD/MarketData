@@ -626,8 +626,6 @@ logreg <- function(formula, dataTrain, output){
 
 ``` {r include = FALSE, eval = FALSE}
 
-# WORK IN PROGRESS
-
 # Function to fit logistic regression to all possible combinations of n variables
 # Outputs value and combination of variables for desired prediction metric
 logreg.comb <- function(dataTrain, output, n){
@@ -637,6 +635,24 @@ logreg.comb <- function(dataTrain, output, n){
     sapply(FUN = logreg, dataTrain = dataTrain, output = output) %>% 
     sort() %>%
     return()}
+
+# Find top 10 models for accuracy
+SPWeeklyTop <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain, output = "accuracy"))
+sort(SPWeeklyTop, decreasing = TRUE)[1:10]
+logreg(Direction~Prev5GM+Prev5Pct+Lag1+Lag2+Lag4, dataTrain = SPWeeklyTrain, output = "confMatrix")
+
+# Find top 10 models for ppv
+SPWeeklyTop <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain, output = "ppv"))
+sort(SPWeeklyTop, decreasing = TRUE)[1:10]
+
+# Find top 10 models for npv
+SPWeeklyTop <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain, output = "npv"))
+sort(SPWeeklyTop, decreasing = TRUE)[1:10]
+logreg(Direction ~ Prev5GM, dataTrain = SPWeeklyTrain, output = "confMatrix")
+
+```
+
+``` {r include = FALSE, eval = FALSE}
 
 # Function to remove a term and find new accuracy
 logreg.lcv <- function(i, dataTrain, output){
@@ -667,23 +683,23 @@ logreg.fwd <- function(predVecRemain, predVecFwd){
   pvr <- predVecRemain[-which.max(accs)]
   return(list(predVecFwd = pvf, predVecRemain = pvr, maxacc = max(accs)))}
 
-# Apply backward step algorithm
+# Apply backward step algorithm using accuracy
 combn(names(SPWeeklyTrain)[-c(2:3)], 2) %>%
     apply(FUN = paste0, MARGIN = 2, collapse = ":") %>%
     c(names(SPWeeklyTrain)[-c(2:3)]) -> predVec
 prevmaxacc <- c(0.5, 0.5)
-predVec <- logreg.bwd(predVec)$predVec
 maxacc <- logreg.bwd(predVec)$maxacc
+predVec <- logreg.bwd(predVec)$predVec
 prevmaxacc <- c(prevmaxacc, maxacc)
-while(maxacc >= prevmaxacc[length(prevmaxacc) - 1]){
-  predVec <- logreg.bwd(predVec)$predVec
+while(length(predVec) > 1){
   maxacc <- logreg.bwd(predVec)$maxacc
-  prevmaxacc <- c(prevmaxacc, maxacc)
-  if(length(predVec) == 1){
-    break}}
-prevmaxacc[length(prevmaxacc) - 1]
+  if(maxacc < prevmaxacc[length(prevmaxacc) - 1]){
+    break}
+  predVec <- logreg.bwd(predVec)$predVec
+  prevmaxacc <- c(prevmaxacc, maxacc)}
+prevmaxacc[length(prevmaxacc)]
 
-# Apply foward step algorithm
+# Apply foward step algorithm using accuracy
 combn(names(SPWeeklyTrain)[-c(2:3)], 2) %>%
     apply(FUN = paste0, MARGIN = 2, collapse = ":") %>%
     c(names(SPWeeklyTrain)[-c(2:3)]) -> predVecRemain
@@ -691,38 +707,17 @@ prevmaxacc <- c(0.5, 0.5)
 predVecFwd <- c()
 maxacc <- logreg.fwd(predVecRemain, predVecFwd)$maxacc
 predVecFwd <- logreg.fwd(predVecRemain, predVecFwd)$predVecFwd
-predVecRemain <- logreg.fwd(predVecRemain, predVecFwd)$predVecRemain
+predVecRemain <- predVecRemain[predVecRemain != predVecFwd[length(predVecFwd)]]
 prevmaxacc <- c(prevmaxacc, maxacc)
-while(maxacc >= prevmaxacc[length(prevmaxacc) - 1]){
-  predVecFwd <- logreg.fwd(predVecRemain, predVecFwd)$predVecFwd
-  predVecRemain <- logreg.fwd(predVecRemain, predVecFwd)$predVecRemain
+while(length(predVecFwd) < 36){
   maxacc <- logreg.fwd(predVecRemain, predVecFwd)$maxacc
-  prevmaxacc <- c(prevmaxacc, maxacc)
-  if(length(predVec) == 36){
-    break}}
+  if(maxacc < prevmaxacc[length(prevmaxacc) - 1]){
+    break}
+  predVecFwd <- logreg.fwd(predVecRemain, predVecFwd)$predVecFwd
+  predVecRemain <- predVecRemain[predVecRemain != predVecFwd[length(predVecFwd)]]
+  prevmaxacc <- c(prevmaxacc, maxacc)}
+prevmaxacc[length(prevmaxacc)]
 
-
-
-
-
-
-
-
-
-
-# Find top 10 models for accuracy
-SPWeeklyTop <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain, output = "accuracy"))
-sort(SPWeeklyTop, decreasing = TRUE)[1:10]
-logreg(Direction~Prev5GM+Prev5Pct+Lag1+Lag2+Lag4, dataTrain = SPWeeklyTrain, output = "confMatrix")
-
-# Find top 10 models for ppv
-SPWeeklyTop <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain, output = "ppv"))
-sort(SPWeeklyTop, decreasing = TRUE)[1:10]
-
-# Find top 10 models for npv
-SPWeeklyTop <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain, output = "npv"))
-sort(SPWeeklyTop, decreasing = TRUE)[1:10]
-logreg(Direction~Prev5GM, dataTrain = SPWeeklyTrain, output = "confMatrix")
 
 
 
