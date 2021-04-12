@@ -20,8 +20,6 @@ urlcolor: blue
 
 ```{r setup, include = FALSE}
 
-knitr::opts_chunk$set(echo = FALSE)
-
 # Load libraries
 library(MASS)
 library(corrplot)
@@ -31,6 +29,11 @@ library(reshape2)
 library(knitr)
 library(pROC)
 library(car)
+
+# Set chunk and hook options
+knitr::opts_chunk$set(echo = FALSE, fig.pos = 'htb!')
+knit_hooks$set(plot = function(x, options)  {
+  hook_plot_tex(x, options)})
 
 # Tidy data
 source("https://raw.githubusercontent.com/TrevorHD/MarketData/master/YFData.R")
@@ -98,6 +101,18 @@ SPDaily %>% group_by(Direction) %>%
   summarise(Count = n(),
             Change = mean(PctChange))
 
+# Split S&P 500 data into training and test sets
+trainVec <- sample(1:nrow(SPWeekly), size = nrow(SPWeekly)*0.7, replace = FALSE)
+SPWeekly <- SPWeekly[SPWeekly$Direction != "Zero", ]
+SPWeekly$Direction <- factor(SPWeekly$Direction)
+SPWeeklyTrain <- SPWeekly[trainVec, ]
+SPWeeklyTest <- SPWeekly[-trainVec, ]
+trainVec <- sample(1:nrow(SPDaily), size = nrow(SPDaily)*0.7, replace = FALSE)
+SPDaily <- SPDaily[SPDaily$Direction != "Zero", ]
+SPDaily$Direction <- factor(SPDaily$Direction)
+SPDailyTrain <- SPDaily[trainVec, ]
+SPDailyTest <- SPDaily[-trainVec, ]
+
 # Counts and means for NASDAQ decreases/increases
 NDWeekly %>% group_by(Direction) %>% 
   summarise(Count = n(),
@@ -105,6 +120,18 @@ NDWeekly %>% group_by(Direction) %>%
 NDDaily %>% group_by(Direction) %>% 
   summarise(Count = n(),
             Change = mean(PctChange))
+
+# Split NASDAQ data into training and test sets
+trainVec <- sample(1:nrow(NDWeekly), size = nrow(NDWeekly)*0.7, replace = FALSE)
+NDWeekly <- NDWeekly[NDWeekly$Direction != "Zero", ]
+NDWeekly$Direction <- factor(NDWeekly$Direction)
+NDWeeklyTrain <- NDWeekly[trainVec, ]
+NDWeeklyTest <- NDWeekly[-trainVec, ]
+trainVec <- sample(1:nrow(NDDaily), size = nrow(NDDaily)*0.7, replace = FALSE)
+NDDaily <- NDDaily[NDDaily$Direction != "Zero", ]
+NDDaily$Direction <- factor(NDDaily$Direction)
+NDDailyTrain <- NDDaily[trainVec, ]
+NDDailyTest <- NDDaily[-trainVec, ]
 
 # Counts and means for Dow Jones decreases/increases
 DJWeekly %>% group_by(Direction) %>% 
@@ -114,16 +141,23 @@ DJDaily %>% group_by(Direction) %>%
   summarise(Count = n(),
             Change = mean(PctChange))
 
-# Split data into training and test set
-trainVec <- sample(1:nrow(SPWeekly), size = nrow(SPWeekly)*0.7, replace = FALSE)
-SPWeekly <- SPWeekly[SPWeekly$Direction != "Zero", ]
-SPWeekly$Direction <- factor(SPWeekly$Direction)
-SPWeeklyTrain <- SPWeekly[trainVec, ]
-SPWeeklyTest <- SPWeekly[-trainVec, ]
+# Split Dow Jones data into training and test sets
+trainVec <- sample(1:nrow(DJWeekly), size = nrow(DJWeekly)*0.7, replace = FALSE)
+DJWeekly <- DJWeekly[DJWeekly$Direction != "Zero", ]
+DJWeekly$Direction <- factor(DJWeekly$Direction)
+DJWeeklyTrain <- DJWeekly[trainVec, ]
+DJWeeklyTest <- DJWeekly[-trainVec, ]
+trainVec <- sample(1:nrow(DJDaily), size = nrow(DJDaily)*0.7, replace = FALSE)
+DJDaily <- DJDaily[DJDaily$Direction != "Zero", ]
+DJDaily$Direction <- factor(DJDaily$Direction)
+DJDailyTrain <- DJDaily[trainVec, ]
+DJDailyTest <- DJDaily[-trainVec, ]
 
 ```
 
-``` {r Figure1, fig.height = 8, fig.cap = "\\label{fig:Figure1} Correlations bewteen volume, percent change, and the various lag variables for the weekly (top) and daily (bottom) data on the S&P 500. The area of squares below the diagonal are proportional to the absolute value of the corresponding correlation coefficients."}
+\newpage
+
+``` {r Figure1, fig.height = 8, fig.cap = "\\label{fig:Figure1} Correlations bewteen volume, percent change, and the various lag variables for the weekly (top) and daily (bottom) data on the S\\&P 500. The area of squares below the diagonal are proportional to the absolute value of the corresponding correlation coefficients."}
 
 # Plots of correlations between variables: weekly data
 par(mfrow = c(2, 1), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
@@ -144,6 +178,8 @@ corrplot(add = TRUE, method = "number", type = "upper",
          number.cex = 0.5, col = "black", tl.pos = "n", cl.pos = "n")
 
 ```
+
+\newpage
 
 ``` {r Figure2, fig.height = 8, fig.cap = "\\label{fig:Figure2} Correlations bewteen volume, percent change, and the various lag variables for the weekly (top) and daily (bottom) data on the NASDAQ Composite. The area of squares below the diagonal are proportional to the absolute value of the corresponding correlation coefficients."}
 
@@ -167,6 +203,8 @@ corrplot(add = TRUE, method = "number", type = "upper",
 
 ```
 
+\newpage
+
 ``` {r Figure3, fig.height = 8, fig.cap = "\\label{fig:Figure3} Correlations bewteen volume, percent change, and the various lag variables for the weekly (top) and daily (bottom) data on the Dow Jones Industrial Average. The area of squares below the diagonal are proportional to the absolute value of the corresponding correlation coefficients."}
 
 # Plots of correlations between variables: weekly data
@@ -189,7 +227,9 @@ corrplot(add = TRUE, method = "number", type = "upper",
 
 ```
 
-``` {r Figure4, fig.height = 8, fig.cap = "\\label{fig:Figure4} Plots of S&P 500 weekly percent change against percent change of up to 5 weeks prior. Autocorrelation in weekly percent change corresponding to 1-5 week lag times is shown in the bottom-right panel; dashed blue lines represent the 95% confidence interval for the autocorrelation."}
+\newpage
+
+``` {r Figure4, fig.height = 8, fig.cap = "\\label{fig:Figure4} Plots of S\\&P 500 weekly percent change against percent change of up to 5 weeks prior. Autocorrelation in daily percent change corresponding to 1-5 day lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
 
 # Plot percent change for given week against percent change up to five weeks ago
 # Also plot autocorrelation in percent change
@@ -210,7 +250,9 @@ par(mfrow = c(1, 1))
 
 ```
 
-``` {r Figure5, fig.height = 8, fig.cap = "\\label{fig:Figure5} Plots of S&P 500 daily percent change against percent change of up to 5 days prior. Autocorrelation in daily percent change corresponding to 1-5 day lag times is shown in the bottom-right panel; dashed blue lines represent the 95% confidence interval for the autocorrelation."}
+\newpage
+
+``` {r Figure5, fig.height = 8, fig.cap = "\\label{fig:Figure5} Plots of S\\&P 500 daily percent change against percent change of up to 5 days prior. Autocorrelation in daily percent change corresponding to 1-5 day lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
 
 # Plot percent change for given day against percent change up to five days ago
 # Also plot autocorrelation in percent change
@@ -231,7 +273,9 @@ par(mfrow = c(1, 1))
 
 ```
 
-``` {r Figure6, fig.height = 8, fig.cap = "\\label{fig:Figure6} Plots of S&P 500 weekly volume against volume of up to 5 weeks prior. Autocorrelation in volume corresponding to 1-5 week lag times is shown in the bottom-right panel; dashed blue lines represent the 95% confidence interval for the autocorrelation."}
+\newpage
+
+``` {r Figure6, fig.height = 8, fig.cap = "\\label{fig:Figure6} Plots of S\\&P 500 weekly volume against volume of up to 5 weeks prior. Autocorrelation in volume corresponding to 1-5 week lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
 
 # Plot volume for given week against volume up to five weeks ago
 # Also plot autocorrelation in volume
@@ -252,7 +296,9 @@ par(mfrow = c(1, 1))
 
 ```
 
-``` {r Figure7, fig.height = 8, fig.cap = "\\label{fig:Figure7} Plots of S&P 500 daily volume against volume of up to 5 days prior. Autocorrelation in volume corresponding to 1-5 day lag times is shown in the bottom-right panel; dashed blue lines represent the 95% confidence interval for the autocorrelation."}
+\newpage
+
+``` {r Figure7, fig.height = 8, fig.cap = "\\label{fig:Figure7} Plots of S\\&P 500 daily volume against volume of up to 5 days prior. Autocorrelation in volume corresponding to 1-5 day lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
 
 # Plot volume for given day against volume up to five days ago
 # Also plot autocorrelation in volume
@@ -273,7 +319,9 @@ par(mfrow = c(1, 1))
 
 ```
 
-``` {r Figure8, fig.height = 8, fig.cap = "\\label{fig:Figure8} Plots of NASDAQ Composite weekly percent change against percent change of up to 5 weeks prior. Autocorrelation in weekly percent change corresponding to 1-5 week lag times is shown in the bottom-right panel; dashed blue lines represent the 95% confidence interval for the autocorrelation."}
+\newpage
+
+``` {r Figure8, fig.height = 8, fig.cap = "\\label{fig:Figure8} Plots of NASDAQ Composite weekly percent change against percent change of up to 5 weeks prior. Autocorrelation in weekly percent change corresponding to 1-5 week lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
 
 # Plot percent change for given week against percent change up to five weeks ago
 # Also plot autocorrelation in percent change
@@ -294,7 +342,9 @@ par(mfrow = c(1, 1))
 
 ```
 
-``` {r Figure9, fig.height = 8, fig.cap = "\\label{fig:Figure9} Plots of NASDAQ Composite daily percent change against percent change of up to 5 days prior. Autocorrelation in daily percent change corresponding to 1-5 day lag times is shown in the bottom-right panel; dashed blue lines represent the 95% confidence interval for the autocorrelation."}
+\newpage
+
+``` {r Figure9, fig.height = 8, fig.cap = "\\label{fig:Figure9} Plots of NASDAQ Composite daily percent change against percent change of up to 5 days prior. Autocorrelation in daily percent change corresponding to 1-5 day lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
 
 # Plot percent change for given day against percent change up to five days ago
 # Also plot autocorrelation in percent change
@@ -315,7 +365,9 @@ par(mfrow = c(1, 1))
 
 ```
 
-``` {r Figure10, fig.height = 8, fig.cap = "\\label{fig:Figure10} Plots of NASDAQ Composite weekly volume against volume of up to 5 weeks prior. Autocorrelation in volume corresponding to 1-5 week lag times is shown in the bottom-right panel; dashed blue lines represent the 95% confidence interval for the autocorrelation."}
+\newpage
+
+``` {r Figure10, fig.height = 8, fig.cap = "\\label{fig:Figure10} Plots of NASDAQ Composite weekly volume against volume of up to 5 weeks prior. Autocorrelation in volume corresponding to 1-5 week lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
 
 # Plot volume for given week against volume up to five weeks ago
 # Also plot autocorrelation in volume
@@ -336,7 +388,9 @@ par(mfrow = c(1, 1))
 
 ```
 
-``` {r Figure11, fig.height = 8, fig.cap = "\\label{fig:Figure11} Plots of NASDAQ Composite daily volume against volume of up to 5 days prior. Autocorrelation in volume corresponding to 1-5 day lag times is shown in the bottom-right panel; dashed blue lines represent the 95% confidence interval for the autocorrelation."}
+\newpage
+
+``` {r Figure11, fig.height = 8, fig.cap = "\\label{fig:Figure11} Plots of NASDAQ Composite daily volume against volume of up to 5 days prior. Autocorrelation in volume corresponding to 1-5 day lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
 
 # Plot volume for given day against volume up to five days ago
 # Also plot autocorrelation in volume
@@ -357,7 +411,9 @@ par(mfrow = c(1, 1))
 
 ```
 
-``` {r Figure12, fig.height = 8, fig.cap = "\\label{fig:Figure12} Plots of Dow Jones Industrial Average weekly percent change against percent change of up to 5 weeks prior. Autocorrelation in weekly percent change corresponding to 1-5 week lag times is shown in the bottom-right panel; dashed blue lines represent the 95% confidence interval for the autocorrelation."}
+\newpage
+
+``` {r Figure12, fig.height = 8, fig.cap = "\\label{fig:Figure12} Plots of Dow Jones Industrial Average weekly percent change against percent change of up to 5 weeks prior. Autocorrelation in weekly percent change corresponding to 1-5 week lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
 
 # Plot percent change for given week against percent change up to five weeks ago
 # Also plot autocorrelation in percent change
@@ -378,7 +434,9 @@ par(mfrow = c(1, 1))
 
 ```
 
-``` {r Figure13, fig.height = 8, fig.cap = "\\label{fig:Figure13} Plots of Dow Jones Industrial Average daily percent change against percent change of up to 5 days prior. Autocorrelation in daily percent change corresponding to 1-5 day lag times is shown in the bottom-right panel; dashed blue lines represent the 95% confidence interval for the autocorrelation."}
+\newpage
+
+``` {r Figure13, fig.height = 8, fig.cap = "\\label{fig:Figure13} Plots of Dow Jones Industrial Average daily percent change against percent change of up to 5 days prior. Autocorrelation in daily percent change corresponding to 1-5 day lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
 
 # Plot percent change for given day against percent change up to five days ago
 # Also plot autocorrelation in percent change
@@ -399,7 +457,9 @@ par(mfrow = c(1, 1))
 
 ```
 
-``` {r Figure14, fig.height = 8, fig.cap = "\\label{fig:Figure14} Plots of Dow Jones Industrial Average weekly volume against volume of up to 5 weeks prior. Autocorrelation in volume corresponding to 1-5 week lag times is shown in the bottom-right panel; dashed blue lines represent the 95% confidence interval for the autocorrelation."}
+\newpage
+
+``` {r Figure14, fig.height = 8, fig.cap = "\\label{fig:Figure14} Plots of Dow Jones Industrial Average weekly volume against volume of up to 5 weeks prior. Autocorrelation in volume corresponding to 1-5 week lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
 
 # Plot volume for given week against volume up to five weeks ago
 # Also plot autocorrelation in volume
@@ -420,7 +480,9 @@ par(mfrow = c(1, 1))
 
 ```
 
-``` {r Figure15, fig.height = 8, fig.cap = "\\label{fig:Figure15} Plots of Dow Jones Industrial Average daily volume against volume of up to 5 days prior. Autocorrelation in volume corresponding to 1-5 day lag times is shown in the bottom-right panel; dashed blue lines represent the 95% confidence interval for the autocorrelation."}
+\newpage
+
+``` {r Figure15, fig.height = 8, fig.cap = "\\label{fig:Figure15} Plots of Dow Jones Industrial Average daily volume against volume of up to 5 days prior. Autocorrelation in volume corresponding to 1-5 day lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
 
 # Plot volume for given day against volume up to five days ago
 # Also plot autocorrelation in volume
@@ -441,7 +503,9 @@ par(mfrow = c(1, 1))
 
 ```
 
-``` {r Figure16, fig.height = 7.9, fig.cap = "\\label{fig:Figure16} Relative value of the S&P 500 over time compared to its 1986 value (top) and distribution of daily percent changes (bottom). Note that in the bottom panel, the leftmost bin represents all days with a percent change less than -5, and rightmost bin represents all days with a percent change greater than 5. Note that the top chart does not account for after-hours gains or losses."}
+\newpage
+
+``` {r Figure16, fig.height = 7.9, fig.cap = "\\label{fig:Figure16} Relative value of the S\\&P 500 over time compared to its 1986 value (top) and distribution of daily percent changes (bottom). Note that in the bottom panel, the leftmost bin represents all days with a percent change less than -5, and rightmost bin represents all days with a percent change greater than 5. Note that the top chart does not account for after-hours gains or losses."}
 
 # Plot value of S&P 500 over time relative to a 1986 baseline
 # Check this chart for accuracy, as it doesn't quite match up with the YF chart
@@ -472,6 +536,8 @@ axis(1, at = (-11:11)/2, labels = labelvec)
 box()
 
 ```
+
+\newpage
 
 ``` {r Figure17, fig.height = 7.9, fig.cap = "\\label{fig:Figure17} Relative value of the NASDAQ Composite over time compared to its 1986 value (top) and distribution of daily percent changes (bottom). Note that in the bottom panel, the leftmost bin represents all days with a percent change less than -5, and rightmost bin represents all days with a percent change greater than 5. Note that the top chart does not account for after-hours gains or losses."}
 
@@ -505,6 +571,8 @@ box()
 
 ```
 
+\newpage
+
 ``` {r Figure18, fig.height = 7.9, fig.cap = "\\label{fig:Figure18} Relative value of the Dow Jones Industrial Average over time compared to its 1992 value (top) and distribution of daily percent changes (bottom). Note that in the bottom panel, the leftmost bin represents all days with a percent change less than -5, and rightmost bin represents all days with a percent change greater than 5. Note that the top chart does not account for after-hours gains or losses."}
 
 # Plot value of Dow Jones over time relative to a 1986 baseline
@@ -537,20 +605,22 @@ box()
 
 ```
 
+\newpage
+
 # Predictive Analysis: S&P 500
 
 ## Logistic Regression
 
-We begin our analyses on the S&P 500 data by examine how accurate a logistic regression can be for predicting whether the S&P 500 will increase or decrease in value. We first consider a model such that `Direction` is the response and `BVolume`, `Prev5GM`, `Prev5Pct`, and`Lag1` through `Lag5` are predictors.
+We begin our analyses on the S&P 500 data by using a logistic model to predict increases or decreases in the S&P 500, starting with the weekly data before proceeding to the daily data. We first consider a model such that `Direction` is the response and `BVolume`, `Prev5GM`, `Prev5Pct`, and`Lag1` through `Lag5` are predictors, and fitting this model to the training data.
 
 ``` {r, echo = TRUE, eval = FALSE}
 
 glm(Direction ~ Lag1 + Lag2 + Lag3 + Lag4 + Lag5 + BVolume + Prev5GM + Prev5Pct,
-    data = Weekly, family = binomial)
+    data = SPWeeklyTrain, family = binomial)
 
 ```
 
-This model contains the maximum number of non-interactive predictors and is only one of many models that we can make; we could fit a model with only seven of these eight terms, or six of these eight terms, and so on. It is easy to show that the total number of non-interactive models that we can form is \begin{equation} \sum_{i=1}^{8}\frac{8!}{i!(8-i)!} \end{equation} which is equal to 255. Fitting these models individually like in the code above would be too time consuming, so we write a function `logreg.comb` to do it for us.
+This model contains the maximum number (8) of non-interactive predictors and is only one of many models that we can make; we could fit a model with only seven of these eight terms, six of these eight terms, five of these eight terms, and so on. As a matter of fact, one can prove that the total number of non-interactive models that we can form is \begin{equation} \sum_{i=1}^{8}\frac{8!}{i!(8-i)!}=255 \end{equation} which is computationally feasible if we wish to evaluate every single one of these possible models. However, fitting these models individually like we did in the code above would be too time consuming, so we write a function `logreg.comb` to do it for us.
 
 ``` {r echo = TRUE, eval = FALSE}
 
@@ -564,14 +634,16 @@ logreg.comb <- function(dataTrain, dataTest, output, n){
 
 ```
 
-Here, we use the `combn` function to generate all 255 different combination of variables and then `paste0` to collapse them down into their individual formulas. We then use `sapply` to apply a custom function `logreg` to each of these formulas; this custom function fits a logistic regression using a given formula and training data set and returns a specified statistic such as accuracy, sensitivity, specificity, positive predictive value, or negative predictive value. Because this function is too long to properly include in a code snippet, we have not included it here and can instead be found in the markdown for this analysis. After using `logreg.comb` to find the model that maximises training set accuracy, we get the model \begin{equation} logit(\pi)=\beta_{0}+\beta_{1}x_{1}+\beta_{2}x_{2}+\beta_{3}x_{3}+\beta_{4}x_{4}+\beta_{5}x_{5} \end{equation} with the predictor variables `Prev5GM`, `Prev5Pct`, `Lag1`, `Lag2`, and `Lag4`. This model has an accuracy of approximately 58.26% on the training data which, while low, still seems to be slightly better than guessing. However, we see that this accuracy is highly skewed towards predicting increases; our model has a training sensitivity of 98.64% and correctly classified 724 out of 734 increases, but has an abysmal specificity of 3.68% and correctly classified only 20 out of 543 decreases. Sensitivity and specificiy may not be useful in the context of this problem, though; recall that they would interpreted such that given an increase (or decrease), the sensitivity (or specificity) is the probability of correctly identifying that increase (or decrease). However, if we are trying to predict the behaviour of a stock or ETF next week, then we are not given an increase or decrease then since that is what we are trying to predict in the first place! As such, it might make more sense to examine something like positive predictive value (PPV); that is, when the model predicts an increase, the percentage of times that an increase actually occurs. If we use `logreg.comb` again, but this time seeking to maximise the training PPV, we actually get the same model, with a PPV of 58.06% on the training data. We can also try and maximise negative predictive value (NPV); that is, when the model predicts a decrease, the percentage of times that a decrease actually occurs. Upon doing so, we get the model \begin{equation} logit(\pi)=\beta_{0}+\beta_{1}x_{1} \end{equation} with `Prev5GM` as the only predictor. This model has an NPV of 100%, meaning that every time a decrease is predicted, the markets actually decrease. This number is suspiciously high, and after checking the confusion matrix, it is clear why: the model only predicted a decrease once and got it right, while the other 542 decreases were incorrectly predicted as increases. Even looking at the next few highest models in terms of NPV, we see the same trend of high NPVs due to a extremely low number of decreases that just so happened to be correctly predicted. As such, it might be wise to stick with accuracy and PPV when choosing our models.
+Here, we use the `combn` function to generate all 255 different combination of variables and then `paste0` to collapse them down into their individual formulas. We then use `sapply` to apply a custom function `logreg` to each of these formulas; this custom function fits a logistic regression using a given formula and training data set and returns a specified statistic such as accuracy, sensitivity, specificity, positive predictive value, or negative predictive value. Because this function is too long to properly include in a code snippet, we have not included it here and can instead be found in the markdown for this analysis.
 
-We can also examine the training accuracy of models that include two-way interactions; the total number of two-way interaction terms plus single terms is 36, so thus the total number of interactive models that we can form is \begin{equation} \sum_{i=1}^{36}\frac{36!}{i!(36-i)!} \end{equation} which is equal to 68719476735. This would be far too computationally expensive for R, and we thus cannot calculate the accuracy of each model like we did when we only had 255 models. However, we can develop a heuristical solution that only searches through several of these possible models; we start with a backward step function that selects a model based on accuracy.
+After creating the functions `logreg` and  `logreg.comb`, we then use them to evaluate all 255 possible non-interactive models and find the one that maximises training set accuracy. Doing so yields the model \begin{equation} logit(\pi)=\beta_{0}+\beta_{1}x_{1}+\beta_{2}x_{2}+\beta_{3}x_{3}+\beta_{4}x_{4}+\beta_{5}x_{5} \end{equation} with the predictor variables `BVolume` `Prev5GM`, `Prev5Pct`, `Lag1`, and `Lag5`. This model has an accuracy of approximately 58.29% on the training data which, while low, still seems to be slightly better than guessing. However, we see that this accuracy is highly skewed towards predicting increases; our model has a training sensitivity of 98.91% and correctly classified 727 out of 735 increases, but has an extremely low specificity of 3.31% and correctly classified only 18 out of 543 decreases. Sensitivity and specificity may not be useful in the context of this problem, though; recall that they would interpreted such that given an increase (or decrease), the sensitivity (or specificity) is the probability of correctly identifying that increase (or decrease). However, if we are trying to predict the behaviour of a stock or ETF next week, then we are not given an increase or decrease then since that is what we are trying to predict in the first place! As such, it might make more sense to examine something like positive predictive value (PPV); that is, when the model predicts an increase, the percentage of times that an increase actually occurs. If we use `logreg.comb` again, but this time seeking to maximise the training PPV, we actually get the same model, with a PPV of 58.09% on the training data. We can also try and maximise negative predictive value (NPV); that is, when the model predicts a decrease, the percentage of times that a decrease actually occurs. Upon doing so, we get the model \begin{equation} logit(\pi)=\beta_{0}+\beta_{1}x_{1} \end{equation} with `Prev5GM` as the only predictor. This model has an NPV of 100%, meaning that every time a decrease is predicted, the markets actually decrease. This number is suspiciously high, and after checking the confusion matrix, it is clear why: the model only predicted a decrease once and got it right, while the other 542 decreases were incorrectly predicted as increases. Even looking at the next few highest models in terms of NPV, we see the same trend of high NPVs due to a extremely low number of decreases that just so happened to be correctly predicted. As such, it might be wise to stick with accuracy and PPV when choosing our models.
+
+We can also examine the training accuracy of models that include two-way interactions, as these interactions may help capture patterns in the data that our original non-interactive models might have missed. The total number of two-way interaction terms plus single terms is 36, so thus the total number of interactive models that we can form is \begin{equation} \sum_{i=1}^{36}\frac{36!}{i!(36-i)!}=68719476735. \end{equation} which is much larger than the number of possible models considering only non-interactive terms. Evaluating every single one of these possible models would be far too computationally expensive for R, and we thus cannot calculate the accuracy of each model like we did when we only had 255 models. However, we can develop a heuristical solution that only searches through several of these possible models; we can create an algorithm that performs a backward search much like how the function `step` does so, though selecting our models based on training data accuracy rather than AIC.
 
 ``` {r eval = FALSE, echo = TRUE}
 
 # Function to remove a term and find new accuracy
-logreg.lcv <- function(i, dataTrain, output){
+logreg.lcv1 <- function(i, dataTrain, output){
   predVec[-i] %>% 
     paste0(., collapse = "+") %>% 
     paste0("Direction~", .) %>% 
@@ -580,10 +652,10 @@ logreg.lcv <- function(i, dataTrain, output){
 
 # Function to return accuracy and new list of predictors after removing a predictor
 logreg.bwd <- function(predVec, output){
-  accs <- sapply(1:length(predVec), FUN = logreg.lcv, dataTrain = SPWeeklyTrain,
+  accs <- sapply(1:length(predVec), FUN = logreg.lcv1, dataTrain = SPWeeklyTrain,
                  output = output)
-  predVec <- predVec[-which.max(accs)]
-  return(list(predVec = predVec, maxacc = max(accs)))}
+  pv <- predVec[-which.max(accs)]
+  return(list(predVec = pv, maxacc = max(accs)))}
 
 ```
 
@@ -624,7 +696,7 @@ logreg <- function(formula, dataTrain, output){
   # Fit logistic regression using training data
   glm.fit <- glm(formula, data = dataTrain, family = "binomial")
   
-  # Classify test data; get posterior probabilities
+  # Classify training data; get posterior probabilities
   glm.probs <- predict(glm.fit, dataTrain, type = "response")
   glm.pred <- rep("Down", length(glm.probs))
   glm.pred[glm.probs >= 0.5] <- "Up"
@@ -679,26 +751,32 @@ logreg.comb <- function(dataTrain, output, n){
     sort() %>%
     return()}
 
+# Create empty list to populate with top models
+SPWeeklyMods <- list()
+
 # Find top 10 models for accuracy
 SPWeeklyTop <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain, output = "accuracy"))
 sort(SPWeeklyTop, decreasing = TRUE)[1:10]
-logreg(Direction~Prev5GM+Prev5Pct+Lag1+Lag2+Lag4, dataTrain = SPWeeklyTrain, output = "confMatrix")
+SPWeeklyMods[[1]] <- names(sort(SPWeeklyTop, decreasing = TRUE)[1])
+logreg(SPWeeklyMods[[1]], dataTrain = SPWeeklyTrain, output = "confMatrix")
 
 # Find top 10 models for ppv
 SPWeeklyTop <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain, output = "ppv"))
 sort(SPWeeklyTop, decreasing = TRUE)[1:10]
+SPWeeklyMods[[2]] <- names(sort(SPWeeklyTop, decreasing = TRUE)[1])
+logreg(SPWeeklyMods[[2]], dataTrain = SPWeeklyTrain, output = "confMatrix")
 
 # Find top 10 models for npv
 SPWeeklyTop <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain, output = "npv"))
 sort(SPWeeklyTop, decreasing = TRUE)[1:10]
-logreg(Direction ~ Prev5GM, dataTrain = SPWeeklyTrain, output = "confMatrix")
+logreg(names(sort(SPWeeklyTop, decreasing = TRUE))[1], dataTrain = SPWeeklyTrain, output = "confMatrix")
 
 ```
 
 ``` {r include = FALSE, eval = FALSE}
 
 # Function to remove a term and find new accuracy
-logreg.lcv <- function(i, dataTrain, output){
+logreg.lcv1 <- function(i, dataTrain, output){
   predVec[-i] %>% 
     paste0(., collapse = "+") %>% 
     paste0("Direction~", .) %>% 
@@ -707,9 +785,9 @@ logreg.lcv <- function(i, dataTrain, output){
 
 # Function to return accuracy and new list of predictors after removing a predictor
 logreg.bwd <- function(predVec, output){
-  accs <- sapply(1:length(predVec), FUN = logreg.lcv, dataTrain = SPWeeklyTrain, output = output)
-  predVec <- predVec[-which.max(accs)]
-  return(list(predVec = predVec, maxacc = max(accs)))}
+  accs <- sapply(1:length(predVec), FUN = logreg.lcv1, dataTrain = SPWeeklyTrain, output = output)
+  pv <- predVec[-which.max(accs)]
+  return(list(predVec = pv, maxacc = max(accs)))}
 
 # Function to add a term and find new accuracy
 logreg.lcv2 <- function(i, dataTrain, output){
@@ -741,6 +819,7 @@ while(length(predVec) > 1){
   predVec <- logreg.bwd(predVec, "accuracy")$predVec
   prevmaxacc <- c(prevmaxacc, maxacc)}
 prevmaxacc[length(prevmaxacc)]
+SPWeeklyMods[[3]] <- paste0("Direction~", paste0(predVec, collapse = "+"))
 
 # Apply forward step algorithm using accuracy
 combn(names(SPWeeklyTrain)[-c(2:3)], 2) %>%
@@ -760,6 +839,7 @@ while(length(predVecFwd) < 36){
   predVecRemain <- predVecRemain[predVecRemain != predVecFwd[length(predVecFwd)]]
   prevmaxacc <- c(prevmaxacc, maxacc)}
 prevmaxacc[length(prevmaxacc)]
+SPWeeklyMods[[4]] <- paste0("Direction~", paste0(predVecFwd, collapse = "+"))
 
 # Apply backward step algorithm using PPV
 combn(names(SPWeeklyTrain)[-c(2:3)], 2) %>%
@@ -776,6 +856,7 @@ while(length(predVec) > 1){
   predVec <- logreg.bwd(predVec, "ppv")$predVec
   prevmaxacc <- c(prevmaxacc, maxacc)}
 prevmaxacc[length(prevmaxacc)]
+SPWeeklyMods[[5]] <- paste0("Direction~", paste0(predVec, collapse = "+"))
 
 # Apply forward step algorithm using PPV
 combn(names(SPWeeklyTrain)[-c(2:3)], 2) %>%
@@ -795,14 +876,39 @@ while(length(predVecFwd) < 36){
   predVecRemain <- predVecRemain[predVecRemain != predVecFwd[length(predVecFwd)]]
   prevmaxacc <- c(prevmaxacc, maxacc)}
 prevmaxacc[length(prevmaxacc)]
+SPWeeklyMods[[6]] <- paste0("Direction~", paste0(predVecFwd, collapse = "+"))
 
 ```
 
 ``` {r eval = FALSE}
 
-totalReturn <- c()
-for(i in 1:nrow(SPWeekly)){
-  totalReturn <- c(totalReturn, prod((SPWeekly$PctChange[1:i]/100)+1))}
+# Compare model test accuracy
+sapply(SPWeeklyMods, FUN = logreg, dataTrain = SPWeeklyTest, output = "accuracy")
+
+# Compare model test PPV
+sapply(SPWeeklyMods, FUN = logreg, dataTrain = SPWeeklyTest, output = "ppv")
+
+# Function to estimate total return on model vs no model
+returns <- function(formula, data, final = FALSE){
+  if(formula != "none"){
+    glm.fit <- glm(formula = formula, data = data, family = "binomial")
+    glm.probs <- predict(glm.fit, SPWeekly, type = "response")
+    glm.pred <- rep("Down", length(glm.probs))
+    glm.pred[glm.probs >= 0.5] <- "Up"
+    pcts <- data$PctChange
+    pcts[glm.pred == "Down"] <- 0
+    totalReturn <- c()
+    for(i in 1:length(pcts)){
+      totalReturn <- c(totalReturn, prod((pcts[1:i]/100)+1))}}
+  if(formula == "none"){
+    totalReturn <- c()
+    for(i in 1:nrow(data)){
+      totalReturn <- c(totalReturn, prod((data$PctChange[1:i]/100)+1))}}
+  ifelse(final == TRUE, return(totalReturn[length(totalReturn)]), return(totalReturn))}
+
+# Compare lifetime returns; use loop since sapply doesn't work for some reason
+for(i in 1:6){
+  print(returns(SPWeeklyMods[[i]], data = SPWeekly, final = TRUE))}
 
 ```
 
