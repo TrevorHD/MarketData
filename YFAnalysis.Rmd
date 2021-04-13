@@ -153,6 +153,9 @@ DJDaily$Direction <- factor(DJDaily$Direction)
 DJDailyTrain <- DJDaily[trainVec, ]
 DJDailyTest <- DJDaily[-trainVec, ]
 
+# Remove trainvec from global environment
+remove(trainVec)
+
 ```
 
 \newpage
@@ -683,7 +686,7 @@ logreg.fwd <- function(predVecRemain, predVecFwd, output){
 
 Doing so now results in a model with a training accuracy of 59.15% and 9 terms; while the training accuracy is lower, there are fewer terms than our model resulting from backward selection. We can also use the same forward and backward algorithms but select models using PPV instead of accuracy. If we do so using the backward step algorithm, we get a model with a PPV of 60.30% and 26 terms; using the forward step algorithm, we get a model with a PPV of 59.38% and 12 terms.
 
-``` {r include = FALSE, eval = FALSE}
+``` {r include = FALSE}
 
 # Note: Our analyses show that VLag1 - VLag5 doesn't make much of a difference
 # Thus, we remove it to make the models simpler
@@ -739,7 +742,7 @@ logreg <- function(formula, dataTrain, output){
 
 ```
 
-``` {r include = FALSE, eval = FALSE}
+``` {r include = FALSE}
 
 # Function to fit logistic regression to all possible combinations of n variables
 # Outputs value and combination of variables for desired prediction metric
@@ -752,28 +755,31 @@ logreg.comb <- function(dataTrain, output, n){
     return()}
 
 # Create empty list to populate with top models
-SPWeeklyMods <- list()
+SPWeeklyLMod <- list()
 
 # Find top 10 models for accuracy
 SPWeeklyTop <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain, output = "accuracy"))
 sort(SPWeeklyTop, decreasing = TRUE)[1:10]
-SPWeeklyMods[[1]] <- names(sort(SPWeeklyTop, decreasing = TRUE)[1])
-logreg(SPWeeklyMods[[1]], dataTrain = SPWeeklyTrain, output = "confMatrix")
+SPWeeklyLMod[[1]] <- names(sort(SPWeeklyTop, decreasing = TRUE)[1])
+logreg(SPWeeklyLMod[[1]], dataTrain = SPWeeklyTrain, output = "confMatrix")
 
 # Find top 10 models for ppv
 SPWeeklyTop <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain, output = "ppv"))
 sort(SPWeeklyTop, decreasing = TRUE)[1:10]
-SPWeeklyMods[[2]] <- names(sort(SPWeeklyTop, decreasing = TRUE)[1])
-logreg(SPWeeklyMods[[2]], dataTrain = SPWeeklyTrain, output = "confMatrix")
+SPWeeklyLMod[[2]] <- names(sort(SPWeeklyTop, decreasing = TRUE)[1])
+logreg(SPWeeklyLMod[[2]], dataTrain = SPWeeklyTrain, output = "confMatrix")
 
 # Find top 10 models for npv
 SPWeeklyTop <- unlist(sapply(1:8, FUN = logreg.comb, dataTrain = SPWeeklyTrain, output = "npv"))
 sort(SPWeeklyTop, decreasing = TRUE)[1:10]
 logreg(names(sort(SPWeeklyTop, decreasing = TRUE))[1], dataTrain = SPWeeklyTrain, output = "confMatrix")
 
+# Remove variables from global environment
+remove(SPWeeklyTop)
+
 ```
 
-``` {r include = FALSE, eval = FALSE}
+``` {r include = FALSE}
 
 # Function to remove a term and find new accuracy
 logreg.lcv1 <- function(i, dataTrain, output){
@@ -819,7 +825,7 @@ while(length(predVec) > 1){
   predVec <- logreg.bwd(predVec, "accuracy")$predVec
   prevmaxacc <- c(prevmaxacc, maxacc)}
 prevmaxacc[length(prevmaxacc)]
-SPWeeklyMods[[3]] <- paste0("Direction~", paste0(predVec, collapse = "+"))
+SPWeeklyLMod[[3]] <- paste0("Direction~", paste0(predVec, collapse = "+"))
 
 # Apply forward step algorithm using accuracy
 combn(names(SPWeeklyTrain)[-c(2:3)], 2) %>%
@@ -839,7 +845,7 @@ while(length(predVecFwd) < 36){
   predVecRemain <- predVecRemain[predVecRemain != predVecFwd[length(predVecFwd)]]
   prevmaxacc <- c(prevmaxacc, maxacc)}
 prevmaxacc[length(prevmaxacc)]
-SPWeeklyMods[[4]] <- paste0("Direction~", paste0(predVecFwd, collapse = "+"))
+SPWeeklyLMod[[4]] <- paste0("Direction~", paste0(predVecFwd, collapse = "+"))
 
 # Apply backward step algorithm using PPV
 combn(names(SPWeeklyTrain)[-c(2:3)], 2) %>%
@@ -856,7 +862,7 @@ while(length(predVec) > 1){
   predVec <- logreg.bwd(predVec, "ppv")$predVec
   prevmaxacc <- c(prevmaxacc, maxacc)}
 prevmaxacc[length(prevmaxacc)]
-SPWeeklyMods[[5]] <- paste0("Direction~", paste0(predVec, collapse = "+"))
+SPWeeklyLMod[[5]] <- paste0("Direction~", paste0(predVec, collapse = "+"))
 
 # Apply forward step algorithm using PPV
 combn(names(SPWeeklyTrain)[-c(2:3)], 2) %>%
@@ -876,17 +882,20 @@ while(length(predVecFwd) < 36){
   predVecRemain <- predVecRemain[predVecRemain != predVecFwd[length(predVecFwd)]]
   prevmaxacc <- c(prevmaxacc, maxacc)}
 prevmaxacc[length(prevmaxacc)]
-SPWeeklyMods[[6]] <- paste0("Direction~", paste0(predVecFwd, collapse = "+"))
+SPWeeklyLMod[[6]] <- paste0("Direction~", paste0(predVecFwd, collapse = "+"))
+
+# Remove variables from global environment
+remove(maxacc, predVec, predVecFwd, predVecRemain, prevmaxacc)
 
 ```
 
-``` {r eval = FALSE}
+``` {r include = FALSE}
 
 # Compare model test accuracy
-sapply(SPWeeklyMods, FUN = logreg, dataTrain = SPWeeklyTest, output = "accuracy")
+sapply(SPWeeklyLMod, FUN = logreg, dataTrain = SPWeeklyTest, output = "accuracy")
 
 # Compare model test PPV
-sapply(SPWeeklyMods, FUN = logreg, dataTrain = SPWeeklyTest, output = "ppv")
+sapply(SPWeeklyLMod, FUN = logreg, dataTrain = SPWeeklyTest, output = "ppv")
 
 # Function to estimate total return on model vs no model
 returns <- function(formula, data, final = FALSE){
@@ -908,7 +917,7 @@ returns <- function(formula, data, final = FALSE){
 
 # Compare lifetime returns; use loop since sapply doesn't work for some reason
 for(i in 1:6){
-  print(returns(SPWeeklyMods[[i]], data = SPWeekly, final = TRUE))}
+  print(returns(SPWeeklyLMod[[i]], data = SPWeekly, final = TRUE))}
 
 ```
 
@@ -979,32 +988,151 @@ kable(round(SPWeeklyTopPTab, 3))
 
 ```
 
-``` {r Figure19, eval = FALSE, fig.height = 8, fig.cap = "\\label{fig:Figure19} Standardised deviance residuals (top) and standardised Pearson residuals (bottom) for the best model in the logistic regression framework. Solid red lines represent a loess fit to the residuals and should be approximately horizontal at zero; dotted red lines represent $\\pm$ 2 standard deviations on the residuals."}
+\newpage
 
-# Re-fit best model for easy plotting
-glm.fit <- glm(Direction ~ Lag2 + Lag3 + Prev5Pct + Volume, data = SPWeeklyTrain, family = "binomial")
+``` {r Figure19, fig.height = 8, fig.cap = "\\label{fig:Figure19} Standardised deviance residuals (left) and standardised Pearson residuals (right) for logistic regression models selected using accuracy. Solid red lines represent a loess fit to the residuals and should be approximately horizontal at zero; dotted red lines represent $\\pm$ 2 standard deviations on the residuals."}
 
-# Calculate standardised deviance and Pearson residuals for logistic regression
-hvals <- influence(glm.fit)$hat
-SRDeviance <- rstandard(glm.fit)
-SRPearson <- residuals(glm.fit, "pearson")/sqrt(1 - hvals)
+# Re-fit top models to get residuals
+SPWeeklyLModList <- lapply(SPWeeklyLMod, FUN = glm, data = SPWeeklyTrain, family = "binomial")
 
-# Plot standardised deviance residuals
-par(mfrow = c(2, 1), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
-plot(predict(glm.fit, type = "response"), SRDeviance, xlab = "Fitted Probability",
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylim = c(-3, 3),
-     ylab = "Standardised Deviance Residuals")
-lines(lowess(predict(glm.fit), residuals(glm.fit)), col = "red", lwd = 1.5)
-abline(h = c(-2, 2), col = "red", lty = 3, lwd = 1.5)
+# Generate residual plots
+par(mfrow = c(3, 2), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
+for(i in c(1, 3, 4)){
+  
+  # Offset numbers for indexing purposes
+  if(i == 1){j <- 1}
+  if(i == 3){j <- 2}
+  if(i == 4){j <- 3}
+  
+  # Calculate leverage and residuals
+  hvals <- influence(SPWeeklyLModList[[i]])$hat
+  SRDeviance <- rstandard(SPWeeklyLModList[[i]])
+  SRPearson <- residuals(SPWeeklyLModList[[i]], "pearson")/sqrt(1 - hvals)
+  
+  # Plot standardised deviance residuals
+  plot(predict(SPWeeklyLModList[[i]], type = "response"), SRDeviance, xlab = "Fitted Probability",
+       col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylim = c(-3, 3),
+       ylab = "Standardised Deviance Residuals", xlim = if(i == 4){c(0.3, 0.8)})
+  lines(lowess(predict(SPWeeklyLModList[[i]]), residuals(SPWeeklyLModList[[i]])), col = "red", lwd = 1.5)
+  abline(h = c(-2, 2), col = "red", lty = 3, lwd = 1.5)
+  text(x = c(0.736, 1, 0.8)[j], y = rep(3, 3)[j], labels = c("Model 1", "Model 3", "Model 4")[j], adj = 1)
 
-# Plot standardised Pearson residuals
-plot(predict(glm.fit, type = "response"), SRPearson, xlab = "Fitted Probability",
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylim = c(-3, 3),
-     ylab = "Pearson Deviance Residuals")
-lines(lowess(predict(glm.fit), residuals(glm.fit, "pearson")), col = "red", lwd = 1.5)
-abline(h = c(-2, 2), col = "red", lty = 3, lwd = 1.5)
+  # Plot standardised Pearson residuals
+  plot(predict(SPWeeklyLModList[[i]], type = "response"), SRPearson, xlab = "Fitted Probability",
+       col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylim = c(-3, 3),
+       ylab = "Pearson Deviance Residuals", xlim = if(i == 4){c(0.3, 0.8)})
+  lines(lowess(predict(SPWeeklyLModList[[i]]), residuals(SPWeeklyLModList[[i]], "pearson")), col = "red", lwd = 1.5)
+  abline(h = c(-2, 2), col = "red", lty = 3, lwd = 1.5)
+  text(x = c(0.736, 1, 0.8)[j], y = rep(3, 3)[j], labels = c("Model 1", "Model 3", "Model 4")[j], adj = 1)}
 
 ```
+
+\newpage
+
+``` {r Figure20, fig.height = 8, fig.cap = "\\label{fig:Figure20} Standardised deviance residuals (left) and standardised Pearson residuals (right) for logistic regression models selected using PPV. Solid red lines represent a loess fit to the residuals and should be approximately horizontal at zero; dotted red lines represent $\\pm$ 2 standard deviations on the residuals."}
+
+# Re-fit top models to get residuals
+SPWeeklyLModList <- lapply(SPWeeklyLMod, FUN = glm, data = SPWeeklyTrain, family = "binomial")
+
+# Generate residual plots
+par(mfrow = c(3, 2), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
+for(i in c(2, 5, 6)){
+  
+  # Offset numbers for indexing purposes
+  if(i == 2){j <- 1}
+  if(i == 5){j <- 2}
+  if(i == 6){j <- 3}
+  
+  # Calculate leverage and residuals
+  hvals <- influence(SPWeeklyLModList[[i]])$hat
+  SRDeviance <- rstandard(SPWeeklyLModList[[i]])
+  SRPearson <- residuals(SPWeeklyLModList[[i]], "pearson")/sqrt(1 - hvals)
+  
+  # Plot standardised deviance residuals
+  plot(predict(SPWeeklyLModList[[i]], type = "response"), SRDeviance, xlab = "Fitted Probability",
+       col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylim = c(-3, 3),
+       ylab = "Standardised Deviance Residuals", xlim = if(i %in% c(2, 6)){
+                                                            if(i == 2){c(0.3, 0.8)} else {c(0.2, 1)}})
+  lines(lowess(predict(SPWeeklyLModList[[i]]), residuals(SPWeeklyLModList[[i]])), col = "red", lwd = 1.5)
+  abline(h = c(-2, 2), col = "red", lty = 3, lwd = 1.5)
+  text(x = c(0.8, 1, 1)[j], y = rep(3, 3)[j], labels = c("Model 2", "Model 5", "Model 6")[j], adj = 1)
+
+  # Plot standardised Pearson residuals
+  plot(predict(SPWeeklyLModList[[i]], type = "response"), SRPearson, xlab = "Fitted Probability",
+       col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylim = c(-3, 3),
+       ylab = "Pearson Deviance Residuals", xlim = if(i %in% c(2, 6)){
+                                                       if(i == 2){c(0.3, 0.8)} else {c(0.2, 1)}})
+  lines(lowess(predict(SPWeeklyLModList[[i]]), residuals(SPWeeklyLModList[[i]], "pearson")), col = "red", lwd = 1.5)
+  abline(h = c(-2, 2), col = "red", lty = 3, lwd = 1.5)
+  text(x = c(0.8, 1, 1)[j], y = rep(3, 3)[j], labels = c("Model 2", "Model 5", "Model 6")[j], adj = 1)}
+
+```
+
+\newpage
+
+``` {r Figure21, fig.height = 8, fig.cap = "\\label{fig:Figure21} Relative value of the S\\&P 500 over time compared to its 1986 value (left) and percent change for weeks in which the model did not predict an increase (right) for logistic regression models selected using accuracy. The black line represents a buy-and-hold strategy, while the blue line represents a strategy of selling all assets before a predicted decrease and then purchasing them back the next time there is a predicted increase."}
+
+par(mfrow = c(3, 2), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
+for(i in c(1, 3, 4)){
+  
+  # Offset numbers for indexing purposes
+  if(i == 1){j <- 1}
+  if(i == 3){j <- 2}
+  if(i == 4){j <- 3}
+  
+  plot(returns(SPWeeklyLMod[[i]], data = SPWeekly), type = "l", col = "blue", xaxt = "n",
+       xlab = "Year", ylab = "Proportion of Initial Value", ylim = c(0, 40))
+  axis(1, at = nrow(SPWeekly)*(0:7)/7, labels = seq(1986, 2021, length.out = 8), cex.axis = 0.85)
+  lines(returns("none", data = SPWeekly))
+  text(x = rep(20, 3)[j], y = rep(39, 3)[j], labels = c("Model 1", "Model 3", "Model 4")[j], adj = 0)
+  
+  glm.fit <- glm(SPWeeklyLMod[[i]], data = SPWeekly, family = "binomial")
+  glm.probs <- predict(glm.fit, SPWeekly, type = "response")
+  glm.pred <- rep("Down", length(glm.probs))
+  glm.pred[glm.probs >= 0.5] <- "Up"
+  plotdat <- data.frame(glm.pred, SPWeekly$Direction, SPWeekly$PctChange)
+  plotdat <- subset(plotdat, glm.pred == "Down")
+  plot(as.numeric(rownames(plotdat)), plotdat$SPWeekly.PctChange, pch = 16, xaxt = "n",
+       xlim = c(0, nrow(SPWeekly)), col = ifelse(plotdat$SPWeekly.PctChange < 0, "red", "green"),
+       xlab = "Year", ylab = "Weekly Percent Change", ylim = c(-16, 16))
+  axis(1, at = nrow(SPWeekly)*(0:7)/7, labels = seq(1986, 2021, length.out = 8), cex.axis = 0.85)
+  text(x = rep(20, 3)[j], y = rep(15, 3)[j], labels = c("Model 1", "Model 3", "Model 4")[j], adj = 0)}
+
+```
+
+\newpage
+
+``` {r Figure22, fig.height = 8, fig.cap = "\\label{fig:Figure22} Relative value of the S\\&P 500 over time compared to its 1986 value (left) and percent change for weeks in which the model did not predict an increase (right) for logistic regression models selected using accuracy. The black line represents a buy-and-hold strategy, while the blue line represents a strategy of selling all assets before a predicted decrease and then purchasing them back the next time there is a predicted increase."}
+
+par(mfrow = c(3, 2), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
+for(i in c(2, 5, 6)){
+  
+  # Offset numbers for indexing purposes
+  if(i == 2){j <- 1}
+  if(i == 5){j <- 2}
+  if(i == 6){j <- 3}
+  
+  plot(returns(SPWeeklyLMod[[i]], data = SPWeekly), type = "l", col = "blue", xaxt = "n",
+       xlab = "Year", ylab = "Proportion of Initial Value", ylim = c(0, 40))
+  axis(1, at = nrow(SPWeekly)*(0:7)/7, labels = seq(1986, 2021, length.out = 8), cex.axis = 0.85)
+  lines(returns("none", data = SPWeekly))
+  text(x = rep(20, 3)[j], y = rep(39, 3)[j], labels = c("Model 1", "Model 3", "Model 4")[j], adj = 0)
+  
+  glm.fit <- glm(SPWeeklyLMod[[i]], data = SPWeekly, family = "binomial")
+  glm.probs <- predict(glm.fit, SPWeekly, type = "response")
+  glm.pred <- rep("Down", length(glm.probs))
+  glm.pred[glm.probs >= 0.5] <- "Up"
+  plotdat <- data.frame(glm.pred, SPWeekly$Direction, SPWeekly$PctChange)
+  plotdat <- subset(plotdat, glm.pred == "Down")
+  plot(as.numeric(rownames(plotdat)), plotdat$SPWeekly.PctChange, pch = 16, xaxt = "n",
+       xlim = c(0, nrow(SPWeekly)), col = ifelse(plotdat$SPWeekly.PctChange < 0, "red", "green"),
+       xlab = "Year", ylab = "Weekly Percent Change", ylim = c(-16, 16))
+  axis(1, at = nrow(SPWeekly)*(0:7)/7, labels = seq(1986, 2021, length.out = 8), cex.axis = 0.85)
+  text(x = rep(20, 3)[j], y = rep(15, 3)[j], labels = c("Model 2", "Model 5", "Model 6")[j], adj = 0)}
+
+```
+
+\newpage
 
 ## Discriminant Analysis
 
