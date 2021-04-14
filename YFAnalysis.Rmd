@@ -898,14 +898,19 @@ sapply(SPWeeklyLMod, FUN = logreg, dataTrain = SPWeeklyTest, output = "accuracy"
 sapply(SPWeeklyLMod, FUN = logreg, dataTrain = SPWeeklyTest, output = "ppv")
 
 # Function to estimate total return on model vs no model
-returns <- function(formula, data, final = FALSE){
+# Assumes complete liquidation of assets prior to predicted decrease
+# Setting lrisk to TRUE liquidates only 35% of assets prior to predicted decrease
+returns <- function(formula, data, final = FALSE, lrisk = FALSE){
   if(formula != "none"){
     glm.fit <- glm(formula = formula, data = data, family = "binomial")
     glm.probs <- predict(glm.fit, SPWeekly, type = "response")
     glm.pred <- rep("Down", length(glm.probs))
     glm.pred[glm.probs >= 0.5] <- "Up"
     pcts <- data$PctChange
-    pcts[glm.pred == "Down"] <- 0
+    if(lrisk == FALSE){
+      pcts[glm.pred == "Down"] <- 0}
+    if(lrisk == TRUE){
+      pcts[glm.pred == "Down"] <- pcts[glm.pred == "Down"]*0.65}
     totalReturn <- c()
     for(i in 1:length(pcts)){
       totalReturn <- c(totalReturn, prod((pcts[1:i]/100)+1))}}
@@ -1070,8 +1075,9 @@ for(i in c(2, 5, 6)){
 
 \newpage
 
-``` {r Figure21, fig.height = 8, fig.cap = "\\label{fig:Figure21} Relative value of the S\\&P 500 over time compared to its 1986 value (left) and percent change for weeks in which the model did not predict an increase (right) for logistic regression models selected using accuracy. The black line represents a buy-and-hold strategy, while the blue line represents a strategy of selling all assets before a predicted decrease and then purchasing them back the next time there is a predicted increase."}
+``` {r Figure21, fig.height = 7.8, fig.cap = "\\label{fig:Figure21} Relative value of the S\\&P 500 over time compared to its 1986 value (left) and percent change for weeks in which the model did not predict an increase (right) for logistic regression models selected using accuracy. The black line represents a buy-and-hold strategy, while the blue line represents a strategy of selling all assets before a predicted decrease and then purchasing them back the next time there is a predicted increase. The purple line represents a less risky strategy of only selling 35\\% of assets before a predicted decrease and then purchasing them back the next time there is a predicted increase."}
 
+# Generate plots
 par(mfrow = c(3, 2), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
 for(i in c(1, 3, 4)){
   
@@ -1080,12 +1086,15 @@ for(i in c(1, 3, 4)){
   if(i == 3){j <- 2}
   if(i == 4){j <- 3}
   
+  # Plot returns
   plot(returns(SPWeeklyLMod[[i]], data = SPWeekly), type = "l", col = "blue", xaxt = "n",
        xlab = "Year", ylab = "Proportion of Initial Value", ylim = c(0, 40))
   axis(1, at = nrow(SPWeekly)*(0:7)/7, labels = seq(1986, 2021, length.out = 8), cex.axis = 0.85)
+  lines(returns(SPWeeklyLMod[[i]], data = SPWeekly, lrisk = TRUE), col = "purple")
   lines(returns("none", data = SPWeekly))
   text(x = rep(20, 3)[j], y = rep(39, 3)[j], labels = c("Model 1", "Model 3", "Model 4")[j], adj = 0)
   
+  # Plot increases/decreases on weeks when mode predicts a decrease
   glm.fit <- glm(SPWeeklyLMod[[i]], data = SPWeekly, family = "binomial")
   glm.probs <- predict(glm.fit, SPWeekly, type = "response")
   glm.pred <- rep("Down", length(glm.probs))
@@ -1096,14 +1105,22 @@ for(i in c(1, 3, 4)){
        xlim = c(0, nrow(SPWeekly)), col = ifelse(plotdat$SPWeekly.PctChange < 0, "red", "green"),
        xlab = "Year", ylab = "Weekly Percent Change", ylim = c(-16, 16))
   axis(1, at = nrow(SPWeekly)*(0:7)/7, labels = seq(1986, 2021, length.out = 8), cex.axis = 0.85)
-  text(x = rep(20, 3)[j], y = rep(15, 3)[j], labels = c("Model 1", "Model 3", "Model 4")[j], adj = 0)}
+  abline(h = mean(plotdat$SPWeekly.PctChange[plotdat$SPWeekly.PctChange < 0]), lty = 2, col = "red")
+  abline(h = mean(plotdat$SPWeekly.PctChange[plotdat$SPWeekly.PctChange > 0]), lty = 2, col = "green")
+  text(x = rep(20, 3)[j], y = rep(15, 3)[j], labels = c("Model 1", "Model 3", "Model 4")[j], adj = 0)
+  text(x = rep(400, 3)[j], y = rep(15, 3)[j], labels = as.numeric(table(plotdat$SPWeekly.Direction)[1]),
+       col = "red", adj = 0)
+  text(x = c(510, 550, 510)[j], y = rep(15, 3)[j], labels = "/", adj = 0)
+  text(x = c(540, 580, 540)[j], y = rep(15, 3)[j], labels = as.numeric(table(plotdat$SPWeekly.Direction)[2]),
+       col = "green", adj = 0)}
 
 ```
 
 \newpage
 
-``` {r Figure22, fig.height = 8, fig.cap = "\\label{fig:Figure22} Relative value of the S\\&P 500 over time compared to its 1986 value (left) and percent change for weeks in which the model did not predict an increase (right) for logistic regression models selected using accuracy. The black line represents a buy-and-hold strategy, while the blue line represents a strategy of selling all assets before a predicted decrease and then purchasing them back the next time there is a predicted increase."}
+``` {r Figure22, fig.height = 7.8, fig.cap = "\\label{fig:Figure22} Relative value of the S\\&P 500 over time compared to its 1986 value (left) and percent change for weeks in which the model did not predict an increase (right) for logistic regression models selected using PPV The black line represents a buy-and-hold strategy, while the blue line represents a strategy of selling all assets before a predicted decrease and then purchasing them back the next time there is a predicted increase. The purple line represents a less risky strategy of only selling 35\\% of assets before a predicted decrease and then purchasing them back the next time there is a predicted increase."}
 
+# Generate plots
 par(mfrow = c(3, 2), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
 for(i in c(2, 5, 6)){
   
@@ -1112,12 +1129,15 @@ for(i in c(2, 5, 6)){
   if(i == 5){j <- 2}
   if(i == 6){j <- 3}
   
+  # Plot returns
   plot(returns(SPWeeklyLMod[[i]], data = SPWeekly), type = "l", col = "blue", xaxt = "n",
        xlab = "Year", ylab = "Proportion of Initial Value", ylim = c(0, 40))
   axis(1, at = nrow(SPWeekly)*(0:7)/7, labels = seq(1986, 2021, length.out = 8), cex.axis = 0.85)
+  lines(returns(SPWeeklyLMod[[i]], data = SPWeekly, lrisk = TRUE), col = "purple")
   lines(returns("none", data = SPWeekly))
   text(x = rep(20, 3)[j], y = rep(39, 3)[j], labels = c("Model 1", "Model 3", "Model 4")[j], adj = 0)
   
+  # Plot increases/decreases on weeks when mode predicts a decrease
   glm.fit <- glm(SPWeeklyLMod[[i]], data = SPWeekly, family = "binomial")
   glm.probs <- predict(glm.fit, SPWeekly, type = "response")
   glm.pred <- rep("Down", length(glm.probs))
@@ -1128,7 +1148,14 @@ for(i in c(2, 5, 6)){
        xlim = c(0, nrow(SPWeekly)), col = ifelse(plotdat$SPWeekly.PctChange < 0, "red", "green"),
        xlab = "Year", ylab = "Weekly Percent Change", ylim = c(-16, 16))
   axis(1, at = nrow(SPWeekly)*(0:7)/7, labels = seq(1986, 2021, length.out = 8), cex.axis = 0.85)
-  text(x = rep(20, 3)[j], y = rep(15, 3)[j], labels = c("Model 2", "Model 5", "Model 6")[j], adj = 0)}
+  abline(h = mean(plotdat$SPWeekly.PctChange[plotdat$SPWeekly.PctChange < 0]), lty = 2, col = "red")
+  abline(h = mean(plotdat$SPWeekly.PctChange[plotdat$SPWeekly.PctChange > 0]), lty = 2, col = "green")
+  text(x = rep(20, 3)[j], y = rep(15, 3)[j], labels = c("Model 2", "Model 5", "Model 6")[j], adj = 0)
+  text(x = rep(400, 3)[j], y = rep(15, 3)[j], labels = as.numeric(table(plotdat$SPWeekly.Direction)[1]),
+       col = "red", adj = 0)
+  text(x = c(510, 550, 510)[j], y = rep(15, 3)[j], labels = "/", adj = 0)
+  text(x = c(540, 580, 540)[j], y = rep(15, 3)[j], labels = as.numeric(table(plotdat$SPWeekly.Direction)[2]),
+       col = "green", adj = 0)}
 
 ```
 
