@@ -1255,6 +1255,218 @@ for(i in c(2, 5, 6)){
 
 ## Discriminant Analysis
 
+``` {r include = FALSE}
+
+# Function to perform discriminant analysis and output predictive accuracy
+damod <- function(formula, dataTrain, daType, output){
+  
+  # Fit linear or quadratic discriminant analysis using training data
+  if(daType == "lda"){
+    da.fit <- lda(formula, data = dataTrain)}
+  if(daType == "qda"){
+    da.fit <- qda(formula, data = dataTrain)}
+  
+  # Classify training data; get posterior probabilities
+  da.pred <- predict(da.fit, dataTrain)$class
+  
+  # Confusion matrix of classified observations
+  # Must manually add Down row if model never predicts Down
+  confMatrix <- table(da.pred, dataTrain$Direction)
+  if(nrow(confMatrix) == 1){
+    confMatrix <- rbind(c(0, 0), confMatrix)}
+  rownames(confMatrix) <- c("[P]Down", "[P]Up")
+  colnames(confMatrix) <- c("[O]Down", "[O]Up")
+  
+  # Overall predictive accuracy
+  accuracy <- sum(diag(confMatrix)/sum(confMatrix))
+  
+  # Sensitivity and specificity
+  specificity <- confMatrix[1, 1]/sum(confMatrix[, 1])
+  sensitivity <- confMatrix[2, 2]/sum(confMatrix[, 2])
+  
+  # Positive and negative predictive value
+  npv <- confMatrix[1, 1]/sum(confMatrix[1, ])
+  ppv <- confMatrix[2, 2]/sum(confMatrix[2, ])
+  
+  # Return individual outputs or list of all outputs
+  if(output == "all"){
+    return(list(confMatrix = confMatrix, accuracy = accuracy, specificity = specificity,
+              sensitivity = sensitivity, npv = npv, ppv = ppv))}
+  if(output == "confMatrix"){
+    return(confMatrix)}
+  if(output == "accuracy"){
+    return(accuracy)}
+  if(output == "specificity"){
+    return(specificity)}
+  if(output == "sensitivity"){
+    return(sensitivity)}
+  if(output == "npv"){
+    return(npv)}
+  if(output == "ppv"){
+    return(ppv)}}
+
+```
+
+``` {r include = FALSE}
+
+# Function to fit logistic regression to all possible combinations of n variables
+# Outputs value and combination of variables for desired prediction metric
+damod.comb <- function(dataTrain, daType, output, n){
+  combn(names(dataTrain)[-c(2:3)], n) %>% 
+    apply(FUN = paste0, MARGIN = 2, collapse = "+") %>% 
+    paste0("Direction~", .) %>%
+    sapply(formula) %>% 
+    sapply(FUN = damod, dataTrain = dataTrain, daType = daType, output = output) %>% 
+    sort() %>%
+    return()}
+
+# Create empty list to populate with top models
+SPWeeklyDMod <- list()
+
+# Find top 10 models for accuracy: LDA
+SPWeeklyTop <- unlist(sapply(1:8, FUN = damod.comb, dataTrain = SPWeeklyTrain, daType = "lda", output = "accuracy"))
+sort(SPWeeklyTop, decreasing = TRUE)[1:10]
+SPWeeklyDMod[[1]] <- names(sort(SPWeeklyTop, decreasing = TRUE)[1])
+damod(formula(SPWeeklyDMod[[1]]), dataTrain = SPWeeklyTrain, daType = "lda", output = "confMatrix")
+
+# Find top 10 models for accuracy: QDA
+SPWeeklyTop <- unlist(sapply(1:8, FUN = damod.comb, dataTrain = SPWeeklyTrain, daType = "qda", output = "accuracy"))
+sort(SPWeeklyTop, decreasing = TRUE)[1:10]
+SPWeeklyDMod[[2]] <- names(sort(SPWeeklyTop, decreasing = TRUE)[1])
+damod(formula(SPWeeklyDMod[[2]]), dataTrain = SPWeeklyTrain, daType = "qda", output = "confMatrix")
+
+# Find top 10 models for ppv: LDA
+SPWeeklyTop <- unlist(sapply(1:8, FUN = damod.comb, dataTrain = SPWeeklyTrain, daType = "lda", output = "ppv"))
+sort(SPWeeklyTop, decreasing = TRUE)[1:10]
+SPWeeklyDMod[[3]] <- names(sort(SPWeeklyTop, decreasing = TRUE)[1])
+damod(formula(SPWeeklyDMod[[3]]), dataTrain = SPWeeklyTrain, daType = "lda", output = "confMatrix")
+
+# Find top 10 models for ppv: QDA
+SPWeeklyTop <- unlist(sapply(1:8, FUN = damod.comb, dataTrain = SPWeeklyTrain, daType = "qda", output = "ppv"))
+sort(SPWeeklyTop, decreasing = TRUE)[1:10]
+SPWeeklyDMod[[4]] <- names(sort(SPWeeklyTop, decreasing = TRUE)[1])
+damod(formula(SPWeeklyDMod[[4]]), dataTrain = SPWeeklyTrain, daType = "qda", output = "confMatrix")
+
+# Find top 10 models for npv
+SPWeeklyTop <- unlist(sapply(1:8, FUN = damod.comb, dataTrain = SPWeeklyTrain, daType = "lda", output = "npv"))
+sort(SPWeeklyTop, decreasing = TRUE)[1:10]
+logreg(names(sort(SPWeeklyTop, decreasing = TRUE))[1], dataTrain = SPWeeklyTrain, output = "confMatrix")
+
+# Remove variables from global environment
+remove(SPWeeklyTop)
+
+```
+
+``` {r include = FALSE}
+
+# Function to remove a term and find new accuracy
+logreg.lcv1 <- function(i, dataTrain, output){
+  predVec[-i] %>% 
+    paste0(., collapse = "+") %>% 
+    paste0("Direction~", .) %>% 
+    logreg(dataTrain = SPWeeklyTrain, output = output) %>% 
+    return()}
+
+# Function to return accuracy and new list of predictors after removing a predictor
+logreg.bwd <- function(predVec, output){
+  accs <- sapply(1:length(predVec), FUN = logreg.lcv1, dataTrain = SPWeeklyTrain, output = output)
+  pv <- predVec[-which.max(accs)]
+  return(list(predVec = pv, maxacc = max(accs)))}
+
+# Function to add a term and find new accuracy
+logreg.lcv2 <- function(i, dataTrain, output){
+  c(predVecFwd, predVecRemain[i]) %>% 
+  paste0(., collapse = "+") %>% 
+    paste0("Direction~", .) %>% 
+    logreg(dataTrain = SPWeeklyTrain, output = output) %>% 
+    return()}
+
+# Function to return accuracy and new list of predictors after adding a predictor
+logreg.fwd <- function(predVecRemain, predVecFwd, output){
+  accs <- sapply(1:length(predVecRemain), FUN = logreg.lcv2, dataTrain = SPWeeklyTrain, output = output)
+  pvf <- c(predVecFwd, predVecRemain[which.max(accs)])
+  pvr <- predVecRemain[-which.max(accs)]
+  return(list(predVecFwd = pvf, predVecRemain = pvr, maxacc = max(accs)))}
+
+# Apply backward step algorithm using accuracy
+combn(names(SPWeeklyTrain)[-c(2:3)], 2) %>%
+    apply(FUN = paste0, MARGIN = 2, collapse = ":") %>%
+    c(names(SPWeeklyTrain)[-c(2:3)]) -> predVec
+prevmaxacc <- c(0.5, 0.5)
+maxacc <- logreg.bwd(predVec, "accuracy")$maxacc
+predVec <- logreg.bwd(predVec, "accuracy")$predVec
+prevmaxacc <- c(prevmaxacc, maxacc)
+while(length(predVec) > 1){
+  maxacc <- logreg.bwd(predVec, "accuracy")$maxacc
+  if(maxacc < prevmaxacc[length(prevmaxacc) - 1]){
+    break}
+  predVec <- logreg.bwd(predVec, "accuracy")$predVec
+  prevmaxacc <- c(prevmaxacc, maxacc)}
+prevmaxacc[length(prevmaxacc)]
+SPWeeklyLMod[[3]] <- paste0("Direction~", paste0(predVec, collapse = "+"))
+
+# Apply forward step algorithm using accuracy
+combn(names(SPWeeklyTrain)[-c(2:3)], 2) %>%
+    apply(FUN = paste0, MARGIN = 2, collapse = ":") %>%
+    c(names(SPWeeklyTrain)[-c(2:3)]) -> predVecRemain
+prevmaxacc <- c(0.5, 0.5)
+predVecFwd <- c()
+maxacc <- logreg.fwd(predVecRemain, predVecFwd, "accuracy")$maxacc
+predVecFwd <- logreg.fwd(predVecRemain, predVecFwd, "accuracy")$predVecFwd
+predVecRemain <- predVecRemain[predVecRemain != predVecFwd[length(predVecFwd)]]
+prevmaxacc <- c(prevmaxacc, maxacc)
+while(length(predVecFwd) < 36){
+  maxacc <- logreg.fwd(predVecRemain, predVecFwd, "accuracy")$maxacc
+  if(maxacc < prevmaxacc[length(prevmaxacc) - 1]){
+    break}
+  predVecFwd <- logreg.fwd(predVecRemain, predVecFwd, "accuracy")$predVecFwd
+  predVecRemain <- predVecRemain[predVecRemain != predVecFwd[length(predVecFwd)]]
+  prevmaxacc <- c(prevmaxacc, maxacc)}
+prevmaxacc[length(prevmaxacc)]
+SPWeeklyLMod[[4]] <- paste0("Direction~", paste0(predVecFwd, collapse = "+"))
+
+# Apply backward step algorithm using PPV
+combn(names(SPWeeklyTrain)[-c(2:3)], 2) %>%
+    apply(FUN = paste0, MARGIN = 2, collapse = ":") %>%
+    c(names(SPWeeklyTrain)[-c(2:3)]) -> predVec
+prevmaxacc <- c(0.5, 0.5)
+maxacc <- logreg.bwd(predVec, "ppv")$maxacc
+predVec <- logreg.bwd(predVec, "ppv")$predVec
+prevmaxacc <- c(prevmaxacc, maxacc)
+while(length(predVec) > 1){
+  maxacc <- logreg.bwd(predVec, "ppv")$maxacc
+  if(maxacc < prevmaxacc[length(prevmaxacc) - 1]){
+    break}
+  predVec <- logreg.bwd(predVec, "ppv")$predVec
+  prevmaxacc <- c(prevmaxacc, maxacc)}
+prevmaxacc[length(prevmaxacc)]
+SPWeeklyLMod[[5]] <- paste0("Direction~", paste0(predVec, collapse = "+"))
+
+# Apply forward step algorithm using PPV
+combn(names(SPWeeklyTrain)[-c(2:3)], 2) %>%
+    apply(FUN = paste0, MARGIN = 2, collapse = ":") %>%
+    c(names(SPWeeklyTrain)[-c(2:3)]) -> predVecRemain
+prevmaxacc <- c(0.5, 0.5)
+predVecFwd <- c()
+maxacc <- logreg.fwd(predVecRemain, predVecFwd, "ppv")$maxacc
+predVecFwd <- logreg.fwd(predVecRemain, predVecFwd, "ppv")$predVecFwd
+predVecRemain <- predVecRemain[predVecRemain != predVecFwd[length(predVecFwd)]]
+prevmaxacc <- c(prevmaxacc, maxacc)
+while(length(predVecFwd) < 36){
+  maxacc <- logreg.fwd(predVecRemain, predVecFwd, "ppv")$maxacc
+  if(maxacc < prevmaxacc[length(prevmaxacc) - 1]){
+    break}
+  predVecFwd <- logreg.fwd(predVecRemain, predVecFwd, "ppv")$predVecFwd
+  predVecRemain <- predVecRemain[predVecRemain != predVecFwd[length(predVecFwd)]]
+  prevmaxacc <- c(prevmaxacc, maxacc)}
+prevmaxacc[length(prevmaxacc)]
+SPWeeklyLMod[[6]] <- paste0("Direction~", paste0(predVecFwd, collapse = "+"))
+
+# Remove variables from global environment
+remove(maxacc, predVec, predVecFwd, predVecRemain, prevmaxacc)
+
+```
+
 \newpage
 
 ## K-Nearest Neighbours
