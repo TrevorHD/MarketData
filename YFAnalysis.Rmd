@@ -1360,107 +1360,184 @@ remove(SPWeeklyTop)
 ``` {r include = FALSE}
 
 # Function to remove a term and find new accuracy
-logreg.lcv1 <- function(i, dataTrain, output){
+damod.lcv1 <- function(i, dataTrain, daType, output){
   predVec[-i] %>% 
     paste0(., collapse = "+") %>% 
-    paste0("Direction~", .) %>% 
-    logreg(dataTrain = SPWeeklyTrain, output = output) %>% 
+    paste0("Direction~", .) %>%
+    formula() %>% 
+    damod(dataTrain = SPWeeklyTrain, daType = daType, output = output) %>% 
     return()}
 
 # Function to return accuracy and new list of predictors after removing a predictor
-logreg.bwd <- function(predVec, output){
-  accs <- sapply(1:length(predVec), FUN = logreg.lcv1, dataTrain = SPWeeklyTrain, output = output)
+damod.bwd <- function(predVec, daType, output){
+  accs <- sapply(1:length(predVec), FUN = damod.lcv1, dataTrain = SPWeeklyTrain, daType = daType, output = output)
   pv <- predVec[-which.max(accs)]
   return(list(predVec = pv, maxacc = max(accs)))}
 
 # Function to add a term and find new accuracy
-logreg.lcv2 <- function(i, dataTrain, output){
+damod.lcv2 <- function(i, dataTrain, daType, output){
   c(predVecFwd, predVecRemain[i]) %>% 
   paste0(., collapse = "+") %>% 
-    paste0("Direction~", .) %>% 
-    logreg(dataTrain = SPWeeklyTrain, output = output) %>% 
+    paste0("Direction~", .) %>%
+    formula() %>%
+    damod(dataTrain = SPWeeklyTrain, daType = daType, output = output) %>% 
     return()}
 
 # Function to return accuracy and new list of predictors after adding a predictor
-logreg.fwd <- function(predVecRemain, predVecFwd, output){
-  accs <- sapply(1:length(predVecRemain), FUN = logreg.lcv2, dataTrain = SPWeeklyTrain, output = output)
+damod.fwd <- function(predVecRemain, predVecFwd, daType, output){
+  accs <- sapply(1:length(predVecRemain), FUN = damod.lcv2, dataTrain = SPWeeklyTrain,
+                 daType = daType, output = output)
   pvf <- c(predVecFwd, predVecRemain[which.max(accs)])
   pvr <- predVecRemain[-which.max(accs)]
   return(list(predVecFwd = pvf, predVecRemain = pvr, maxacc = max(accs)))}
 
-# Apply backward step algorithm using accuracy
+# Apply backward step algorithm using accuracy: LDA
 combn(names(SPWeeklyTrain)[-c(2:3)], 2) %>%
     apply(FUN = paste0, MARGIN = 2, collapse = ":") %>%
     c(names(SPWeeklyTrain)[-c(2:3)]) -> predVec
 prevmaxacc <- c(0.5, 0.5)
-maxacc <- logreg.bwd(predVec, "accuracy")$maxacc
-predVec <- logreg.bwd(predVec, "accuracy")$predVec
+maxacc <- damod.bwd(predVec, "lda", "accuracy")$maxacc
+predVec <- damod.bwd(predVec, "lda", "accuracy")$predVec
 prevmaxacc <- c(prevmaxacc, maxacc)
 while(length(predVec) > 1){
-  maxacc <- logreg.bwd(predVec, "accuracy")$maxacc
+  maxacc <- damod.bwd(predVec, "lda", "accuracy")$maxacc
   if(maxacc < prevmaxacc[length(prevmaxacc) - 1]){
     break}
-  predVec <- logreg.bwd(predVec, "accuracy")$predVec
+  predVec <- damod.bwd(predVec, "lda", "accuracy")$predVec
   prevmaxacc <- c(prevmaxacc, maxacc)}
 prevmaxacc[length(prevmaxacc)]
-SPWeeklyLMod[[3]] <- paste0("Direction~", paste0(predVec, collapse = "+"))
+SPWeeklyDMod[[5]] <- paste0("Direction~", paste0(predVec, collapse = "+"))
 
-# Apply forward step algorithm using accuracy
+# Apply forward step algorithm using accuracy: LDA
 combn(names(SPWeeklyTrain)[-c(2:3)], 2) %>%
     apply(FUN = paste0, MARGIN = 2, collapse = ":") %>%
     c(names(SPWeeklyTrain)[-c(2:3)]) -> predVecRemain
 prevmaxacc <- c(0.5, 0.5)
 predVecFwd <- c()
-maxacc <- logreg.fwd(predVecRemain, predVecFwd, "accuracy")$maxacc
-predVecFwd <- logreg.fwd(predVecRemain, predVecFwd, "accuracy")$predVecFwd
+maxacc <- damod.fwd(predVecRemain, predVecFwd, "lda", "accuracy")$maxacc
+predVecFwd <- damod.fwd(predVecRemain, predVecFwd, "lda", "accuracy")$predVecFwd
 predVecRemain <- predVecRemain[predVecRemain != predVecFwd[length(predVecFwd)]]
 prevmaxacc <- c(prevmaxacc, maxacc)
 while(length(predVecFwd) < 36){
-  maxacc <- logreg.fwd(predVecRemain, predVecFwd, "accuracy")$maxacc
+  maxacc <- damod.fwd(predVecRemain, predVecFwd, "lda", "accuracy")$maxacc
   if(maxacc < prevmaxacc[length(prevmaxacc) - 1]){
     break}
-  predVecFwd <- logreg.fwd(predVecRemain, predVecFwd, "accuracy")$predVecFwd
+  predVecFwd <- damod.fwd(predVecRemain, predVecFwd, "lda", "accuracy")$predVecFwd
   predVecRemain <- predVecRemain[predVecRemain != predVecFwd[length(predVecFwd)]]
   prevmaxacc <- c(prevmaxacc, maxacc)}
 prevmaxacc[length(prevmaxacc)]
-SPWeeklyLMod[[4]] <- paste0("Direction~", paste0(predVecFwd, collapse = "+"))
+SPWeeklyDMod[[6]] <- paste0("Direction~", paste0(predVecFwd, collapse = "+"))
 
-# Apply backward step algorithm using PPV
+# Apply backward step algorithm using accuracy: QDA
 combn(names(SPWeeklyTrain)[-c(2:3)], 2) %>%
     apply(FUN = paste0, MARGIN = 2, collapse = ":") %>%
     c(names(SPWeeklyTrain)[-c(2:3)]) -> predVec
 prevmaxacc <- c(0.5, 0.5)
-maxacc <- logreg.bwd(predVec, "ppv")$maxacc
-predVec <- logreg.bwd(predVec, "ppv")$predVec
+maxacc <- damod.bwd(predVec, "qda", "accuracy")$maxacc
+predVec <- damod.bwd(predVec, "qda", "accuracy")$predVec
 prevmaxacc <- c(prevmaxacc, maxacc)
 while(length(predVec) > 1){
-  maxacc <- logreg.bwd(predVec, "ppv")$maxacc
+  maxacc <- damod.bwd(predVec, "qda", "accuracy")$maxacc
   if(maxacc < prevmaxacc[length(prevmaxacc) - 1]){
     break}
-  predVec <- logreg.bwd(predVec, "ppv")$predVec
+  predVec <- damod.bwd(predVec, "qda", "accuracy")$predVec
   prevmaxacc <- c(prevmaxacc, maxacc)}
 prevmaxacc[length(prevmaxacc)]
-SPWeeklyLMod[[5]] <- paste0("Direction~", paste0(predVec, collapse = "+"))
+SPWeeklyDMod[[7]] <- paste0("Direction~", paste0(predVec, collapse = "+"))
 
-# Apply forward step algorithm using PPV
+# Apply forward step algorithm using accuracy: QDA
 combn(names(SPWeeklyTrain)[-c(2:3)], 2) %>%
     apply(FUN = paste0, MARGIN = 2, collapse = ":") %>%
     c(names(SPWeeklyTrain)[-c(2:3)]) -> predVecRemain
 prevmaxacc <- c(0.5, 0.5)
 predVecFwd <- c()
-maxacc <- logreg.fwd(predVecRemain, predVecFwd, "ppv")$maxacc
-predVecFwd <- logreg.fwd(predVecRemain, predVecFwd, "ppv")$predVecFwd
+maxacc <- damod.fwd(predVecRemain, predVecFwd, "qda", "accuracy")$maxacc
+predVecFwd <- damod.fwd(predVecRemain, predVecFwd, "qda", "accuracy")$predVecFwd
 predVecRemain <- predVecRemain[predVecRemain != predVecFwd[length(predVecFwd)]]
 prevmaxacc <- c(prevmaxacc, maxacc)
 while(length(predVecFwd) < 36){
-  maxacc <- logreg.fwd(predVecRemain, predVecFwd, "ppv")$maxacc
+  maxacc <- damod.fwd(predVecRemain, predVecFwd, "qda", "accuracy")$maxacc
   if(maxacc < prevmaxacc[length(prevmaxacc) - 1]){
     break}
-  predVecFwd <- logreg.fwd(predVecRemain, predVecFwd, "ppv")$predVecFwd
+  predVecFwd <- damod.fwd(predVecRemain, predVecFwd, "qda", "accuracy")$predVecFwd
   predVecRemain <- predVecRemain[predVecRemain != predVecFwd[length(predVecFwd)]]
   prevmaxacc <- c(prevmaxacc, maxacc)}
 prevmaxacc[length(prevmaxacc)]
-SPWeeklyLMod[[6]] <- paste0("Direction~", paste0(predVecFwd, collapse = "+"))
+SPWeeklyDMod[[8]] <- paste0("Direction~", paste0(predVecFwd, collapse = "+"))
+
+# Apply backward step algorithm using PPV: LDA
+combn(names(SPWeeklyTrain)[-c(2:3)], 2) %>%
+    apply(FUN = paste0, MARGIN = 2, collapse = ":") %>%
+    c(names(SPWeeklyTrain)[-c(2:3)]) -> predVec
+prevmaxacc <- c(0.5, 0.5)
+maxacc <- damod.bwd(predVec, "lda", "ppv")$maxacc
+predVec <- damod.bwd(predVec, "lda", "ppv")$predVec
+prevmaxacc <- c(prevmaxacc, maxacc)
+while(length(predVec) > 1){
+  maxacc <- damod.bwd(predVec, "lda", "ppv")$maxacc
+  if(maxacc < prevmaxacc[length(prevmaxacc) - 1]){
+    break}
+  predVec <- damod.bwd(predVec, "lda", "ppv")$predVec
+  prevmaxacc <- c(prevmaxacc, maxacc)}
+prevmaxacc[length(prevmaxacc)]
+SPWeeklyDMod[[9]] <- paste0("Direction~", paste0(predVec, collapse = "+"))
+
+# Apply forward step algorithm using PPV: LDA
+combn(names(SPWeeklyTrain)[-c(2:3)], 2) %>%
+    apply(FUN = paste0, MARGIN = 2, collapse = ":") %>%
+    c(names(SPWeeklyTrain)[-c(2:3)]) -> predVecRemain
+prevmaxacc <- c(0.5, 0.5)
+predVecFwd <- c()
+maxacc <- damod.fwd(predVecRemain, predVecFwd, "lda", "ppv")$maxacc
+predVecFwd <- damod.fwd(predVecRemain, predVecFwd, "lda", "ppv")$predVecFwd
+predVecRemain <- predVecRemain[predVecRemain != predVecFwd[length(predVecFwd)]]
+prevmaxacc <- c(prevmaxacc, maxacc)
+while(length(predVecFwd) < 36){
+  maxacc <- damod.fwd(predVecRemain, predVecFwd, "lda", "ppv")$maxacc
+  if(maxacc < prevmaxacc[length(prevmaxacc) - 1]){
+    break}
+  predVecFwd <- damod.fwd(predVecRemain, predVecFwd, "lda", "ppv")$predVecFwd
+  predVecRemain <- predVecRemain[predVecRemain != predVecFwd[length(predVecFwd)]]
+  prevmaxacc <- c(prevmaxacc, maxacc)}
+prevmaxacc[length(prevmaxacc)]
+SPWeeklyDMod[[10]] <- paste0("Direction~", paste0(predVecFwd, collapse = "+"))
+
+# Apply backward step algorithm using PPV: QDA
+combn(names(SPWeeklyTrain)[-c(2:3)], 2) %>%
+    apply(FUN = paste0, MARGIN = 2, collapse = ":") %>%
+    c(names(SPWeeklyTrain)[-c(2:3)]) -> predVec
+prevmaxacc <- c(0.5, 0.5)
+maxacc <- damod.bwd(predVec, "qda", "ppv")$maxacc
+predVec <- damod.bwd(predVec, "qda", "ppv")$predVec
+prevmaxacc <- c(prevmaxacc, maxacc)
+while(length(predVec) > 1){
+  maxacc <- damod.bwd(predVec, "qda", "ppv")$maxacc
+  if(maxacc < prevmaxacc[length(prevmaxacc) - 1]){
+    break}
+  predVec <- damod.bwd(predVec, "qda", "ppv")$predVec
+  prevmaxacc <- c(prevmaxacc, maxacc)}
+prevmaxacc[length(prevmaxacc)]
+SPWeeklyDMod[[11]] <- paste0("Direction~", paste0(predVec, collapse = "+"))
+
+# Apply forward step algorithm using PPV: QDA
+combn(names(SPWeeklyTrain)[-c(2:3)], 2) %>%
+    apply(FUN = paste0, MARGIN = 2, collapse = ":") %>%
+    c(names(SPWeeklyTrain)[-c(2:3)]) -> predVecRemain
+prevmaxacc <- c(0.5, 0.5)
+predVecFwd <- c()
+maxacc <- damod.fwd(predVecRemain, predVecFwd, "qda", "ppv")$maxacc
+predVecFwd <- damod.fwd(predVecRemain, predVecFwd, "qda", "ppv")$predVecFwd
+predVecRemain <- predVecRemain[predVecRemain != predVecFwd[length(predVecFwd)]]
+prevmaxacc <- c(prevmaxacc, maxacc)
+while(length(predVecFwd) < 36){
+  maxacc <- damod.fwd(predVecRemain, predVecFwd, "qda", "ppv")$maxacc
+  if(maxacc < prevmaxacc[length(prevmaxacc) - 1]){
+    break}
+  predVecFwd <- damod.fwd(predVecRemain, predVecFwd, "qda", "ppv")$predVecFwd
+  predVecRemain <- predVecRemain[predVecRemain != predVecFwd[length(predVecFwd)]]
+  prevmaxacc <- c(prevmaxacc, maxacc)}
+prevmaxacc[length(prevmaxacc)]
+SPWeeklyDMod[[12]] <- paste0("Direction~", paste0(predVecFwd, collapse = "+"))
 
 # Remove variables from global environment
 remove(maxacc, predVec, predVecFwd, predVecRemain, prevmaxacc)
