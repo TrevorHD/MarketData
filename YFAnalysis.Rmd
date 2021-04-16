@@ -641,9 +641,9 @@ logreg.comb <- function(dataTrain, dataTest, output, n){
 
 Here, we use the `combn` function to generate all 255 different combination of variables and then `paste0` to collapse them down into their individual formulas. We then use `sapply` to apply a custom function `logreg` to each of these formulas; this custom function fits a logistic regression using a given formula and training data set and returns a specified statistic such as accuracy, sensitivity, specificity, positive predictive value, or negative predictive value. Because this function is too long to properly include in a code snippet, we have not included it here and can instead be found in the markdown for this analysis.
 
-After creating the functions `logreg` and  `logreg.comb`, we then use them to evaluate all 255 possible non-interactive models and find the one that maximises training set accuracy. Doing so yields the model \begin{equation} logit(\pi)=\beta_{0}+\beta_{1}x_{1}+\beta_{2}x_{2}+\beta_{3}x_{3}+\beta_{4}x_{4}+\beta_{5}x_{5} \end{equation} with the predictor variables `BVolume` `Prev5GM`, `Lag2`, `Lag3`, and `Lag5`. This model has an accuracy of approximately 57.69% on the training data which, while low, still seems to be slightly better than guessing. However, we see that this accuracy is highly skewed towards predicting increases; our model has a training sensitivity of 91.72% and correctly classified 665 out of 725 increases, but has an extremely low specificity of 14.78% and correctly classified only 85 out of 575 decreases. Sensitivity and specificity may not be useful in the context of this problem, though; recall that they would interpreted such that given an increase (or decrease), the sensitivity (or specificity) is the probability of correctly identifying that increase (or decrease). However, if we are trying to predict the behaviour of a stock or ETF next week, then we are not given an increase or decrease then since that is what we are trying to predict in the first place! As such, it might make more sense to examine something like positive predictive value (PPV); that is, when the model predicts an increase, the percentage of times that an increase actually occurs. If we use `logreg.comb` again, but this time seeking to maximise the training PPV, we actually get the same model, with a PPV of 57.58% on the training data. We can also try and maximise negative predictive value (NPV); that is, when the model predicts a decrease, the percentage of times that a decrease actually occurs. Upon doing so, we get the model \begin{equation} logit(\pi)=\beta_{0}+\beta_{1}x_{1} \end{equation} with `Prev5GM` as the only predictor. This model has an NPV of 100%, meaning that every time a decrease is predicted, the markets actually decrease. This number is suspiciously high, and after checking the confusion matrix, it is clear why: the model only predicted a decrease once and got it right, while the other 542 decreases were incorrectly predicted as increases. Even looking at the next few highest models in terms of NPV, we see the same trend of high NPVs due to a extremely low number of decreases that just so happened to be correctly predicted. As such, it might be wise to stick with accuracy and PPV when choosing our models.
+After creating the functions `logreg` and  `logreg.comb`, we then use them to evaluate all 255 possible non-interactive models and find the one that maximises training set accuracy. Doing so yields the model \begin{equation} logit(\pi)=\beta_{0}+\beta_{1}x_{1}+\beta_{2}x_{2}+\beta_{3}x_{3}+\beta_{4}x_{4}+\beta_{5}x_{5} \end{equation} with the predictor variables `BVolume` `Prev5GM`, `Lag2`, `Lag3`, and `Lag5`. We will call this model **Model 1**. This model has an accuracy of approximately 57.69% on the training data which, while low, still seems to be slightly better than guessing. However, we see that this accuracy is highly skewed towards predicting increases; our model has a training sensitivity of 91.72% and correctly classified 665 out of 725 increases, but has an extremely low specificity of 14.78% and correctly classified only 85 out of 575 decreases. Sensitivity and specificity may not be useful in the context of this problem, though; recall that they would interpreted such that given an increase (or decrease), the sensitivity (or specificity) is the probability of correctly identifying that increase (or decrease). However, if we are trying to predict the behaviour of a stock or ETF next week, then we are not given an increase or decrease then since that is what we are trying to predict in the first place! As such, it might make more sense to examine something like positive predictive value (PPV); that is, when the model predicts an increase, the percentage of times that an increase actually occurs. If we use `logreg.comb` again, but this time seeking to maximise the training PPV, we actually get the same model, with a PPV of 57.58% on the training data. We will call this model **Model 2** to distinguish it from Model 1 because though they are the same model, they were selected using different criteria. We can also try and maximise negative predictive value (NPV); that is, when the model predicts a decrease, the percentage of times that a decrease actually occurs. Upon doing so, we get the model \begin{equation} logit(\pi)=\beta_{0}+\beta_{1}x_{1} \end{equation} with `Prev5GM` as the only predictor. This model has an NPV of 100%, meaning that every time a decrease is predicted, the markets actually decrease. This number is suspiciously high, and after checking the confusion matrix, it is clear why: the model only predicted a decrease once and got it right, while the other 542 decreases were incorrectly predicted as increases. Even looking at the next few highest models in terms of NPV, we see the same trend of high NPVs due to a extremely low number of decreases that just so happened to be correctly predicted. As such, it might be wise to stick with accuracy and PPV when choosing our models.
 
-We can also examine the training accuracy of models that include two-way interactions, as these interactions may help capture patterns in the data that our original non-interactive models might have missed. The total number of two-way interaction terms plus single terms is 36, so thus the total number of interactive models that we can form is \begin{equation} \sum_{i=1}^{36}\frac{36!}{i!(36-i)!}=68719476735. \end{equation} which is much larger than the number of possible models considering only non-interactive terms. Evaluating every single one of these possible models would be far too computationally expensive for R, and we thus cannot calculate the accuracy of each model like we did when we only had 255 models. However, we can develop a heuristical solution that only searches through several of these possible models rather than attempting to test them all; here, we create an algorithm that performs a backward search much like how the function `step` with argument `direction = "backward"` does, though selecting our models based on training data accuracy rather than Akaike's information criterion (AIC).
+We can also examine the training accuracy of models that include two-way interactions, as these interactions may help capture patterns in the data that our original non-interactive models might have missed. The total number of two-way interaction terms plus single terms is 36, so thus the total number of interactive models that we can form is \begin{equation} \sum_{i=1}^{36}\frac{36!}{i!(36-i)!}=68719476735. \end{equation} which is much larger than the number of possible models considering only non-interactive terms. Evaluating every single one of these possible models would be far too computationally expensive for R, and we thus cannot calculate the accuracy of each model like we did when we only had 255 models. However, we can develop a heuristic solution that only searches through several of these possible models rather than attempting to test them all; here, we create an algorithm that performs a backward search much like how the function `step` with argument `direction = "backward"` does, though selecting our models based on training data accuracy rather than Akaike's information criterion (AIC).
 
 ``` {r eval = FALSE, echo = TRUE}
 
@@ -664,7 +664,7 @@ logreg.bwd <- function(predVec, output){
 
 ```
 
-Here, we start with the maximum number (36) of interactive and non-interactive terms, and use an `output` of `accuracy` to select our models based on overall prediction accuracy. We then calculate the new training accuracy after we remove a term, and do this for each term, then removing the term that results in the highest accuracy. We repeat this process until the model accuracy is maximised. Doing so results in a model with a training accuracy of 59.54% and 32 terms. We can also perform forward selection, starting with a null model and calculating the new training accuracy after adding a term, doing this for each term, and then adding the term that results in the highest accuracy.
+Here, we start with the maximum number (36) of interactive and non-interactive terms, and use an `output` of `accuracy` to select our models based on overall prediction accuracy. We then calculate the new training accuracy after we remove a term, and do this for each term, then removing the term that results in the highest accuracy. We repeat this process until the model accuracy is maximised. Doing so results in a model with a training accuracy of 59.77% and 32 terms; we will call this model **Model 3**. We can also perform forward selection, starting with a null model and calculating the new training accuracy after adding a term, doing this for each term, and then adding the term that results in the highest accuracy.
 
 ``` {r eval = FALSE, echo = TRUE}
 
@@ -686,7 +686,21 @@ logreg.fwd <- function(predVecRemain, predVecFwd, output){
 
 ```
 
-Doing so now results in a model with a training accuracy of 57.08% and 7 terms; while the training accuracy is lower, there are fewer terms than our model resulting from backward selection. We can also use the same forward and backward algorithms but select models using PPV instead of accuracy. If we do so using the backward step algorithm, we get a model with a PPV of 59.24% and 32 terms; using the forward step algorithm, we get a model with a PPV of 57.68% and 10 terms.
+Doing so now results in a model with a training accuracy of 57.15% and 7 terms; we will call this model **Model 4**. While the training accuracy is lower on this model, there are fewer terms than our Model 3 resulting from backward selection. We can also use the same forward and backward algorithms but select models using PPV instead of accuracy. If we do so using the backward step algorithm, we get a model with a PPV of 59.24% and 32 terms; we will call this model **Model 5**. Using the forward step algorithm, we get a model with a PPV of 57.71% and 10 terms; we will call this model **Model 6**.
+
+Now that we have three models (1, 3, and 4) selected by maximising overall accuracy and three models (2, 5, and 6) selected by maximising PPv, we can compare their performance. Model 3 has the highest overall accuracy on the training data at 59.77% and, interestingly, also has the highest PPV at 59.32%; the fact that this model has a higher PPv than any of the models that were explicitly selected by maximising PPv suggests that the heuristic algorithm used in Model 5 and Model 6 may have only found a local maximum rather than a global maximum. We can also plot an ROC curve for each model, as has been done in Figures \ref{fig:Figure19} and \ref{fig:Figure20}; here, we see that Model 3 has the second-highest area under the curve (AUC) at 0.5893. Model 5 has the highest AUC at 0.5900, though only by a slight margin, and has only a slightly lower accuracy (59.62%) and PPV (59.24%) than Model 3, making these two models extremely competitive.
+
+However, we also need to assess model performance on the test data. We again see that model 3 has the highest accuracy (64.38%) and highest PPV (64.18%), and this time even has a higher AUC (0.6538) than Model 5. Model 5 is still a close second, though, with an accuracy of 64.00%, PPV of 63.96%, and AUC of 0.6428.
+
+We can also check the residuals for these models to ensure that the logistic model is an appropriate fit. As can be seen in Figures \ref{fig:Figure21} and \ref{fig:Figure22}, most of the residuals are resemble those of a typical logistic regression: two bands above and below zero, with a loess fit that approximates a horizontal line at zero. However, significant curvature of the loess fit to the residuals of Model 4 and Model 6 suggest that the logistic model may not be satisfactory in these instances.
+
+So far, we see that Model 3 and Model 5 have overall accuracies and PPVs close to 60%, which is surprisingly high considering the lack of autocorrelation in our data and how noisy stock market data can be. But how can we connect model accuracy and PPV back to return on investment? While accuracy and PPV are excellent ways to understand the predictive capabilities of our models, we also seek to understand whether or not these models can "beat the market", so to speak.
+
+We can do this by applying the models to the test data, and using model predictions to calculate the cumulative percent change at each point in time, as has been done in the left panels of Figures \ref{fig:Figure23} and \ref{fig:Figure24}. The black lines represent a buy-and-hold strategy without any action informaed from the model; that is, an investor would simply buy shares and hold them without selling, regardless of the increases and decreases in value along the way. We see that under a buy-and-hold strategy, an investor that purchased shares at the beginning of 2011 would find that their investment would be worth approximately 2.30 times as much at the beginning of 2021, which represents an approximately 130% increase in value over the course of a decade. The blue lines represent the strategy of selling all shares before a predicted decrease, then buying them back before the next predicted increase, effectively sheltering all assets from a suspected dip. This stategy works extremely well for Model 3 and Model 5, with investments respectively reaching 6.95 and 6.57 times their initial value. However, liquidating all assets only to buy them back is extremely risky, so one could also employ a strategy of selling only 35% of assets before a predicted decrease and then buying them back at the next predicted increase; this strategy is represented by the purple lines. Even with this less risky strategy, investments under the guidance of Model 3 and Model 5 reach 3.44 and 3.37 times their initial value, which still yields a higher return on investment than a buy-and-hold strategy.
+
+The other four models, however, do not perform as well as Model 3 and Model 5. Even with the risky strategy represented by the blue lines in Figures \ref{fig:Figure23} and \ref{fig:Figure24}, the next best models (Model 1 and 2 which, recall, are identical) see the initial investment reach 2.88 times its initial value, which while still better than the buy-and-hold strategy, are nowhere close the gains that Model 3 and Model 5 yield. Furthermore, these increases over the buy-and-hold strategy only happen in the small window from 2020-2021, after the beginning of the dip caused by the COVID-19 pandemic; before this, performance is almost identical to that of the buy-and-hold strategy.
+
+So then, how can Model 3 and Model 5 differ so drastically from the other four models when it comes to return on investment? After all, the largest difference in model accuracy is only 4.19% and only 3.37% when it comes to PPV, so how can such small differences be amplified? Part of the reason lies within the number and timing of predicted increases and decreases, which can be seen in the right panels in Figures \ref{fig:Figure23} and \ref{fig:Figure24}. These panels show what happens on the weeks that the model predicted a decrease; on these weeks, investors using the blue line strategy would not be exposed to any increase or decrease in value, and investors using the less risky purple line strategy would only be exposed to 35% of each increase or decrease in value. We see that the magnitude of the mean percent decrease during these weeks is approximately equal to the magnitude of the mean percent increase, so it's not like decreases tend to be stronger or weaker than increases on weeks where a decrease is predicted. However, we do see that Model 3 and Model 5 have a high ratio of decreases avoided to increases avoided; Model 3 avoided 46 decreases and only 24 increases, while Model 5 avoided 45 decreases and only 25 increases. Compare this to the other four models, where the number of decreases avoided is only slightly greater than or approximately equal to the number of increases avoided and we can see that by avoiding significantly more decreases than increases, Model 3 and Model 5 shield investors from decreases while sacrificing only a relatively small number of increases. We also see differences in the timing of these decreases avoided; while Model 3 and Model 5 have the decreases avoided more evenly distributed through time, the other four models tend to have their decreases avoided concentrated in 2020 and 2021. When decreases are avoided earlier in the investment period, the investment increases in value relative to the buy-and-hold strategy, and this investment has a longer time to experience multiplicative increases in value than if decreases are avoided closer to the end of the investment period. Thus, because Model 3 and Model 5 avoid more decreases and do so more consistently throughout the investment period compared to the other four models, the investment value increases faster and more often relative to the other four models or the buy-and-hold strategy.
 
 ``` {r include = FALSE}
 
@@ -997,7 +1011,83 @@ kable(round(SPWeeklyTopPTab, 3))
 
 \newpage
 
-``` {r Figure19, fig.height = 8, warning = FALSE, fig.cap = "\\label{fig:Figure19} Standardised deviance residuals (left) and standardised Pearson residuals (right) for logistic regression models selected using accuracy. Solid red lines represent a loess fit to the residuals and should be approximately horizontal at zero; dotted red lines represent $\\pm$ 2 standard deviations on the residuals."}
+``` {r Figure19, fig.height = 8.3, warning = FALSE, message = FALSE, fig.cap = "\\label{fig:Figure19} ROC curves for the models selected by maximising accuracy. Accuracy, positive predictive value (PPV), and area under the curve (AUC) are listed for each plot; the red dot represents model sensitivity and specificity."}
+
+par(mfrow = c(3, 2))
+
+for(i in c(1, 3, 4)){
+  
+  if(i == 1){j <- 1}
+  if(i == 3){j <- 2}
+  if(i == 4){j <- 3}
+  
+  glm.stats <- sapply(c("accuracy", "sensitivity", "specificity", "ppv"),
+                      FUN = logreg, formula = SPWeeklyLMod[[i]], dataTrain = SPWeeklyTrain)
+  glm.fit <- glm(SPWeeklyLMod[[i]], data = SPWeeklyTrain, family = "binomial")
+  glm.probs <- predict(glm.fit, SPWeeklyTrain, type = "response")
+  auc <- roc(SPWeeklyTrain$Direction, glm.probs, direction = "<")$auc
+  roc(SPWeeklyTrain$Direction, glm.probs, plot = TRUE, direction = "<", mar = c(4, 4, 1, 2) + 0.1)
+  text(x = rep(1.1, 3)[j], y = rep(1, 3)[j],
+       labels = c("Model 1: Train", "Model 3: Train", "Model 4: Train")[j], adj = 0)
+  text(x = rep(1.1, 3), y = c(0.9, 0.83, 0.76), labels = c("Acc:", "PPV:", "AUC:"), adj = 0)
+  text(x = rep(0.94, 3), y = c(0.9, 0.83, 0.76), labels = round(as.numeric(c(glm.stats[c(1, 4)], auc)), 4), adj = 0)
+  points(x = glm.stats[3], y = glm.stats[2], col = "red", pch = 16)
+  
+  glm.stats <- sapply(c("accuracy", "sensitivity", "specificity", "ppv"),
+                      FUN = logreg, formula = SPWeeklyLMod[[i]], dataTrain = SPWeeklyTest)
+  glm.fit <- glm(SPWeeklyLMod[[i]], data = SPWeeklyTest, family = "binomial")
+  glm.probs <- predict(glm.fit, SPWeeklyTest, type = "response")
+  auc <- roc(SPWeeklyTest$Direction, glm.probs, direction = "<")$auc
+  roc(SPWeeklyTest$Direction, glm.probs, plot = TRUE, direction = "<", mar = c(4, 4, 1, 2) + 0.1)
+  text(x = rep(1.1, 3)[j], y = rep(1, 3)[j],
+       labels = c("Model 1: Test", "Model 3: Test", "Model 4: Test")[j], adj = 0)
+  text(x = rep(1.1, 3), y = c(0.9, 0.83, 0.76), labels = c("Acc:", "PPV:", "AUC:"), adj = 0)
+  text(x = rep(0.94, 3), y = c(0.9, 0.83, 0.76), labels = round(as.numeric(c(glm.stats[c(1, 4)], auc)), 4), adj = 0)
+  points(x = glm.stats[3], y = glm.stats[2], col = "red", pch = 16)}
+
+```
+
+\newpage
+
+``` {r Figure20, fig.height = 8.3, warning = FALSE, message = FALSE, fig.cap = "\\label{fig:Figure20} ROC curves for the models selected by maximising PPV. Accuracy, positive predictive value (PPV), and area under the curve (AUC) are listed for each plot; the red dot represents model sensitivity and specificity."}
+
+par(mfrow = c(3, 2))
+
+for(i in c(2, 5, 6)){
+  
+  if(i == 2){j <- 1}
+  if(i == 5){j <- 2}
+  if(i == 6){j <- 3}
+  
+  glm.stats <- sapply(c("accuracy", "sensitivity", "specificity", "ppv"),
+                      FUN = logreg, formula = SPWeeklyLMod[[i]], dataTrain = SPWeeklyTrain)
+  glm.fit <- glm(SPWeeklyLMod[[i]], data = SPWeeklyTrain, family = "binomial")
+  glm.probs <- predict(glm.fit, SPWeeklyTrain, type = "response")
+  auc <- roc(SPWeeklyTrain$Direction, glm.probs, direction = "<")$auc
+  roc(SPWeeklyTrain$Direction, glm.probs, plot = TRUE, direction = "<", mar = c(4, 4, 1, 2) + 0.1)
+  text(x = rep(1.1, 3)[j], y = rep(1, 3)[j],
+       labels = c("Model 2: Train", "Model 5: Train", "Model 6: Train")[j], adj = 0)
+  text(x = rep(1.1, 3), y = c(0.9, 0.83, 0.76), labels = c("Acc:", "PPV:", "AUC:"), adj = 0)
+  text(x = rep(0.94, 3), y = c(0.9, 0.83, 0.76), labels = round(as.numeric(c(glm.stats[c(1, 4)], auc)), 4), adj = 0)
+  points(x = glm.stats[3], y = glm.stats[2], col = "red", pch = 16)
+  
+  glm.stats <- sapply(c("accuracy", "sensitivity", "specificity", "ppv"),
+                      FUN = logreg, formula = SPWeeklyLMod[[i]], dataTrain = SPWeeklyTest)
+  glm.fit <- glm(SPWeeklyLMod[[i]], data = SPWeeklyTest, family = "binomial")
+  glm.probs <- predict(glm.fit, SPWeeklyTest, type = "response")
+  auc <- roc(SPWeeklyTest$Direction, glm.probs, direction = "<")$auc
+  roc(SPWeeklyTest$Direction, glm.probs, plot = TRUE, direction = "<", mar = c(4, 4, 1, 2) + 0.1)
+  text(x = rep(1.1, 3)[j], y = rep(1, 3)[j],
+       labels = c("Model 2: Test", "Model 5: Test", "Model 6: Test")[j], adj = 0)
+  text(x = rep(1.1, 3), y = c(0.9, 0.83, 0.76), labels = c("Acc:", "PPV:", "AUC:"), adj = 0)
+  text(x = rep(0.94, 3), y = c(0.9, 0.83, 0.76), labels = round(as.numeric(c(glm.stats[c(1, 4)], auc)), 4), adj = 0)
+  points(x = glm.stats[3], y = glm.stats[2], col = "red", pch = 16)}
+
+```
+
+\newpage
+
+``` {r Figure21, fig.height = 8, warning = FALSE, fig.cap = "\\label{fig:Figure21} Standardised deviance residuals (left) and standardised Pearson residuals (right) for logistic regression models selected using accuracy. Solid red lines represent a loess fit to the residuals and should be approximately horizontal at zero; dotted red lines represent $\\pm$ 2 standard deviations on the residuals."}
 
 # Re-fit top models to get residuals
 SPWeeklyLModList <- lapply(SPWeeklyLMod, FUN = glm, data = SPWeeklyTrain, family = "binomial")
@@ -1036,7 +1126,7 @@ for(i in c(1, 3, 4)){
 
 \newpage
 
-``` {r Figure20, fig.height = 8, warning = FALSE, fig.cap = "\\label{fig:Figure20} Standardised deviance residuals (left) and standardised Pearson residuals (right) for logistic regression models selected using PPV. Solid red lines represent a loess fit to the residuals and should be approximately horizontal at zero; dotted red lines represent $\\pm$ 2 standard deviations on the residuals."}
+``` {r Figure22, fig.height = 8, warning = FALSE, fig.cap = "\\label{fig:Figure22} Standardised deviance residuals (left) and standardised Pearson residuals (right) for logistic regression models selected using PPV. Solid red lines represent a loess fit to the residuals and should be approximately horizontal at zero; dotted red lines represent $\\pm$ 2 standard deviations on the residuals."}
 
 # Re-fit top models to get residuals
 SPWeeklyLModList <- lapply(SPWeeklyLMod, FUN = glm, data = SPWeeklyTrain, family = "binomial")
@@ -1077,7 +1167,7 @@ for(i in c(2, 5, 6)){
 
 \newpage
 
-``` {r Figure21, fig.height = 7.8, warning = FALSE, fig.cap = "\\label{fig:Figure21} Relative value of the S\\&P 500 from 2011-2021 (left) and percent change for weeks in 2011-2021 for which an increase was not predicted (right) based on models fit to the 1986-2010 data; the three models here were selected using overall accuracy. The black line represents a buy-and-hold strategy, while the blue line represents a strategy of selling all assets before a predicted decrease and then purchasing them back the next time there is a predicted increase. The purple line represents a less risky strategy of only selling 35\\% of assets before a predicted decrease and then purchasing them back the next time there is a predicted increase."}
+``` {r Figure23, fig.height = 7.8, warning = FALSE, fig.cap = "\\label{fig:Figure23} Relative value of the S\\&P 500 from 2011-2021 (left) and percent change for weeks in 2011-2021 for which an increase was not predicted (right) based on models fit to the 1986-2010 data; the three models here were selected using overall accuracy. The black line represents a buy-and-hold strategy, while the blue line represents a strategy of selling all assets before a predicted decrease and then purchasing them back the next time there is a predicted increase. The purple line represents a less risky strategy of only selling 35\\% of assets before a predicted decrease and then purchasing them back the next time there is a predicted increase."}
 
 # Generate plots
 par(mfrow = c(3, 2), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
@@ -1120,7 +1210,7 @@ for(i in c(1, 3, 4)){
 
 \newpage
 
-``` {r Figure22, fig.height = 7.8, warning = FALSE, fig.cap = "\\label{fig:Figure22} Relative value of the S\\&P 500 from 2011-2021 (left) and percent change for weeks in 2011-2021 for which an increase was not predicted (right) based on models fit to the 1986-2010 data; the three models here were selected using PPV. The black line represents a buy-and-hold strategy, while the blue line represents a strategy of selling all assets before a predicted decrease and then purchasing them back the next time there is a predicted increase. The purple line represents a less risky strategy of only selling 35\\% of assets before a predicted decrease and then purchasing them back the next time there is a predicted increase."}
+``` {r Figure24, fig.height = 7.8, warning = FALSE, fig.cap = "\\label{fig:Figure24} Relative value of the S\\&P 500 from 2011-2021 (left) and percent change for weeks in 2011-2021 for which an increase was not predicted (right) based on models fit to the 1986-2010 data; the three models here were selected using PPV. The black line represents a buy-and-hold strategy, while the blue line represents a strategy of selling all assets before a predicted decrease and then purchasing them back the next time there is a predicted increase. The purple line represents a less risky strategy of only selling 35\\% of assets before a predicted decrease and then purchasing them back the next time there is a predicted increase."}
 
 # Generate plots
 par(mfrow = c(3, 2), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
@@ -1164,6 +1254,8 @@ for(i in c(2, 5, 6)){
 \newpage
 
 ## Discriminant Analysis
+
+\newpage
 
 ## K-Nearest Neighbours
 
