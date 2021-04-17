@@ -1167,7 +1167,7 @@ for(i in c(2, 5, 6)){
 
 \newpage
 
-``` {r Figure23, fig.height = 7.8, warning = FALSE, fig.cap = "\\label{fig:Figure23} Relative value of the S\\&P 500 from 2011-2021 (left) and percent change for weeks in 2011-2021 for which an increase was not predicted (right) based on models fit to the 1986-2010 data; the three models here were selected using overall accuracy. The black line represents a buy-and-hold strategy, while the blue line represents a strategy of selling all assets before a predicted decrease and then purchasing them back the next time there is a predicted increase. The purple line represents a less risky strategy of only selling 35\\% of assets before a predicted decrease and then purchasing them back the next time there is a predicted increase."}
+``` {r Figure23, fig.height = 7.8, warning = FALSE, fig.cap = "\\label{fig:Figure23} Relative value of the S\\&P 500 from 2011-2021 (left) and percent change for weeks in 2011-2021 for which an increase was not predicted (right) based on logistic regression models fit to the 1986-2010 data; the three models here were selected using overall accuracy. The black line represents a buy-and-hold strategy, while the blue line represents a strategy of selling all assets before a predicted decrease and then purchasing them back the next time there is a predicted increase. The purple line represents a less risky strategy of only selling 35\\% of assets before a predicted decrease and then purchasing them back the next time there is a predicted increase."}
 
 # Generate plots
 par(mfrow = c(3, 2), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
@@ -1210,7 +1210,7 @@ for(i in c(1, 3, 4)){
 
 \newpage
 
-``` {r Figure24, fig.height = 7.8, warning = FALSE, fig.cap = "\\label{fig:Figure24} Relative value of the S\\&P 500 from 2011-2021 (left) and percent change for weeks in 2011-2021 for which an increase was not predicted (right) based on models fit to the 1986-2010 data; the three models here were selected using PPV. The black line represents a buy-and-hold strategy, while the blue line represents a strategy of selling all assets before a predicted decrease and then purchasing them back the next time there is a predicted increase. The purple line represents a less risky strategy of only selling 35\\% of assets before a predicted decrease and then purchasing them back the next time there is a predicted increase."}
+``` {r Figure24, fig.height = 7.8, warning = FALSE, fig.cap = "\\label{fig:Figure24} Relative value of the S\\&P 500 from 2011-2021 (left) and percent change for weeks in 2011-2021 for which an increase was not predicted (right) based on logistic regression models fit to the 1986-2010 data; the three models here were selected using PPV. The black line represents a buy-and-hold strategy, while the blue line represents a strategy of selling all assets before a predicted decrease and then purchasing them back the next time there is a predicted increase. The purple line represents a less risky strategy of only selling 35\\% of assets before a predicted decrease and then purchasing them back the next time there is a predicted increase."}
 
 # Generate plots
 par(mfrow = c(3, 2), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
@@ -1619,7 +1619,7 @@ for(i in c(1, 5, 6)){
   auc <- roc(SPWeeklyTrain$Direction, da.probs[, 2], direction = "<")$auc
   roc(SPWeeklyTrain$Direction, da.probs[, 2], plot = TRUE, direction = "<", mar = c(4, 4, 1, 2) + 0.1)
   text(x = rep(1.1, 3)[j], y = rep(1, 3)[j],
-       labels = c("Model 1: Train", "Model 3: Train", "Model 4: Train")[j], adj = 0)
+       labels = c("Model 1: Train", "Model 5: Train", "Model 6: Train")[j], adj = 0)
   text(x = rep(1.1, 3), y = c(0.9, 0.83, 0.76), labels = c("Acc:", "PPV:", "AUC:"), adj = 0)
   text(x = rep(0.94, 3), y = c(0.9, 0.83, 0.76), labels = round(as.numeric(c(da.stats[c(1, 4)], auc)), 4), adj = 0)
   points(x = da.stats[3], y = da.stats[2], col = "red", pch = 16)
@@ -1631,7 +1631,7 @@ for(i in c(1, 5, 6)){
   auc <- roc(SPWeeklyTest$Direction, da.probs[, 2], direction = "<")$auc
   roc(SPWeeklyTest$Direction, da.probs[, 2], plot = TRUE, direction = "<", mar = c(4, 4, 1, 2) + 0.1)
   text(x = rep(1.1, 3)[j], y = rep(1, 3)[j],
-       labels = c("Model 1: Test", "Model 3: Test", "Model 4: Test")[j], adj = 0)
+       labels = c("Model 1: Test", "Model 5: Test", "Model 6: Test")[j], adj = 0)
   text(x = rep(1.1, 3), y = c(0.9, 0.83, 0.76), labels = c("Acc:", "PPV:", "AUC:"), adj = 0)
   text(x = rep(0.94, 3), y = c(0.9, 0.83, 0.76), labels = round(as.numeric(c(da.stats[c(1, 4)], auc)), 4), adj = 0)
   points(x = da.stats[3], y = da.stats[2], col = "red", pch = 16)}
@@ -1695,7 +1695,7 @@ for(i in c(3, 9, 10)){
   auc <- roc(SPWeeklyTrain$Direction, da.probs[, 2], direction = "<")$auc
   roc(SPWeeklyTrain$Direction, da.probs[, 2], plot = TRUE, direction = "<", mar = c(4, 4, 1, 2) + 0.1)
   text(x = rep(1.1, 3)[j], y = rep(1, 3)[j],
-       labels = c("Model 1: Train", "Model 3: Train", "Model 4: Train")[j], adj = 0)
+       labels = c("Model 3: Train", "Model 9: Train", "Model 10: Train")[j], adj = 0)
   text(x = rep(1.1, 3), y = c(0.9, 0.83, 0.76), labels = c("Acc:", "PPV:", "AUC:"), adj = 0)
   text(x = rep(0.94, 3), y = c(0.9, 0.83, 0.76), labels = round(as.numeric(c(da.stats[c(1, 4)], auc)), 4), adj = 0)
   points(x = da.stats[3], y = da.stats[2], col = "red", pch = 16)
@@ -1707,7 +1707,7 @@ for(i in c(3, 9, 10)){
   auc <- roc(SPWeeklyTest$Direction, da.probs[, 2], direction = "<")$auc
   roc(SPWeeklyTest$Direction, da.probs[, 2], plot = TRUE, direction = "<", mar = c(4, 4, 1, 2) + 0.1)
   text(x = rep(1.1, 3)[j], y = rep(1, 3)[j],
-       labels = c("Model 1: Test", "Model 3: Test", "Model 4: Test")[j], adj = 0)
+       labels = c("Model 3: Test", "Model 9: Test", "Model 10: Test")[j], adj = 0)
   text(x = rep(1.1, 3), y = c(0.9, 0.83, 0.76), labels = c("Acc:", "PPV:", "AUC:"), adj = 0)
   text(x = rep(0.94, 3), y = c(0.9, 0.83, 0.76), labels = round(as.numeric(c(da.stats[c(1, 4)], auc)), 4), adj = 0)
   points(x = da.stats[3], y = da.stats[2], col = "red", pch = 16)}
@@ -1733,7 +1733,7 @@ for(i in c(4, 11, 12)){
   auc <- roc(SPWeeklyTrain$Direction, da.probs[, 2], direction = "<")$auc
   roc(SPWeeklyTrain$Direction, da.probs[, 2], plot = TRUE, direction = "<", mar = c(4, 4, 1, 2) + 0.1)
   text(x = rep(1.1, 3)[j], y = rep(1, 3)[j],
-       labels = c("Model 2: Train", "Model 7: Train", "Model 8: Train")[j], adj = 0)
+       labels = c("Model 4: Train", "Model 11: Train", "Model 12: Train")[j], adj = 0)
   text(x = rep(1.1, 3), y = c(0.9, 0.83, 0.76), labels = c("Acc:", "PPV:", "AUC:"), adj = 0)
   text(x = rep(0.94, 3), y = c(0.9, 0.83, 0.76), labels = round(as.numeric(c(da.stats[c(1, 4)], auc)), 4), adj = 0)
   points(x = da.stats[3], y = da.stats[2], col = "red", pch = 16)
@@ -1745,10 +1745,172 @@ for(i in c(4, 11, 12)){
   auc <- roc(SPWeeklyTest$Direction, da.probs[, 2], direction = "<")$auc
   roc(SPWeeklyTest$Direction, da.probs[, 2], plot = TRUE, direction = "<", mar = c(4, 4, 1, 2) + 0.1)
   text(x = rep(1.1, 3)[j], y = rep(1, 3)[j],
-       labels = c("Model 2: Test", "Model 7: Test", "Model 8: Test")[j], adj = 0)
+       labels = c("Model 4: Test", "Model 11: Test", "Model 12: Test")[j], adj = 0)
   text(x = rep(1.1, 3), y = c(0.9, 0.83, 0.76), labels = c("Acc:", "PPV:", "AUC:"), adj = 0)
   text(x = rep(0.94, 3), y = c(0.9, 0.83, 0.76), labels = round(as.numeric(c(da.stats[c(1, 4)], auc)), 4), adj = 0)
   points(x = da.stats[3], y = da.stats[2], col = "red", pch = 16)}
+
+```
+
+\newpage
+
+``` {r Figure29, fig.height = 7.8, warning = FALSE, fig.cap = "\\label{fig:Figure29} Relative value of the S\\&P 500 from 2011-2021 (left) and percent change for weeks in 2011-2021 for which an increase was not predicted (right) based on LDA models fit to the 1986-2010 data; the three models here were selected using accuracy. The black line represents a buy-and-hold strategy, while the blue line represents a strategy of selling all assets before a predicted decrease and then purchasing them back the next time there is a predicted increase. The purple line represents a less risky strategy of only selling 35\\% of assets before a predicted decrease and then purchasing them back the next time there is a predicted increase."}
+
+# Generate plots
+par(mfrow = c(3, 2), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
+for(i in c(1, 5, 6)){
+  
+  # Offset numbers for indexing purposes
+  if(i == 1){j <- 1}
+  if(i == 5){j <- 2}
+  if(i == 6){j <- 3}
+  
+  # Plot returns
+  plot(returns.damod(formula(SPWeeklyDMod[[i]]), data = SPWeeklyTest, daType = "lda"), type = "l",
+       col = "blue", xaxt = "n", xlab = "Year", ylab = "Proportion of Initial Value", ylim = c(0, 8))
+  axis(1, at = nrow(SPWeeklyTest)*(0:5)/5, labels = seq(2011, 2021, length.out = 6), cex.axis = 0.85)
+  lines(returns.damod(formula(SPWeeklyDMod[[i]]), data = SPWeeklyTest, daType = "lda", lrisk = TRUE), col = "purple")
+  lines(returns.damod("none", data = SPWeeklyTest))
+  text(x = rep(10, 3)[j], y = rep(7.8, 3)[j], labels = c("Model 1", "Model 5", "Model 6")[j], adj = 0)
+  
+  # Plot increases/decreases on weeks when mode predicts a decrease
+  da.fit <- lda(formula(SPWeeklyDMod[[i]]), data = SPWeeklyTest)
+  da.pred <- predict(da.fit, SPWeeklyTest)$class
+  plotdat <- data.frame(da.pred, SPWeeklyTest$Direction, SPWeeklyTest$PctChange)
+  plotdat <- subset(plotdat, da.pred == "Down")
+  plot(as.numeric(rownames(plotdat)), plotdat$SPWeeklyTest.PctChange, pch = 16, xaxt = "n",
+       xlim = c(0, nrow(SPWeeklyTest)), col = ifelse(plotdat$SPWeeklyTest.PctChange < 0, "red", "green"),
+       xlab = "Year", ylab = "Weekly Percent Change", ylim = c(-16, 16), cex.axis = 0.9)
+  axis(1, at = nrow(SPWeeklyTest)*(0:5)/5, labels = seq(2011, 2021, length.out = 6), cex.axis = 0.85)
+  abline(h = mean(plotdat$SPWeeklyTest.PctChange[plotdat$SPWeeklyTest.PctChange < 0]), lty = 2, col = "red")
+  abline(h = mean(plotdat$SPWeeklyTest.PctChange[plotdat$SPWeeklyTest.PctChange > 0]), lty = 2, col = "green")
+  text(x = rep(10, 3)[j], y = rep(15, 3)[j], labels = c("Model 1", "Model 5", "Model 6")[j], adj = 0)
+  text(x = rep(110, 3)[j], y = rep(15, 3)[j], labels = as.numeric(table(plotdat$SPWeeklyTest.Direction)[1]),
+       col = "red", adj = 0)
+  text(x = rep(140, 3)[j], y = rep(15, 3)[j], labels = "/", adj = 0)
+  text(x = rep(150, 3)[j], y = rep(15, 3)[j], labels = as.numeric(table(plotdat$SPWeeklyTest.Direction)[2]),
+       col = "green", adj = 0)}
+
+```
+
+\newpage
+
+``` {r Figure30, fig.height = 7.8, warning = FALSE, fig.cap = "\\label{fig:Figure30} Relative value of the S\\&P 500 from 2011-2021 (left) and percent change for weeks in 2011-2021 for which an increase was not predicted (right) based on QDA models fit to the 1986-2010 data; the three models here were selected using accuracy. The black line represents a buy-and-hold strategy, while the blue line represents a strategy of selling all assets before a predicted decrease and then purchasing them back the next time there is a predicted increase. The purple line represents a less risky strategy of only selling 35\\% of assets before a predicted decrease and then purchasing them back the next time there is a predicted increase."}
+
+# Generate plots
+par(mfrow = c(3, 2), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
+for(i in c(2, 7, 8)){
+  
+  # Offset numbers for indexing purposes
+  if(i == 2){j <- 1}
+  if(i == 7){j <- 2}
+  if(i == 8){j <- 3}
+  
+  # Plot returns
+  plot(returns.damod(formula(SPWeeklyDMod[[i]]), data = SPWeeklyTest, daType = "qda"), type = "l",
+       col = "blue", xaxt = "n", xlab = "Year", ylab = "Proportion of Initial Value", ylim = c(0, 8))
+  axis(1, at = nrow(SPWeeklyTest)*(0:5)/5, labels = seq(2011, 2021, length.out = 6), cex.axis = 0.85)
+  lines(returns.damod(formula(SPWeeklyDMod[[i]]), data = SPWeeklyTest, daType = "qda", lrisk = TRUE), col = "purple")
+  lines(returns.damod("none", data = SPWeeklyTest))
+  text(x = rep(10, 3)[j], y = rep(7.8, 3)[j], labels = c("Model 2", "Model 7", "Model 8")[j], adj = 0)
+  
+  # Plot increases/decreases on weeks when mode predicts a decrease
+  da.fit <- qda(formula(SPWeeklyDMod[[i]]), data = SPWeeklyTest)
+  da.pred <- predict(da.fit, SPWeeklyTest)$class
+  plotdat <- data.frame(da.pred, SPWeeklyTest$Direction, SPWeeklyTest$PctChange)
+  plotdat <- subset(plotdat, da.pred == "Down")
+  plot(as.numeric(rownames(plotdat)), plotdat$SPWeeklyTest.PctChange, pch = 16, xaxt = "n",
+       xlim = c(0, nrow(SPWeeklyTest)), col = ifelse(plotdat$SPWeeklyTest.PctChange < 0, "red", "green"),
+       xlab = "Year", ylab = "Weekly Percent Change", ylim = c(-16, 16), cex.axis = 0.9)
+  axis(1, at = nrow(SPWeeklyTest)*(0:5)/5, labels = seq(2011, 2021, length.out = 6), cex.axis = 0.85)
+  abline(h = mean(plotdat$SPWeeklyTest.PctChange[plotdat$SPWeeklyTest.PctChange < 0]), lty = 2, col = "red")
+  abline(h = mean(plotdat$SPWeeklyTest.PctChange[plotdat$SPWeeklyTest.PctChange > 0]), lty = 2, col = "green")
+  text(x = rep(10, 3)[j], y = rep(15, 3)[j], labels = c("Model 2", "Model 7", "Model 8")[j], adj = 0)
+  text(x = rep(110, 3)[j], y = rep(15, 3)[j], labels = as.numeric(table(plotdat$SPWeeklyTest.Direction)[1]),
+       col = "red", adj = 0)
+  text(x = rep(140, 3)[j], y = rep(15, 3)[j], labels = "/", adj = 0)
+  text(x = rep(150, 3)[j], y = rep(15, 3)[j], labels = as.numeric(table(plotdat$SPWeeklyTest.Direction)[2]),
+       col = "green", adj = 0)}
+
+```
+
+``` {r Figure31, fig.height = 7.8, warning = FALSE, fig.cap = "\\label{fig:Figure31} Relative value of the S\\&P 500 from 2011-2021 (left) and percent change for weeks in 2011-2021 for which an increase was not predicted (right) based on LDA models fit to the 1986-2010 data; the three models here were selected using PPV. The black line represents a buy-and-hold strategy, while the blue line represents a strategy of selling all assets before a predicted decrease and then purchasing them back the next time there is a predicted increase. The purple line represents a less risky strategy of only selling 35\\% of assets before a predicted decrease and then purchasing them back the next time there is a predicted increase."}
+
+# Generate plots
+par(mfrow = c(3, 2), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
+for(i in c(3, 9, 10)){
+  
+  # Offset numbers for indexing purposes
+  if(i == 3){j <- 1}
+  if(i == 9){j <- 2}
+  if(i == 10){j <- 3}
+  
+  # Plot returns
+  plot(returns.damod(formula(SPWeeklyDMod[[i]]), data = SPWeeklyTest, daType = "lda"), type = "l",
+       col = "blue", xaxt = "n", xlab = "Year", ylab = "Proportion of Initial Value", ylim = c(0, 8))
+  axis(1, at = nrow(SPWeeklyTest)*(0:5)/5, labels = seq(2011, 2021, length.out = 6), cex.axis = 0.85)
+  lines(returns.damod(formula(SPWeeklyDMod[[i]]), data = SPWeeklyTest, daType = "lda", lrisk = TRUE), col = "purple")
+  lines(returns.damod("none", data = SPWeeklyTest))
+  text(x = rep(10, 3)[j], y = rep(7.8, 3)[j], labels = c("Model 3", "Model 9", "Model 10")[j], adj = 0)
+  
+  # Plot increases/decreases on weeks when mode predicts a decrease
+  da.fit <- lda(formula(SPWeeklyDMod[[i]]), data = SPWeeklyTest)
+  da.pred <- predict(da.fit, SPWeeklyTest)$class
+  plotdat <- data.frame(da.pred, SPWeeklyTest$Direction, SPWeeklyTest$PctChange)
+  plotdat <- subset(plotdat, da.pred == "Down")
+  plot(as.numeric(rownames(plotdat)), plotdat$SPWeeklyTest.PctChange, pch = 16, xaxt = "n",
+       xlim = c(0, nrow(SPWeeklyTest)), col = ifelse(plotdat$SPWeeklyTest.PctChange < 0, "red", "green"),
+       xlab = "Year", ylab = "Weekly Percent Change", ylim = c(-16, 16), cex.axis = 0.9)
+  axis(1, at = nrow(SPWeeklyTest)*(0:5)/5, labels = seq(2011, 2021, length.out = 6), cex.axis = 0.85)
+  abline(h = mean(plotdat$SPWeeklyTest.PctChange[plotdat$SPWeeklyTest.PctChange < 0]), lty = 2, col = "red")
+  abline(h = mean(plotdat$SPWeeklyTest.PctChange[plotdat$SPWeeklyTest.PctChange > 0]), lty = 2, col = "green")
+  text(x = rep(10, 3)[j], y = rep(15, 3)[j], labels = c("Model 3", "Model 9", "Model 10")[j], adj = 0)
+  text(x = rep(110, 3)[j], y = rep(15, 3)[j], labels = as.numeric(table(plotdat$SPWeeklyTest.Direction)[1]),
+       col = "red", adj = 0)
+  text(x = rep(140, 3)[j], y = rep(15, 3)[j], labels = "/", adj = 0)
+  text(x = rep(150, 3)[j], y = rep(15, 3)[j], labels = as.numeric(table(plotdat$SPWeeklyTest.Direction)[2]),
+       col = "green", adj = 0)}
+
+```
+
+\newpage
+
+``` {r Figure32, fig.height = 7.8, warning = FALSE, fig.cap = "\\label{fig:Figure32} Relative value of the S\\&P 500 from 2011-2021 (left) and percent change for weeks in 2011-2021 for which an increase was not predicted (right) based on QDA models fit to the 1986-2010 data; the three models here were selected using PPV. The black line represents a buy-and-hold strategy, while the blue line represents a strategy of selling all assets before a predicted decrease and then purchasing them back the next time there is a predicted increase. The purple line represents a less risky strategy of only selling 35\\% of assets before a predicted decrease and then purchasing them back the next time there is a predicted increase."}
+
+# Generate plots
+par(mfrow = c(3, 2), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
+for(i in c(4, 11, 12)){
+  
+  # Offset numbers for indexing purposes
+  if(i == 4){j <- 1}
+  if(i == 11){j <- 2}
+  if(i == 12){j <- 3}
+  
+  # Plot returns
+  plot(returns.damod(formula(SPWeeklyDMod[[i]]), data = SPWeeklyTest, daType = "qda"), type = "l",
+       col = "blue", xaxt = "n", xlab = "Year", ylab = "Proportion of Initial Value", ylim = c(0, 8))
+  axis(1, at = nrow(SPWeeklyTest)*(0:5)/5, labels = seq(2011, 2021, length.out = 6), cex.axis = 0.85)
+  lines(returns.damod(formula(SPWeeklyDMod[[i]]), data = SPWeeklyTest, daType = "qda", lrisk = TRUE), col = "purple")
+  lines(returns.damod("none", data = SPWeeklyTest))
+  text(x = rep(10, 3)[j], y = rep(7.8, 3)[j], labels = c("Model 4", "Model 11", "Model 12")[j], adj = 0)
+  
+  # Plot increases/decreases on weeks when mode predicts a decrease
+  da.fit <- qda(formula(SPWeeklyDMod[[i]]), data = SPWeeklyTest)
+  da.pred <- predict(da.fit, SPWeeklyTest)$class
+  plotdat <- data.frame(da.pred, SPWeeklyTest$Direction, SPWeeklyTest$PctChange)
+  plotdat <- subset(plotdat, da.pred == "Down")
+  plot(as.numeric(rownames(plotdat)), plotdat$SPWeeklyTest.PctChange, pch = 16, xaxt = "n",
+       xlim = c(0, nrow(SPWeeklyTest)), col = ifelse(plotdat$SPWeeklyTest.PctChange < 0, "red", "green"),
+       xlab = "Year", ylab = "Weekly Percent Change", ylim = c(-16, 16), cex.axis = 0.9)
+  axis(1, at = nrow(SPWeeklyTest)*(0:5)/5, labels = seq(2011, 2021, length.out = 6), cex.axis = 0.85)
+  abline(h = mean(plotdat$SPWeeklyTest.PctChange[plotdat$SPWeeklyTest.PctChange < 0]), lty = 2, col = "red")
+  abline(h = mean(plotdat$SPWeeklyTest.PctChange[plotdat$SPWeeklyTest.PctChange > 0]), lty = 2, col = "green")
+  text(x = rep(10, 3)[j], y = rep(15, 3)[j], labels = c("Model 4", "Model 11", "Model 12")[j], adj = 0)
+  text(x = rep(110, 3)[j], y = rep(15, 3)[j], labels = as.numeric(table(plotdat$SPWeeklyTest.Direction)[1]),
+       col = "red", adj = 0)
+  text(x = rep(140, 3)[j], y = rep(15, 3)[j], labels = "/", adj = 0)
+  text(x = rep(150, 3)[j], y = rep(15, 3)[j], labels = as.numeric(table(plotdat$SPWeeklyTest.Direction)[2]),
+       col = "green", adj = 0)}
 
 ```
 
