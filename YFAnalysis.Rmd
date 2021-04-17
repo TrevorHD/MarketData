@@ -916,7 +916,7 @@ sapply(SPWeeklyLMod, FUN = logreg, dataTrain = SPWeeklyTest, output = "ppv")
 # Function to estimate total return on model vs no model
 # Assumes complete liquidation of assets prior to predicted decrease
 # Setting lrisk to TRUE liquidates only 35% of assets prior to predicted decrease
-returns <- function(formula, data, final = FALSE, lrisk = FALSE){
+returns.logreg <- function(formula, data, final = FALSE, lrisk = FALSE){
   if(formula != "none"){
     glm.fit <- glm(formula = formula, data = data, family = "binomial")
     glm.probs <- predict(glm.fit, data, type = "response")
@@ -938,7 +938,7 @@ returns <- function(formula, data, final = FALSE, lrisk = FALSE){
 
 # Compare lifetime returns; use loop since sapply doesn't work for some reason
 for(i in 1:6){
-  print(returns(SPWeeklyLMod[[i]], data = SPWeeklyTest, final = TRUE))}
+  print(returns.logreg(SPWeeklyLMod[[i]], data = SPWeeklyTest, final = TRUE))}
 
 ```
 
@@ -1179,11 +1179,11 @@ for(i in c(1, 3, 4)){
   if(i == 4){j <- 3}
   
   # Plot returns
-  plot(returns(SPWeeklyLMod[[i]], data = SPWeeklyTest), type = "l", col = "blue", xaxt = "n",
+  plot(returns.logreg(SPWeeklyLMod[[i]], data = SPWeeklyTest), type = "l", col = "blue", xaxt = "n",
        xlab = "Year", ylab = "Proportion of Initial Value", ylim = c(0, 8))
   axis(1, at = nrow(SPWeeklyTest)*(0:5)/5, labels = seq(2011, 2021, length.out = 6), cex.axis = 0.85)
-  lines(returns(SPWeeklyLMod[[i]], data = SPWeeklyTest, lrisk = TRUE), col = "purple")
-  lines(returns("none", data = SPWeeklyTest))
+  lines(returns.logreg(SPWeeklyLMod[[i]], data = SPWeeklyTest, lrisk = TRUE), col = "purple")
+  lines(returns.logreg("none", data = SPWeeklyTest))
   text(x = rep(10, 3)[j], y = rep(7.8, 3)[j], labels = c("Model 1", "Model 3", "Model 4")[j], adj = 0)
   
   # Plot increases/decreases on weeks when mode predicts a decrease
@@ -1222,11 +1222,11 @@ for(i in c(2, 5, 6)){
   if(i == 6){j <- 3}
   
   # Plot returns
-  plot(returns(SPWeeklyLMod[[i]], data = SPWeeklyTest), type = "l", col = "blue", xaxt = "n",
+  plot(returns.logreg(SPWeeklyLMod[[i]], data = SPWeeklyTest), type = "l", col = "blue", xaxt = "n",
        xlab = "Year", ylab = "Proportion of Initial Value", ylim = c(0, 8))
   axis(1, at = nrow(SPWeeklyTest)*(0:5)/5, labels = seq(2011, 2021, length.out = 6), cex.axis = 0.85)
-  lines(returns(SPWeeklyLMod[[i]], data = SPWeeklyTest, lrisk = TRUE), col = "purple")
-  lines(returns("none", data = SPWeeklyTest))
+  lines(returns.logreg(SPWeeklyLMod[[i]], data = SPWeeklyTest, lrisk = TRUE), col = "purple")
+  lines(returns.logreg("none", data = SPWeeklyTest))
   text(x = rep(10, 3)[j], y = rep(7.8, 3)[j], labels = c("Model 2", "Model 5", "Model 6")[j], adj = 0)
   
   # Plot increases/decreases on weeks when mode predicts a decrease
@@ -1541,6 +1541,62 @@ SPWeeklyDMod[[12]] <- paste0("Direction~", paste0(predVecFwd, collapse = "+"))
 
 # Remove variables from global environment
 remove(maxacc, predVec, predVecFwd, predVecRemain, prevmaxacc)
+
+```
+
+``` {r include = FALSE}
+
+# Compare model test accuracy (LDA)
+SPWeeklyDMod[c(1, 3, 5, 6, 9, 10)] %>% 
+  sapply(formula) %>% 
+  sapply(FUN = damod, dataTrain = SPWeeklyTest, daType = "lda", output = "accuracy")
+
+# Compare model test accuracy (QDA)
+SPWeeklyDMod[c(2, 4, 7, 8, 11, 12)] %>% 
+  sapply(formula) %>% 
+  sapply(FUN = damod, dataTrain = SPWeeklyTest, daType = "qda", output = "accuracy")
+
+# Compare model test PPV (LDA)
+SPWeeklyDMod[c(1, 3, 5, 6, 9, 10)] %>% 
+  sapply(formula) %>% 
+  sapply(FUN = damod, dataTrain = SPWeeklyTest, daType = "lda", output = "ppv")
+
+# Compare model test PPV (QDA)
+SPWeeklyDMod[c(2, 4, 7, 8, 11, 12)] %>% 
+  sapply(formula) %>% 
+  sapply(FUN = damod, dataTrain = SPWeeklyTest, daType = "qda", output = "ppv")
+
+# Function to estimate total return on model vs no model
+# Assumes complete liquidation of assets prior to predicted decrease
+# Setting lrisk to TRUE liquidates only 35% of assets prior to predicted decrease
+returns.damod <- function(formula, data, daType, final = FALSE, lrisk = FALSE){
+  if(formula != "none"){
+    if(daType == "lda"){
+      da.fit <- lda(formula = formula(formula), data = data)}
+    if(daType == "qda"){
+      da.fit <- qda(formula = formula(formula), data = data)}
+    da.pred <- predict(da.fit, data)$class
+    pcts <- data$PctChange
+    if(lrisk == FALSE){
+      pcts[da.pred == "Down"] <- 0}
+    if(lrisk == TRUE){
+      pcts[da.pred == "Down"] <- pcts[da.pred == "Down"]*0.65}
+    totalReturn <- c()
+    for(i in 1:length(pcts)){
+      totalReturn <- c(totalReturn, prod((pcts[1:i]/100)+1))}}
+  if(formula == "none"){
+    totalReturn <- c()
+    for(i in 1:nrow(data)){
+      totalReturn <- c(totalReturn, prod((data$PctChange[1:i]/100)+1))}}
+  ifelse(final == TRUE, return(totalReturn[length(totalReturn)]), return(totalReturn))}
+
+# Compare lifetime returns (LDA); use loop since sapply doesn't work for some reason
+for(i in c(1, 3, 5, 6, 9, 10)){
+  print(returns.damod(formula(SPWeeklyDMod[[i]]), data = SPWeeklyTest, daType = "lda", final = TRUE))}
+
+# Compare lifetime returns (QDA); use loop since sapply doesn't work for some reason
+for(i in c(2, 4, 7, 8, 11, 12)){
+  print(returns.damod(formula(SPWeeklyDMod[[i]]), data = SPWeeklyTest, daType = "lda", final = TRUE))}
 
 ```
 
