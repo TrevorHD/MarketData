@@ -591,7 +591,7 @@ This model contains the maximum number (8) of non-interactive predictors and is 
 
 ``` {r echo = TRUE, eval = FALSE}
 
-logreg.comb <- function(dataTrain, dataTest, output, n){
+logreg.comb <- function(dataTrain, output, n){
   combn(names(dataTrain)[-c(2:3)], n) %>% 
     apply(FUN = paste0, MARGIN = 2, collapse = "+") %>% 
     paste0("Direction~", .) %>% 
@@ -1204,6 +1204,82 @@ for(i in c(2, 5, 6)){
 \newpage
 
 ## Discriminant Analysis
+
+Now that we have fit several logistic regression models and found two that performed particularly well, we can examine whether or not using a discriminant analysis approach can yield better-performing models. Because we are working an high-dimensional space, we cannot easily determine whether the decision boundary between the two observed classes (increase and decrease) is linear or nonlinear before fitting any sort of model. Thus, we try both linear discriminant analysis (LDA) and quadratic discriminant analysis (QDA), the former of which uses a linear decision boundary while the latter is more flexible and does not assume equal variance/covariance matrices between the two classes. We can then compare their performance and see which one, if any, is more suitable. The R syntax for the LDA and QDA approaches is very similar to that of using `glm` to fit a logistic model, this time using the functions `lda` and `qda` from the `MASS` package.
+
+``` {r eval = FALSE, echo = TRUE}
+
+# Linear discriminant analysis
+lda(Direction ~ Lag1 + Lag2 + Lag3 + Lag4 + Lag5 + BVolume + Prev5GM + Prev5Pct,
+    data = SPWeeklyTrain)
+
+# Quadratic discriminant analysis
+qda(Direction ~ Lag1 + Lag2 + Lag3 + Lag4 + Lag5 + BVolume + Prev5GM + Prev5Pct,
+    data = SPWeeklyTrain)
+
+```
+
+Just like earlier, there are 255 possible non-interactive models that we can fit, and it is computationally feasible to evaluate every single one of these models. We can build a function `damod.comb`, which is almost identical to `logreg.comb` in terms of functionality, that evaluates each possible model on the training data set and returns a specified statistic such as accuracy, sensitivity, specificity, positive predictive value, or negative predictive value.
+
+``` {r eval = FALSE, echo = TRUE}
+
+damod.comb <- function(dataTrain, daType, output, n){
+  combn(names(dataTrain)[-c(2:3)], n) %>% 
+    apply(FUN = paste0, MARGIN = 2, collapse = "+") %>% 
+    paste0("Direction~", .) %>%
+    sapply(formula) %>% 
+    sapply(FUN = damod, dataTrain = dataTrain, daType = daType, output = output) %>% 
+    sort() %>%
+    return()}
+
+```
+
+We then use this function to select the non-interactive model with the highest training accuracy, first specifying an LDA model for the `daType` argument. This model, which we will call **Model 1**, has an overall training accuracy of approximately 57.62% and correctly predicts 749 out of 1662 movements using a linear combination of the predictors `BVolume`, `Prev5Pct`, `Lag2`, `Lag3`, and `Lag5`. We can also maximise accuracy using this function but by fitting a QDA model rather than an LDA model; doing so yields a model with a slightly higher training accuracy of 58.23%, which we will call **Model 2**. This model only uses the predictors `Prev5GM`, `Lag1`, `Lag3` and `Lag4`.
+
+As we did before with our non-interactive logistic regression models, we can also select LDA/QDA models by maximising PPV rather than accuracy. Doing so gives us an LDA model with a PPV of 57.53% and the exact same structure as Model 1; we will call this **Model 3**. We also obtain a QDA model with a PPV of 59.34%; we will call this **Model 4**; this model has the same predictor variables as Model 2, but with the addition of `BVolume` and `Prev5Pct`.
+
+If we wish to also examine the effectiveness of interactive models, we face the same problem as we did earlier; there are simply too many possible models to evaluate every single one, as we do not have the computational resources to fit and test 68719476735 different models. Thus, rather than identifying a global maximum with certainty, we must perform a heuristic search to maximise accuracy or PPV and hope that we can identify the global maximum, or a local maximum that is approximately equal. Here we use an almost identical version of the forward and backward search algorithms employed on the logistic models, though adapting them to use `lda` and `qda` rather than `glm`.
+
+``` {r eval = FALSE, echo = TRUE}
+
+# Function to remove a term and find new accuracy
+damod.lcv1 <- function(i, dataTrain, daType, output){
+  predVec[-i] %>% 
+    paste0(., collapse = "+") %>% 
+    paste0("Direction~", .) %>%
+    formula() %>% 
+    damod(dataTrain = SPWeeklyTrain, daType = daType, output = output) %>% 
+    return()}
+
+# Function to return accuracy and new list of predictors after removing a predictor
+damod.bwd <- function(predVec, daType, output){
+  accs <- sapply(1:length(predVec), FUN = damod.lcv1, dataTrain = SPWeeklyTrain,
+                 daType = daType, output = output)
+  pv <- predVec[-which.max(accs)]
+  return(list(predVec = pv, maxacc = max(accs)))}
+
+# Function to add a term and find new accuracy
+damod.lcv2 <- function(i, dataTrain, daType, output){
+  c(predVecFwd, predVecRemain[i]) %>% 
+  paste0(., collapse = "+") %>% 
+    paste0("Direction~", .) %>%
+    formula() %>%
+    damod(dataTrain = SPWeeklyTrain, daType = daType, output = output) %>% 
+    return()}
+
+# Function to return accuracy and new list of predictors after adding a predictor
+damod.fwd <- function(predVecRemain, predVecFwd, daType, output){
+  accs <- sapply(1:length(predVecRemain), FUN = damod.lcv2, dataTrain = SPWeeklyTrain,
+                 daType = daType, output = output)
+  pvf <- c(predVecFwd, predVecRemain[which.max(accs)])
+  pvr <- predVecRemain[-which.max(accs)]
+  return(list(predVecFwd = pvf, predVecRemain = pvr, maxacc = max(accs)))}
+
+```
+
+These functions operate the same as before; the backward-step algorithm starts with a full model and removes terms until accuracy or PPV is maximised, while the forward-step algorith starts with a null model and adds terms until accuracy or PPV is maximised. If we then use these functions to maximise accuracy on an LDA model, we get a 29-term **Model 5** with 59.15% accuracy that was chosen using backward selection and a 8-term **Model 6** with 57.54% accuracy that was chosen using forward selection. We can then apply these functions by maximising accuracy on an QDA model rather than an LDA model, we get a 31-term **Model 7** with 59.46% accuracy that was chosen using backward selection and a 10-term **Model 8** with 58.92% accuracy that was chosen using forward selection.
+
+After using the forward and backward selection algorithms to maximise accuracy, we then use them to maximise PPV. If we use these functions to maximise PPV on an LDA model, we get a 29-term **Model 9** with 59.38% accuracy that was chosen using backward selection and a 8-term **Model 10** with 57.92% accuracy that was chosen using forward selection. We can then apply these functions by maximising PPV on an QDA model rather than an LDA model, we get a 18-term **Model 11** with 49.23% accuracy that was chosen using backward selection and a 13-term **Model 12** with 49.69% accuracy that was chosen using forward selection. Note that unlike the other models, Model 12 and Model 13 have an accuracy of less than 50%, which is worse than simply guessing.
 
 ``` {r include = FALSE}
 
