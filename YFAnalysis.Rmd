@@ -31,7 +31,7 @@ library(pROC)
 library(car)
 
 # Set chunk and hook options
-knitr::opts_chunk$set(echo = FALSE, fig.pos = 'htb!')
+knitr::opts_chunk$set(echo = FALSE, fig.pos = 'htb!', dev = "png", dev.args = list(type = "cairo-png"), dpi = 200)
 
 # Tidy data
 source("https://raw.githubusercontent.com/TrevorHD/MarketData/master/YFData.R")
