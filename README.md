@@ -1,6 +1,6 @@
 # Overview
 
-An exploration of using machine learning for predictive modelling on three major U.S. stock market indices: the S&P 500, NASDAQ Composite, and the Dow Jones Industrial Average.
+An exploration of using machine learning for predictive modelling on stocks and ETFs, using the S&P 500 (GSPC) as an example. Includes methods such as support vector machines, discriminant analysis, decision trees, logistic regression, and more. Data for the NASDAQ Composite (IXIC) and Dow Jones Industrial Average (DJIA) are also included, though while not used in the analyses, can easily be accommodated using the existing code.
 
 # Files
 
