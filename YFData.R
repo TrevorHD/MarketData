@@ -16,8 +16,12 @@ names <- c("DJDaily", "DJWeekly", "NDDaily", "NDWeekly", "SPDaily", "SPWeekly")
 for(i in 1:6){
   
   # Download data
-  data <- read.csv(paste0("https://raw.githubusercontent.com/TrevorHD/MarketData/master/",
-                          names[i], ".csv"))
+  if(names[i] != "SPWeekly"){
+    data <- read.csv(paste0("https://raw.githubusercontent.com/TrevorHD/MarketData/master/Extras/",
+                            names[i], ".csv"))}
+  if(names[i] == "SPWeekly"){
+    data <- read.csv(paste0("https://raw.githubusercontent.com/TrevorHD/MarketData/master/",
+                            names[i], ".csv"))}
   
   # Remove rows with missing entries
   data <- na.omit(data)
