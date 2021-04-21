@@ -1934,28 +1934,12 @@ for(i in c(4, 11, 12)){
 
 \newpage
 
-## K-Nearest Neighbours
-
 ## Support Vector Machines
 
-# Predictive Analysis: NASDAQ Composite
+## Decision Trees
 
-## Logistic Regression
-
-## Discriminant Analysis
-
-## K-Nearest Neighbours
-
-## Support Vector Machines
-
-# Predictive Analysis: Dow Jones Industrial Average
-
-## Logistic Regression
-
-## Discriminant Analysis
-
-## K-Nearest Neighbours
-
-## Support Vector Machines
+## Advanced Methods
 
 # Conclusions
+
+# Figures
