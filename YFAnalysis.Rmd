@@ -6,13 +6,17 @@ output:
   pdf_document:
     fig_caption: yes
     toc: true
+  includes:
+  in_header: "header.tex"
 editor_options: 
   chunk_output_type: console
 header-includes:
+- \usepackage{titling}
 - \usepackage{float}
 - \usepackage{booktabs}
 - \usepackage[width = 0.96\textwidth]{caption}
 - \usepackage[hang, flushmargin]{footmisc}
+- \input{header.tex}
 urlcolor: blue
 ---
 
@@ -32,6 +36,8 @@ library(car)
 
 # Set chunk and hook options
 knitr::opts_chunk$set(echo = FALSE, fig.pos = 'htb!', dev = "png", dev.args = list(type = "cairo-png"), dpi = 200)
+#knit_hooks$set(plot = function(x, options){
+#  hook_plot_tex(x, options)})
 
 # Tidy data
 source("https://raw.githubusercontent.com/TrevorHD/MarketData/master/YFData.R")
@@ -158,423 +164,9 @@ remove(trainVec)
 
 ```
 
-``` {r Figure1, fig.height = 8, fig.cap = "\\label{fig:Figure1} Correlations bewteen volume, percent change, and the various lag variables for the weekly (top) and daily (bottom) data on the S\\&P 500. The area of squares below the diagonal are proportional to the absolute value of the corresponding correlation coefficients."}
+# Analyses
 
-# Plots of correlations between variables: weekly data
-par(mfrow = c(2, 1), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
-SPWeekly %>% mutate(Direction = ifelse(Direction == "Up", 1, 0)) %>% cor() %>% 
-corrplot(method = "square", type = "lower", win.asp = 0.7, tl.cex = 0.7,
-         tl.pos = "tp", tl.col = "black")
-SPWeekly %>% mutate(Direction = ifelse(Direction == "Up", 1, 0)) %>% cor() %>% 
-corrplot(add = TRUE, method = "number", type = "upper", 
-         number.cex = 0.5, col = "black", tl.pos = "n", cl.pos = "n")
-
-# Plots of correlations between variables: daily data
-par(mar = c(5, 4, 0, 2) + 0.1)
-SPDaily %>% mutate(Direction = ifelse(Direction == "Up", 1, 0)) %>% cor() %>% 
-corrplot(method = "square", type = "lower", win.asp = 0.7, tl.cex = 0.7,
-         tl.pos = "tp", tl.col = "black")
-SPDaily %>% mutate(Direction = ifelse(Direction == "Up", 1, 0)) %>% cor() %>% 
-corrplot(add = TRUE, method = "number", type = "upper", 
-         number.cex = 0.5, col = "black", tl.pos = "n", cl.pos = "n")
-
-```
-
-``` {r Figure2, fig.height = 8, fig.cap = "\\label{fig:Figure2} Correlations bewteen volume, percent change, and the various lag variables for the weekly (top) and daily (bottom) data on the NASDAQ Composite. The area of squares below the diagonal are proportional to the absolute value of the corresponding correlation coefficients."}
-
-# Plots of correlations between variables: weekly data
-par(mfrow = c(2, 1), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
-NDWeekly %>% mutate(Direction = ifelse(Direction == "Up", 1, 0)) %>% cor() %>% 
-corrplot(method = "square", type = "lower", win.asp = 0.7, tl.cex = 0.7,
-         tl.pos = "tp", tl.col = "black")
-NDWeekly %>% mutate(Direction = ifelse(Direction == "Up", 1, 0)) %>% cor() %>% 
-corrplot(add = TRUE, method = "number", type = "upper", 
-         number.cex = 0.5, col = "black", tl.pos = "n", cl.pos = "n")
-
-# Plots of correlations between variables: daily data
-par(mar = c(5, 4, 0, 2) + 0.1)
-NDDaily %>% mutate(Direction = ifelse(Direction == "Up", 1, 0)) %>% cor() %>% 
-corrplot(method = "square", type = "lower", win.asp = 0.7, tl.cex = 0.7,
-         tl.pos = "tp", tl.col = "black")
-NDDaily %>% mutate(Direction = ifelse(Direction == "Up", 1, 0)) %>% cor() %>% 
-corrplot(add = TRUE, method = "number", type = "upper", 
-         number.cex = 0.5, col = "black", tl.pos = "n", cl.pos = "n")
-
-```
-
-``` {r Figure3, fig.height = 8, fig.cap = "\\label{fig:Figure3} Correlations bewteen volume, percent change, and the various lag variables for the weekly (top) and daily (bottom) data on the Dow Jones Industrial Average. The area of squares below the diagonal are proportional to the absolute value of the corresponding correlation coefficients."}
-
-# Plots of correlations between variables: weekly data
-par(mfrow = c(2, 1), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
-DJWeekly %>% mutate(Direction = ifelse(Direction == "Up", 1, 0)) %>% cor() %>% 
-corrplot(method = "square", type = "lower", win.asp = 0.7, tl.cex = 0.7,
-         tl.pos = "tp", tl.col = "black")
-DJWeekly %>% mutate(Direction = ifelse(Direction == "Up", 1, 0)) %>% cor() %>% 
-corrplot(add = TRUE, method = "number", type = "upper", 
-         number.cex = 0.5, col = "black", tl.pos = "n", cl.pos = "n")
-
-# Plots of correlations between variables: daily data
-par(mar = c(5, 4, 0, 2) + 0.1)
-DJDaily %>% mutate(Direction = ifelse(Direction == "Up", 1, 0)) %>% cor() %>% 
-corrplot(method = "square", type = "lower", win.asp = 0.7, tl.cex = 0.7,
-         tl.pos = "tp", tl.col = "black")
-DJDaily %>% mutate(Direction = ifelse(Direction == "Up", 1, 0)) %>% cor() %>% 
-corrplot(add = TRUE, method = "number", type = "upper", 
-         number.cex = 0.5, col = "black", tl.pos = "n", cl.pos = "n")
-
-```
-
-``` {r Figure4, fig.height = 8, fig.cap = "\\label{fig:Figure4} Plots of S\\&P 500 weekly percent change against percent change of up to 5 weeks prior. Autocorrelation in daily percent change corresponding to 1-5 day lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
-
-# Plot percent change for given week against percent change up to five weeks ago
-# Also plot autocorrelation in percent change
-par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
-plot(SPWeekly$PctChange, SPWeekly$Lag1, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (1-Week Lag)")
-plot(SPWeekly$PctChange, SPWeekly$Lag2, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (2-Week Lag)")
-plot(SPWeekly$PctChange, SPWeekly$Lag3, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (3-Week Lag)")
-plot(SPWeekly$PctChange, SPWeekly$Lag4, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (4-Week Lag)")
-plot(SPWeekly$PctChange, SPWeekly$Lag5, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (5-Week Lag)")
-acf(SPWeekly$PctChange, lag.max = 5, lwd = 4, main = NA, xlab = "Lag (Weeks)",
-    ylab = "Autocorrelation")
-par(mfrow = c(1, 1))
-
-```
-
-``` {r Figure5, fig.height = 8, fig.cap = "\\label{fig:Figure5} Plots of S\\&P 500 daily percent change against percent change of up to 5 days prior. Autocorrelation in daily percent change corresponding to 1-5 day lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
-
-# Plot percent change for given day against percent change up to five days ago
-# Also plot autocorrelation in percent change
-par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
-plot(SPDaily$PctChange, SPDaily$Lag1, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (1-Day Lag)")
-plot(SPDaily$PctChange, SPDaily$Lag2, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (2-Day Lag)")
-plot(SPDaily$PctChange, SPDaily$Lag3, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (3-Day Lag)")
-plot(SPDaily$PctChange, SPDaily$Lag4, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (4-Day Lag)")
-plot(SPDaily$PctChange, SPDaily$Lag5, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (5-Day Lag)")
-acf(SPDaily$PctChange, lag.max = 5, lwd = 4, main = NA, xlab = "Lag (Weeks)",
-    ylab = "Autocorrelation")
-par(mfrow = c(1, 1))
-
-```
-
-``` {r Figure6, fig.height = 8, fig.cap = "\\label{fig:Figure6} Plots of S\\&P 500 weekly volume against volume of up to 5 weeks prior. Autocorrelation in volume corresponding to 1-5 week lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
-
-# Plot volume for given week against volume up to five weeks ago
-# Also plot autocorrelation in volume
-par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
-plot(SPWeekly$BVolume, SPWeekly$VLag1, xlim = c(0, 40), xlab = "Volume", ylim = c(0, 40),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (1-Week Lag)")
-plot(SPWeekly$BVolume, SPWeekly$VLag2, xlim = c(0, 40), xlab = "Volume", ylim = c(0, 40),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (2-Week Lag)")
-plot(SPWeekly$BVolume, SPWeekly$VLag3, xlim = c(0, 40), xlab = "Volume", ylim = c(0, 40),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (3-Week Lag)")
-plot(SPWeekly$BVolume, SPWeekly$VLag4, xlim = c(0, 40), xlab = "Volume", ylim = c(0, 40),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (4-Week Lag)")
-plot(SPWeekly$BVolume, SPWeekly$VLag5, xlim = c(0, 40), xlab = "Volume", ylim = c(0, 40),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (5-Week Lag)")
-acf(SPWeekly$BVolume, lag.max = 5, lwd = 4, main = NA, xlab = "Lag (Weeks)",
-    ylab = "Autocorrelation")
-par(mfrow = c(1, 1))
-
-```
-
-``` {r Figure7, fig.height = 8, fig.cap = "\\label{fig:Figure7} Plots of S\\&P 500 daily volume against volume of up to 5 days prior. Autocorrelation in volume corresponding to 1-5 day lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
-
-# Plot volume for given day against volume up to five days ago
-# Also plot autocorrelation in volume
-par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
-plot(SPDaily$BVolume, SPDaily$VLag1, xlim = c(0, 12), xlab = "Volume", ylim = c(0, 12),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (1-Day Lag)")
-plot(SPDaily$BVolume, SPDaily$VLag2, xlim = c(0, 12), xlab = "Volume", ylim = c(0, 12),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (2-Day Lag)")
-plot(SPDaily$BVolume, SPDaily$VLag3, xlim = c(0, 12), xlab = "Volume", ylim = c(0, 12),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (3-Day Lag)")
-plot(SPDaily$BVolume, SPDaily$VLag4, xlim = c(0, 12), xlab = "Volume", ylim = c(0, 12),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (4-Day Lag)")
-plot(SPDaily$BVolume, SPDaily$VLag5, xlim = c(0, 12), xlab = "Volume", ylim = c(0, 12),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (5-Day Lag)")
-acf(SPDaily$BVolume, lag.max = 5, lwd = 4, main = NA, xlab = "Lag (Weeks)",
-    ylab = "Autocorrelation")
-par(mfrow = c(1, 1))
-
-```
-
-``` {r Figure8, fig.height = 8, fig.cap = "\\label{fig:Figure8} Plots of NASDAQ Composite weekly percent change against percent change of up to 5 weeks prior. Autocorrelation in weekly percent change corresponding to 1-5 week lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
-
-# Plot percent change for given week against percent change up to five weeks ago
-# Also plot autocorrelation in percent change
-par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
-plot(NDWeekly$PctChange, NDWeekly$Lag1, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (1-Week Lag)")
-plot(NDWeekly$PctChange, NDWeekly$Lag2, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (2-Week Lag)")
-plot(NDWeekly$PctChange, NDWeekly$Lag3, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (3-Week Lag)")
-plot(NDWeekly$PctChange, NDWeekly$Lag4, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (4-Week Lag)")
-plot(NDWeekly$PctChange, NDWeekly$Lag5, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (5-Week Lag)")
-acf(NDWeekly$PctChange, lag.max = 5, lwd = 4, main = NA, xlab = "Lag (Weeks)",
-    ylab = "Autocorrelation")
-par(mfrow = c(1, 1))
-
-```
-
-``` {r Figure9, fig.height = 8, fig.cap = "\\label{fig:Figure9} Plots of NASDAQ Composite daily percent change against percent change of up to 5 days prior. Autocorrelation in daily percent change corresponding to 1-5 day lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
-
-# Plot percent change for given day against percent change up to five days ago
-# Also plot autocorrelation in percent change
-par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
-plot(NDDaily$PctChange, NDDaily$Lag1, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (1-Day Lag)")
-plot(NDDaily$PctChange, NDDaily$Lag2, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (2-Day Lag)")
-plot(NDDaily$PctChange, NDDaily$Lag3, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (3-Day Lag)")
-plot(NDDaily$PctChange, NDDaily$Lag4, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (4-Day Lag)")
-plot(NDDaily$PctChange, NDDaily$Lag5, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (5-Day Lag)")
-acf(NDDaily$PctChange, lag.max = 5, lwd = 4, main = NA, xlab = "Lag (Weeks)",
-    ylab = "Autocorrelation")
-par(mfrow = c(1, 1))
-
-```
-
-``` {r Figure10, fig.height = 8, fig.cap = "\\label{fig:Figure10} Plots of NASDAQ Composite weekly volume against volume of up to 5 weeks prior. Autocorrelation in volume corresponding to 1-5 week lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
-
-# Plot volume for given week against volume up to five weeks ago
-# Also plot autocorrelation in volume
-par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
-plot(NDWeekly$BVolume, NDWeekly$VLag1, xlim = c(0, 28), xlab = "Volume", ylim = c(0, 28),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (1-Week Lag)")
-plot(NDWeekly$BVolume, NDWeekly$VLag2, xlim = c(0, 28), xlab = "Volume", ylim = c(0, 28),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (2-Week Lag)")
-plot(NDWeekly$BVolume, NDWeekly$VLag3, xlim = c(0, 28), xlab = "Volume", ylim = c(0, 28),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (3-Week Lag)")
-plot(NDWeekly$BVolume, NDWeekly$VLag4, xlim = c(0, 28), xlab = "Volume", ylim = c(0, 28),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (4-Week Lag)")
-plot(NDWeekly$BVolume, NDWeekly$VLag5, xlim = c(0, 28), xlab = "Volume", ylim = c(0, 28),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (5-Week Lag)")
-acf(NDWeekly$BVolume, lag.max = 5, lwd = 4, main = NA, xlab = "Lag (Weeks)",
-    ylab = "Autocorrelation")
-par(mfrow = c(1, 1))
-
-```
-
-``` {r Figure11, fig.height = 8, fig.cap = "\\label{fig:Figure11} Plots of NASDAQ Composite daily volume against volume of up to 5 days prior. Autocorrelation in volume corresponding to 1-5 day lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
-
-# Plot volume for given day against volume up to five days ago
-# Also plot autocorrelation in volume
-par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
-plot(NDDaily$BVolume, NDDaily$VLag1, xlim = c(0, 8), xlab = "Volume", ylim = c(0, 8),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (1-Day Lag)")
-plot(NDDaily$BVolume, NDDaily$VLag2, xlim = c(0, 8), xlab = "Volume", ylim = c(0, 8),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (2-Day Lag)")
-plot(NDDaily$BVolume, NDDaily$VLag3, xlim = c(0, 8), xlab = "Volume", ylim = c(0, 8),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (3-Day Lag)")
-plot(NDDaily$BVolume, NDDaily$VLag4, xlim = c(0, 8), xlab = "Volume", ylim = c(0, 8),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (4-Day Lag)")
-plot(NDDaily$BVolume, NDDaily$VLag5, xlim = c(0, 8), xlab = "Volume", ylim = c(0, 8),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (5-Day Lag)")
-acf(NDDaily$BVolume, lag.max = 5, lwd = 4, main = NA, xlab = "Lag (Weeks)",
-    ylab = "Autocorrelation")
-par(mfrow = c(1, 1))
-
-```
-
-``` {r Figure12, fig.height = 8, fig.cap = "\\label{fig:Figure12} Plots of Dow Jones Industrial Average weekly percent change against percent change of up to 5 weeks prior. Autocorrelation in weekly percent change corresponding to 1-5 week lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
-
-# Plot percent change for given week against percent change up to five weeks ago
-# Also plot autocorrelation in percent change
-par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
-plot(DJWeekly$PctChange, DJWeekly$Lag1, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (1-Week Lag)")
-plot(DJWeekly$PctChange, DJWeekly$Lag2, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (2-Week Lag)")
-plot(DJWeekly$PctChange, DJWeekly$Lag3, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (3-Week Lag)")
-plot(DJWeekly$PctChange, DJWeekly$Lag4, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (4-Week Lag)")
-plot(DJWeekly$PctChange, DJWeekly$Lag5, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (5-Week Lag)")
-acf(DJWeekly$PctChange, lag.max = 5, lwd = 4, main = NA, xlab = "Lag (Weeks)",
-    ylab = "Autocorrelation")
-par(mfrow = c(1, 1))
-
-```
-
-``` {r Figure13, fig.height = 8, fig.cap = "\\label{fig:Figure13} Plots of Dow Jones Industrial Average daily percent change against percent change of up to 5 days prior. Autocorrelation in daily percent change corresponding to 1-5 day lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
-
-# Plot percent change for given day against percent change up to five days ago
-# Also plot autocorrelation in percent change
-par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
-plot(DJDaily$PctChange, DJDaily$Lag1, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (1-Day Lag)")
-plot(DJDaily$PctChange, DJDaily$Lag2, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (2-Day Lag)")
-plot(DJDaily$PctChange, DJDaily$Lag3, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (3-Day Lag)")
-plot(DJDaily$PctChange, DJDaily$Lag4, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (4-Day Lag)")
-plot(DJDaily$PctChange, DJDaily$Lag5, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (5-Day Lag)")
-acf(DJDaily$PctChange, lag.max = 5, lwd = 4, main = NA, xlab = "Lag (Weeks)",
-    ylab = "Autocorrelation")
-par(mfrow = c(1, 1))
-
-```
-
-``` {r Figure14, fig.height = 8, fig.cap = "\\label{fig:Figure14} Plots of Dow Jones Industrial Average weekly volume against volume of up to 5 weeks prior. Autocorrelation in volume corresponding to 1-5 week lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
-
-# Plot volume for given week against volume up to five weeks ago
-# Also plot autocorrelation in volume
-par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
-plot(DJWeekly$BVolume, DJWeekly$VLag1, xlim = c(0, 0.04), xlab = "Volume", ylim = c(0, 0.04),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (1-Week Lag)")
-plot(DJWeekly$BVolume, DJWeekly$VLag2, xlim = c(0, 0.04), xlab = "Volume", ylim = c(0, 0.04),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (2-Week Lag)")
-plot(DJWeekly$BVolume, DJWeekly$VLag3, xlim = c(0, 0.04), xlab = "Volume", ylim = c(0, 0.04),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (3-Week Lag)")
-plot(DJWeekly$BVolume, DJWeekly$VLag4, xlim = c(0, 0.04), xlab = "Volume", ylim = c(0, 0.04),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (4-Week Lag)")
-plot(DJWeekly$BVolume, DJWeekly$VLag5, xlim = c(0, 0.04), xlab = "Volume", ylim = c(0, 0.04),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (5-Week Lag)")
-acf(DJWeekly$BVolume, lag.max = 5, lwd = 4, main = NA, xlab = "Lag (Weeks)",
-    ylab = "Autocorrelation")
-par(mfrow = c(1, 1))
-
-```
-
-``` {r Figure15, fig.height = 8, fig.cap = "\\label{fig:Figure15} Plots of Dow Jones Industrial Average daily volume against volume of up to 5 days prior. Autocorrelation in volume corresponding to 1-5 day lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
-
-# Plot volume for given day against volume up to five days ago
-# Also plot autocorrelation in volume
-par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
-plot(DJDaily$BVolume, DJDaily$VLag1, xlim = c(0, 0.008), xlab = "Volume", ylim = c(0, 0.008),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (1-Day Lag)")
-plot(DJDaily$BVolume, DJDaily$VLag2, xlim = c(0, 0.008), xlab = "Volume", ylim = c(0, 0.008),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (2-Day Lag)")
-plot(DJDaily$BVolume, DJDaily$VLag3, xlim = c(0, 0.008), xlab = "Volume", ylim = c(0, 0.008),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (3-Day Lag)")
-plot(DJDaily$BVolume, DJDaily$VLag4, xlim = c(0, 0.008), xlab = "Volume", ylim = c(0, 0.008),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (4-Day Lag)")
-plot(DJDaily$BVolume, DJDaily$VLag5, xlim = c(0, 0.008), xlab = "Volume", ylim = c(0, 0.008),
-     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (5-Day Lag)")
-acf(DJDaily$BVolume, lag.max = 5, lwd = 4, main = NA, xlab = "Lag (Weeks)",
-    ylab = "Autocorrelation")
-par(mfrow = c(1, 1))
-
-```
-
-``` {r Figure16, fig.height = 7.9, fig.cap = "\\label{fig:Figure16} Relative value of the S\\&P 500 over time compared to its 1986 value (top) and distribution of daily percent changes (bottom). Note that in the bottom panel, the leftmost bin represents all days with a percent change less than -5, and rightmost bin represents all days with a percent change greater than 5. Note that the top chart does not account for after-hours gains or losses."}
-
-# Plot value of S&P 500 over time relative to a 1986 baseline
-# Check this chart for accuracy, as it doesn't quite match up with the YF chart
-# Discrepancies possibly due to after-hours trading?
-par(mfrow = c(2, 1), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
-colourList <- replace(rep("green", nrow(SPWeekly)), which(SPWeekly$PctChange < 0), "red")
-barplot(abs(SPWeekly$PctChange), col = colourList, border = colourList, ylim = c(0, 50), axes = FALSE)
-par(new = TRUE)
-totalReturn <- c()
-for(i in 1:nrow(SPWeekly)){
-  totalReturn <- c(totalReturn, prod((SPWeekly$PctChange[1:i]/100)+1))}
-plot(1:nrow(SPWeekly), totalReturn, type = "l", ylim = c(0, 20), xaxt = "n", 
-     xlab = NA, ylab = "Proportion of Initial Value")
-axis(1, at = nrow(SPWeekly)*(0:7)/7, labels = seq(1986, 2021, length.out = 8))
-title(xlab = "Year")
-
-# Plot frequency of daily percent changes
-labelvec <- (-11:11)/2
-labelvec[labelvec %% 1 == 0.5] <- NA;
-SPDaily %>% mutate(PctChange = ifelse(PctChange < -5, -5.1,
-                                      ifelse(PctChange > 5, 5.1, PctChange))) %>%
-  select(PctChange) %>%
-  as.matrix() %>%
-  as.vector() %>% 
-  hist(x = ., breaks = (-11:11)/2, main = NA, xaxt = "n", xlab = "Daily Percent Change",
-       col = c(colorRampPalette(c("red4", "red"), 0.5)(11), colorRampPalette(c("green", "green4"))(11)))
-axis(1, at = (-11:11)/2, labels = labelvec)
-box()
-
-```
-
-``` {r Figure17, fig.height = 7.9, fig.cap = "\\label{fig:Figure17} Relative value of the NASDAQ Composite over time compared to its 1986 value (top) and distribution of daily percent changes (bottom). Note that in the bottom panel, the leftmost bin represents all days with a percent change less than -5, and rightmost bin represents all days with a percent change greater than 5. Note that the top chart does not account for after-hours gains or losses."}
-
-# Plot value of NASDAQ over time relative to a 1986 baseline
-# Check this chart for accuracy, as it doesn't quite match up with the YF chart
-# Discrepancies possibly due to after-hours trading?
-par(mfrow = c(2, 1), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
-colourList <- replace(rep("green", nrow(NDWeekly)), which(NDWeekly$PctChange < 0), "red")
-barplot(abs(NDWeekly$PctChange), col = colourList, border = colourList, ylim = c(0, 50), axes = FALSE)
-par(new = TRUE)
-totalReturn <- c()
-for(i in 1:nrow(NDWeekly)){
-  totalReturn <- c(totalReturn, prod((NDWeekly$PctChange[1:i]/100)+1))}
-plot(1:nrow(NDWeekly), totalReturn, type = "l", ylim = c(0, 12), xaxt = "n", 
-     xlab = NA, ylab = "Proportion of Initial Value")
-axis(1, at = nrow(NDWeekly)*(0:7)/7, labels = seq(1986, 2021, length.out = 8))
-title(xlab = "Year")
-
-# Plot frequency of daily percent changes
-labelvec <- (-11:11)/2
-labelvec[labelvec %% 1 == 0.5] <- NA;
-NDDaily %>% mutate(PctChange = ifelse(PctChange < -5, -5.1,
-                                      ifelse(PctChange > 5, 5.1, PctChange))) %>%
-  select(PctChange) %>%
-  as.matrix() %>%
-  as.vector() %>% 
-  hist(x = ., breaks = (-11:11)/2, main = NA, xaxt = "n", xlab = "Daily Percent Change",
-       col = c(colorRampPalette(c("red4", "red"), 0.5)(11), colorRampPalette(c("green", "green4"))(11)))
-axis(1, at = (-11:11)/2, labels = labelvec)
-box()
-
-```
-
-``` {r Figure18, fig.height = 7.9, fig.cap = "\\label{fig:Figure18} Relative value of the Dow Jones Industrial Average over time compared to its 1992 value (top) and distribution of daily percent changes (bottom). Note that in the bottom panel, the leftmost bin represents all days with a percent change less than -5, and rightmost bin represents all days with a percent change greater than 5. Note that the top chart does not account for after-hours gains or losses."}
-
-# Plot value of Dow Jones over time relative to a 1986 baseline
-# Check this chart for accuracy, as it doesn't quite match up with the YF chart
-# Discrepancies possibly due to after-hours trading?
-par(mfrow = c(2, 1), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
-colourList <- replace(rep("green", nrow(DJWeekly)), which(DJWeekly$PctChange < 0), "red")
-barplot(abs(c(rep(0, 316), DJWeekly$PctChange)), col = colourList, border = colourList, ylim = c(0, 50), axes = FALSE)
-par(new = TRUE)
-totalReturn <- c()
-for(i in 1:nrow(DJWeekly)){
-  totalReturn <- c(totalReturn, prod((DJWeekly$PctChange[1:i]/100)+1))}
-plot((nrow(SPWeekly) - nrow(DJWeekly) + 1):nrow(SPWeekly), totalReturn, type = "l", xlim = c(0, 1825), ylim = c(0, 12), xaxt = "n", 
-     xlab = NA, ylab = "Proportion of Initial Value")
-axis(1, at = nrow(SPWeekly)*(0:7)/7, labels = seq(1986, 2021, length.out = 8))
-title(xlab = "Year")
-
-# Plot frequency of daily percent changes
-labelvec <- (-11:11)/2
-labelvec[labelvec %% 1 == 0.5] <- NA;
-DJDaily %>% mutate(PctChange = ifelse(PctChange < -5, -5.1,
-                                      ifelse(PctChange > 5, 5.1, PctChange))) %>%
-  select(PctChange) %>%
-  as.matrix() %>%
-  as.vector() %>% 
-  hist(x = ., breaks = (-11:11)/2, main = NA, xaxt = "n", xlab = "Daily Percent Change",
-       col = c(colorRampPalette(c("red4", "red"), 0.5)(11), colorRampPalette(c("green", "green4"))(11)))
-axis(1, at = (-11:11)/2, labels = labelvec)
-box()
-
-```
-
-\newpage
-
-# Predictive Analysis: S&P 500
+## Overview of Methods
 
 ## Logistic Regression
 
@@ -970,238 +562,6 @@ kable(round(SPWeeklyTopATab, 3))
 kable(round(SPWeeklyTopPTab, 3))
 
 ```
-
-``` {r Figure19, fig.height = 8.3, warning = FALSE, message = FALSE, fig.cap = "\\label{fig:Figure19} ROC curves for the logistic regression models selected by maximising accuracy. Accuracy, positive predictive value (PPV), and area under the curve (AUC) are listed for each plot; the red dot represents model sensitivity and specificity."}
-
-par(mfrow = c(3, 2))
-
-for(i in c(1, 3, 4)){
-  
-  if(i == 1){j <- 1}
-  if(i == 3){j <- 2}
-  if(i == 4){j <- 3}
-  
-  glm.stats <- sapply(c("accuracy", "sensitivity", "specificity", "ppv"),
-                      FUN = logreg, formula = SPWeeklyLMod[[i]], dataTrain = SPWeeklyTrain)
-  glm.fit <- glm(SPWeeklyLMod[[i]], data = SPWeeklyTrain, family = "binomial")
-  glm.probs <- predict(glm.fit, SPWeeklyTrain, type = "response")
-  auc <- roc(SPWeeklyTrain$Direction, glm.probs, direction = "<")$auc
-  roc(SPWeeklyTrain$Direction, glm.probs, plot = TRUE, direction = "<", mar = c(4, 4, 1, 2) + 0.1)
-  text(x = rep(1.1, 3)[j], y = rep(0.98, 3)[j],
-       labels = c("Model 1: Train", "Model 3: Train", "Model 4: Train")[j], adj = 0)
-  text(x = rep(1.1, 3), y = c(0.9, 0.83, 0.76), labels = c("Acc:", "PPV:", "AUC:"), adj = 0)
-  text(x = rep(0.94, 3), y = c(0.9, 0.83, 0.76), labels = round(as.numeric(c(glm.stats[c(1, 4)], auc)), 4), adj = 0)
-  points(x = glm.stats[3], y = glm.stats[2], col = "red", pch = 16)
-  
-  glm.stats <- sapply(c("accuracy", "sensitivity", "specificity", "ppv"),
-                      FUN = logreg, formula = SPWeeklyLMod[[i]], dataTrain = SPWeeklyTest)
-  glm.fit <- glm(SPWeeklyLMod[[i]], data = SPWeeklyTest, family = "binomial")
-  glm.probs <- predict(glm.fit, SPWeeklyTest, type = "response")
-  auc <- roc(SPWeeklyTest$Direction, glm.probs, direction = "<")$auc
-  roc(SPWeeklyTest$Direction, glm.probs, plot = TRUE, direction = "<", mar = c(4, 4, 1, 2) + 0.1)
-  text(x = rep(1.1, 3)[j], y = rep(0.98, 3)[j],
-       labels = c("Model 1: Test", "Model 3: Test", "Model 4: Test")[j], adj = 0)
-  text(x = rep(1.1, 3), y = c(0.9, 0.83, 0.76), labels = c("Acc:", "PPV:", "AUC:"), adj = 0)
-  text(x = rep(0.94, 3), y = c(0.9, 0.83, 0.76), labels = round(as.numeric(c(glm.stats[c(1, 4)], auc)), 4), adj = 0)
-  points(x = glm.stats[3], y = glm.stats[2], col = "red", pch = 16)}
-
-```
-
-``` {r Figure20, fig.height = 8.3, warning = FALSE, message = FALSE, fig.cap = "\\label{fig:Figure20} ROC curves for the logistic regression models selected by maximising PPV. Accuracy, positive predictive value (PPV), and area under the curve (AUC) are listed for each plot; the red dot represents model sensitivity and specificity."}
-
-par(mfrow = c(3, 2))
-
-for(i in c(2, 5, 6)){
-  
-  if(i == 2){j <- 1}
-  if(i == 5){j <- 2}
-  if(i == 6){j <- 3}
-  
-  glm.stats <- sapply(c("accuracy", "sensitivity", "specificity", "ppv"),
-                      FUN = logreg, formula = SPWeeklyLMod[[i]], dataTrain = SPWeeklyTrain)
-  glm.fit <- glm(SPWeeklyLMod[[i]], data = SPWeeklyTrain, family = "binomial")
-  glm.probs <- predict(glm.fit, SPWeeklyTrain, type = "response")
-  auc <- roc(SPWeeklyTrain$Direction, glm.probs, direction = "<")$auc
-  roc(SPWeeklyTrain$Direction, glm.probs, plot = TRUE, direction = "<", mar = c(4, 4, 1, 2) + 0.1)
-  text(x = rep(1.1, 3)[j], y = rep(0.98, 3)[j],
-       labels = c("Model 2: Train", "Model 5: Train", "Model 6: Train")[j], adj = 0)
-  text(x = rep(1.1, 3), y = c(0.9, 0.83, 0.76), labels = c("Acc:", "PPV:", "AUC:"), adj = 0)
-  text(x = rep(0.94, 3), y = c(0.9, 0.83, 0.76), labels = round(as.numeric(c(glm.stats[c(1, 4)], auc)), 4), adj = 0)
-  points(x = glm.stats[3], y = glm.stats[2], col = "red", pch = 16)
-  
-  glm.stats <- sapply(c("accuracy", "sensitivity", "specificity", "ppv"),
-                      FUN = logreg, formula = SPWeeklyLMod[[i]], dataTrain = SPWeeklyTest)
-  glm.fit <- glm(SPWeeklyLMod[[i]], data = SPWeeklyTest, family = "binomial")
-  glm.probs <- predict(glm.fit, SPWeeklyTest, type = "response")
-  auc <- roc(SPWeeklyTest$Direction, glm.probs, direction = "<")$auc
-  roc(SPWeeklyTest$Direction, glm.probs, plot = TRUE, direction = "<", mar = c(4, 4, 1, 2) + 0.1)
-  text(x = rep(1.1, 3)[j], y = rep(0.98, 3)[j],
-       labels = c("Model 2: Test", "Model 5: Test", "Model 6: Test")[j], adj = 0)
-  text(x = rep(1.1, 3), y = c(0.9, 0.83, 0.76), labels = c("Acc:", "PPV:", "AUC:"), adj = 0)
-  text(x = rep(0.94, 3), y = c(0.9, 0.83, 0.76), labels = round(as.numeric(c(glm.stats[c(1, 4)], auc)), 4), adj = 0)
-  points(x = glm.stats[3], y = glm.stats[2], col = "red", pch = 16)}
-
-```
-
-``` {r Figure21, fig.height = 8, warning = FALSE, fig.cap = "\\label{fig:Figure21} Standardised deviance residuals (left) and standardised Pearson residuals (right) for logistic regression models selected using accuracy. Solid red lines represent a loess fit to the residuals and should be approximately horizontal at zero; dotted red lines represent $\\pm$ 2 standard deviations on the residuals."}
-
-# Re-fit top models to get residuals
-SPWeeklyLModList <- lapply(SPWeeklyLMod, FUN = glm, data = SPWeeklyTrain, family = "binomial")
-
-# Generate residual plots
-par(mfrow = c(3, 2), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
-for(i in c(1, 3, 4)){
-  
-  # Offset numbers for indexing purposes
-  if(i == 1){j <- 1}
-  if(i == 3){j <- 2}
-  if(i == 4){j <- 3}
-  
-  # Calculate leverage and residuals
-  hvals <- influence(SPWeeklyLModList[[i]])$hat
-  SRDeviance <- rstandard(SPWeeklyLModList[[i]])
-  SRPearson <- residuals(SPWeeklyLModList[[i]], "pearson")/sqrt(1 - hvals)
-  
-  # Plot standardised deviance residuals
-  plot(predict(SPWeeklyLModList[[i]], type = "response"), SRDeviance, xlab = "Fitted Probability",
-       col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylim = c(-3, 3),
-       ylab = "Standardised Deviance Residuals", xlim = if(i == 4){c(0.3, 0.8)})
-  lines(lowess(predict(SPWeeklyLModList[[i]]), residuals(SPWeeklyLModList[[i]])), col = "red", lwd = 1.5)
-  abline(h = c(-2, 2), col = "red", lty = 3, lwd = 1.5)
-  text(x = c(0.294, 0.021, 0.29)[j], y = rep(2.85, 3)[j], labels = c("Model 1", "Model 3", "Model 4")[j], adj = 0)
-
-  # Plot standardised Pearson residuals
-  plot(predict(SPWeeklyLModList[[i]], type = "response"), SRPearson, xlab = "Fitted Probability",
-       col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylim = c(-3, 3),
-       ylab = "Pearson Deviance Residuals", xlim = if(i == 4){c(0.3, 0.8)})
-  lines(lowess(predict(SPWeeklyLModList[[i]]), residuals(SPWeeklyLModList[[i]], "pearson")), col = "red", lwd = 1.5)
-  abline(h = c(-2, 2), col = "red", lty = 3, lwd = 1.5)
-  text(x = c(0.294, 0.021, 0.29)[j], y = rep(2.85, 3)[j], labels = c("Model 1", "Model 3", "Model 4")[j], adj = 0)}
-
-```
-
-``` {r Figure22, fig.height = 8, warning = FALSE, fig.cap = "\\label{fig:Figure22} Standardised deviance residuals (left) and standardised Pearson residuals (right) for logistic regression models selected using PPV. Solid red lines represent a loess fit to the residuals and should be approximately horizontal at zero; dotted red lines represent $\\pm$ 2 standard deviations on the residuals."}
-
-# Re-fit top models to get residuals
-SPWeeklyLModList <- lapply(SPWeeklyLMod, FUN = glm, data = SPWeeklyTrain, family = "binomial")
-
-# Generate residual plots
-par(mfrow = c(3, 2), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
-for(i in c(2, 5, 6)){
-  
-  # Offset numbers for indexing purposes
-  if(i == 2){j <- 1}
-  if(i == 5){j <- 2}
-  if(i == 6){j <- 3}
-  
-  # Calculate leverage and residuals
-  hvals <- influence(SPWeeklyLModList[[i]])$hat
-  SRDeviance <- rstandard(SPWeeklyLModList[[i]])
-  SRPearson <- residuals(SPWeeklyLModList[[i]], "pearson")/sqrt(1 - hvals)
-  
-  # Plot standardised deviance residuals
-  plot(predict(SPWeeklyLModList[[i]], type = "response"), SRDeviance, xlab = "Fitted Probability",
-       col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylim = c(-3, 3),
-       ylab = "Standardised Deviance Residuals", xlim = if(i %in% c(2, 6)){
-                                                            if(i == 2){c(0.3, 0.8)} else {c(0.2, 1)}})
-  lines(lowess(predict(SPWeeklyLModList[[i]]), residuals(SPWeeklyLModList[[i]])), col = "red", lwd = 1.5)
-  abline(h = c(-2, 2), col = "red", lty = 3, lwd = 1.5)
-  text(x = c(0.293, 0.003, 0.19)[j], y = rep(2.85, 3)[j], labels = c("Model 2", "Model 5", "Model 6")[j], adj = 0)
-
-  # Plot standardised Pearson residuals
-  plot(predict(SPWeeklyLModList[[i]], type = "response"), SRPearson, xlab = "Fitted Probability",
-       col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylim = c(-3, 3),
-       ylab = "Pearson Deviance Residuals", xlim = if(i %in% c(2, 6)){
-                                                       if(i == 2){c(0.3, 0.8)} else {c(0.2, 1)}})
-  lines(lowess(predict(SPWeeklyLModList[[i]]), residuals(SPWeeklyLModList[[i]], "pearson")), col = "red", lwd = 1.5)
-  abline(h = c(-2, 2), col = "red", lty = 3, lwd = 1.5)
-  text(x = c(0.293, 0.003, 0.19)[j], y = rep(2.85, 3)[j], labels = c("Model 2", "Model 5", "Model 6")[j], adj = 0)}
-
-```
-
-``` {r Figure23, fig.height = 7.8, warning = FALSE, fig.cap = "\\label{fig:Figure23} Relative value of the S\\&P 500 from 2011-2021 (left) and percent change for weeks in 2011-2021 for which an increase was not predicted (right) based on logistic regression models fit to the 1986-2010 data; the three models here were selected using overall accuracy. The black line represents a buy-and-hold strategy, while the blue line represents a strategy of selling all assets before a predicted decrease and then purchasing them back the next time there is a predicted increase. The purple line represents a less risky strategy of only selling 35\\% of assets before a predicted decrease and then purchasing them back the next time there is a predicted increase."}
-
-# Generate plots
-par(mfrow = c(3, 2), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
-for(i in c(1, 3, 4)){
-  
-  # Offset numbers for indexing purposes
-  if(i == 1){j <- 1}
-  if(i == 3){j <- 2}
-  if(i == 4){j <- 3}
-  
-  # Plot returns
-  plot(returns.logreg(SPWeeklyLMod[[i]], data = SPWeeklyTest), type = "l", col = "blue", xaxt = "n",
-       xlab = "Year", ylab = "Proportion of Initial Value", ylim = c(0, 8))
-  axis(1, at = nrow(SPWeeklyTest)*(0:5)/5, labels = seq(2011, 2021, length.out = 6), cex.axis = 0.85)
-  lines(returns.logreg(SPWeeklyLMod[[i]], data = SPWeeklyTest, lrisk = TRUE), col = "purple")
-  lines(returns.logreg("none", data = SPWeeklyTest))
-  text(x = rep(-8, 3)[j], y = rep(7.8, 3)[j], labels = c("Model 1", "Model 3", "Model 4")[j], adj = 0)
-  
-  # Plot increases/decreases on weeks when mode predicts a decrease
-  glm.fit <- glm(SPWeeklyLMod[[i]], data = SPWeeklyTest, family = "binomial")
-  glm.probs <- predict(glm.fit, SPWeeklyTest, type = "response")
-  glm.pred <- rep("Down", length(glm.probs))
-  glm.pred[glm.probs >= 0.5] <- "Up"
-  plotdat <- data.frame(glm.pred, SPWeeklyTest$Direction, SPWeeklyTest$PctChange)
-  plotdat <- subset(plotdat, glm.pred == "Down")
-  plot(as.numeric(rownames(plotdat)), plotdat$SPWeeklyTest.PctChange, pch = 16, xaxt = "n",
-       xlim = c(0, nrow(SPWeeklyTest)), col = ifelse(plotdat$SPWeeklyTest.PctChange < 0, "red", "green"),
-       xlab = "Year", ylab = "Weekly Percent Change", ylim = c(-16, 16), cex.axis = 0.9)
-  axis(1, at = nrow(SPWeeklyTest)*(0:5)/5, labels = seq(2011, 2021, length.out = 6), cex.axis = 0.85)
-  abline(h = mean(plotdat$SPWeeklyTest.PctChange[plotdat$SPWeeklyTest.PctChange < 0]), lty = 2, col = "red")
-  abline(h = mean(plotdat$SPWeeklyTest.PctChange[plotdat$SPWeeklyTest.PctChange > 0]), lty = 2, col = "green")
-  text(x = rep(-8, 3)[j], y = rep(15, 3)[j], labels = c("Model 1", "Model 3", "Model 4")[j], adj = 0)
-  text(x = rep(110, 3)[j], y = rep(15, 3)[j], labels = as.numeric(table(plotdat$SPWeeklyTest.Direction)[1]),
-       col = "red", adj = 0)
-  text(x = rep(140, 3)[j], y = rep(15, 3)[j], labels = "/", adj = 0)
-  text(x = rep(150, 3)[j], y = rep(15, 3)[j], labels = as.numeric(table(plotdat$SPWeeklyTest.Direction)[2]),
-       col = "green", adj = 0)}
-
-```
-
-``` {r Figure24, fig.height = 7.8, warning = FALSE, fig.cap = "\\label{fig:Figure24} Relative value of the S\\&P 500 from 2011-2021 (left) and percent change for weeks in 2011-2021 for which an increase was not predicted (right) based on logistic regression models fit to the 1986-2010 data; the three models here were selected using PPV. The black line represents a buy-and-hold strategy, while the blue line represents a strategy of selling all assets before a predicted decrease and then purchasing them back the next time there is a predicted increase. The purple line represents a less risky strategy of only selling 35\\% of assets before a predicted decrease and then purchasing them back the next time there is a predicted increase."}
-
-# Generate plots
-par(mfrow = c(3, 2), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
-for(i in c(2, 5, 6)){
-  
-  # Offset numbers for indexing purposes
-  if(i == 2){j <- 1}
-  if(i == 5){j <- 2}
-  if(i == 6){j <- 3}
-  
-  # Plot returns
-  plot(returns.logreg(SPWeeklyLMod[[i]], data = SPWeeklyTest), type = "l", col = "blue", xaxt = "n",
-       xlab = "Year", ylab = "Proportion of Initial Value", ylim = c(0, 8))
-  axis(1, at = nrow(SPWeeklyTest)*(0:5)/5, labels = seq(2011, 2021, length.out = 6), cex.axis = 0.85)
-  lines(returns.logreg(SPWeeklyLMod[[i]], data = SPWeeklyTest, lrisk = TRUE), col = "purple")
-  lines(returns.logreg("none", data = SPWeeklyTest))
-  text(x = rep(-8, 3)[j], y = rep(7.8, 3)[j], labels = c("Model 2", "Model 5", "Model 6")[j], adj = 0)
-  
-  # Plot increases/decreases on weeks when mode predicts a decrease
-  glm.fit <- glm(SPWeeklyLMod[[i]], data = SPWeeklyTest, family = "binomial")
-  glm.probs <- predict(glm.fit, SPWeeklyTest, type = "response")
-  glm.pred <- rep("Down", length(glm.probs))
-  glm.pred[glm.probs >= 0.5] <- "Up"
-  plotdat <- data.frame(glm.pred, SPWeeklyTest$Direction, SPWeeklyTest$PctChange)
-  plotdat <- subset(plotdat, glm.pred == "Down")
-  plot(as.numeric(rownames(plotdat)), plotdat$SPWeeklyTest.PctChange, pch = 16, xaxt = "n",
-       xlim = c(0, nrow(SPWeeklyTest)), col = ifelse(plotdat$SPWeeklyTest.PctChange < 0, "red", "green"),
-       xlab = "Year", ylab = "Weekly Percent Change", ylim = c(-16, 16), cex.axis = 0.9)
-  axis(1, at = nrow(SPWeeklyTest)*(0:5)/5, labels = seq(2011, 2021, length.out = 6), cex.axis = 0.85)
-  abline(h = mean(plotdat$SPWeeklyTest.PctChange[plotdat$SPWeeklyTest.PctChange < 0]), lty = 2, col = "red")
-  abline(h = mean(plotdat$SPWeeklyTest.PctChange[plotdat$SPWeeklyTest.PctChange > 0]), lty = 2, col = "green")
-  text(x = rep(-8, 3)[j], y = rep(15, 3)[j], labels = c("Model 2", "Model 5", "Model 6")[j], adj = 0)
-  text(x = rep(110, 3)[j], y = rep(15, 3)[j], labels = as.numeric(table(plotdat$SPWeeklyTest.Direction)[1]),
-       col = "red", adj = 0)
-  text(x = rep(140, 3)[j], y = rep(15, 3)[j], labels = "/", adj = 0)
-  text(x = rep(150, 3)[j], y = rep(15, 3)[j], labels = as.numeric(table(plotdat$SPWeeklyTest.Direction)[2]),
-       col = "green", adj = 0)}
-
-```
-
-\newpage
 
 ## Discriminant Analysis
 
@@ -1632,6 +992,716 @@ for(i in c(2, 4, 7, 8, 11, 12)){
 
 ```
 
+\newpage
+
+## Support Vector Machines
+
+## Decision Trees
+
+## Advanced Methods
+
+## Additional Trading Strategies
+
+# Conclusions
+
+# References
+
+# Figures
+
+\newpage
+
+``` {r Figure1, fig.height = 8, fig.cap = "\\label{fig:Figure1} Correlations bewteen volume, percent change, and the various lag variables for the weekly (top) and daily (bottom) data on the S\\&P 500. The area of squares below the diagonal are proportional to the absolute value of the corresponding correlation coefficients."}
+
+# Plots of correlations between variables: weekly data
+par(mfrow = c(2, 1), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
+SPWeekly %>% mutate(Direction = ifelse(Direction == "Up", 1, 0)) %>% cor() %>% 
+corrplot(method = "square", type = "lower", win.asp = 0.7, tl.cex = 0.7,
+         tl.pos = "tp", tl.col = "black")
+SPWeekly %>% mutate(Direction = ifelse(Direction == "Up", 1, 0)) %>% cor() %>% 
+corrplot(add = TRUE, method = "number", type = "upper", 
+         number.cex = 0.5, col = "black", tl.pos = "n", cl.pos = "n")
+
+# Plots of correlations between variables: daily data
+par(mar = c(5, 4, 0, 2) + 0.1)
+SPDaily %>% mutate(Direction = ifelse(Direction == "Up", 1, 0)) %>% cor() %>% 
+corrplot(method = "square", type = "lower", win.asp = 0.7, tl.cex = 0.7,
+         tl.pos = "tp", tl.col = "black")
+SPDaily %>% mutate(Direction = ifelse(Direction == "Up", 1, 0)) %>% cor() %>% 
+corrplot(add = TRUE, method = "number", type = "upper", 
+         number.cex = 0.5, col = "black", tl.pos = "n", cl.pos = "n")
+
+```
+
+\newpage
+
+``` {r Figure2, fig.height = 8, fig.cap = "\\label{fig:Figure2} Correlations bewteen volume, percent change, and the various lag variables for the weekly (top) and daily (bottom) data on the NASDAQ Composite. The area of squares below the diagonal are proportional to the absolute value of the corresponding correlation coefficients."}
+
+# Plots of correlations between variables: weekly data
+par(mfrow = c(2, 1), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
+NDWeekly %>% mutate(Direction = ifelse(Direction == "Up", 1, 0)) %>% cor() %>% 
+corrplot(method = "square", type = "lower", win.asp = 0.7, tl.cex = 0.7,
+         tl.pos = "tp", tl.col = "black")
+NDWeekly %>% mutate(Direction = ifelse(Direction == "Up", 1, 0)) %>% cor() %>% 
+corrplot(add = TRUE, method = "number", type = "upper", 
+         number.cex = 0.5, col = "black", tl.pos = "n", cl.pos = "n")
+
+# Plots of correlations between variables: daily data
+par(mar = c(5, 4, 0, 2) + 0.1)
+NDDaily %>% mutate(Direction = ifelse(Direction == "Up", 1, 0)) %>% cor() %>% 
+corrplot(method = "square", type = "lower", win.asp = 0.7, tl.cex = 0.7,
+         tl.pos = "tp", tl.col = "black")
+NDDaily %>% mutate(Direction = ifelse(Direction == "Up", 1, 0)) %>% cor() %>% 
+corrplot(add = TRUE, method = "number", type = "upper", 
+         number.cex = 0.5, col = "black", tl.pos = "n", cl.pos = "n")
+
+```
+
+\newpage
+
+``` {r Figure3, fig.height = 8, fig.cap = "\\label{fig:Figure3} Correlations bewteen volume, percent change, and the various lag variables for the weekly (top) and daily (bottom) data on the Dow Jones Industrial Average. The area of squares below the diagonal are proportional to the absolute value of the corresponding correlation coefficients."}
+
+# Plots of correlations between variables: weekly data
+par(mfrow = c(2, 1), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
+DJWeekly %>% mutate(Direction = ifelse(Direction == "Up", 1, 0)) %>% cor() %>% 
+corrplot(method = "square", type = "lower", win.asp = 0.7, tl.cex = 0.7,
+         tl.pos = "tp", tl.col = "black")
+DJWeekly %>% mutate(Direction = ifelse(Direction == "Up", 1, 0)) %>% cor() %>% 
+corrplot(add = TRUE, method = "number", type = "upper", 
+         number.cex = 0.5, col = "black", tl.pos = "n", cl.pos = "n")
+
+# Plots of correlations between variables: daily data
+par(mar = c(5, 4, 0, 2) + 0.1)
+DJDaily %>% mutate(Direction = ifelse(Direction == "Up", 1, 0)) %>% cor() %>% 
+corrplot(method = "square", type = "lower", win.asp = 0.7, tl.cex = 0.7,
+         tl.pos = "tp", tl.col = "black")
+DJDaily %>% mutate(Direction = ifelse(Direction == "Up", 1, 0)) %>% cor() %>% 
+corrplot(add = TRUE, method = "number", type = "upper", 
+         number.cex = 0.5, col = "black", tl.pos = "n", cl.pos = "n")
+
+```
+
+\newpage
+
+``` {r Figure4, fig.height = 8, fig.cap = "\\label{fig:Figure4} Plots of S\\&P 500 weekly percent change against percent change of up to 5 weeks prior. Autocorrelation in daily percent change corresponding to 1-5 day lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
+
+# Plot percent change for given week against percent change up to five weeks ago
+# Also plot autocorrelation in percent change
+par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
+plot(SPWeekly$PctChange, SPWeekly$Lag1, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (1-Week Lag)")
+plot(SPWeekly$PctChange, SPWeekly$Lag2, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (2-Week Lag)")
+plot(SPWeekly$PctChange, SPWeekly$Lag3, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (3-Week Lag)")
+plot(SPWeekly$PctChange, SPWeekly$Lag4, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (4-Week Lag)")
+plot(SPWeekly$PctChange, SPWeekly$Lag5, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (5-Week Lag)")
+acf(SPWeekly$PctChange, lag.max = 5, lwd = 4, main = NA, xlab = "Lag (Weeks)",
+    ylab = "Autocorrelation")
+par(mfrow = c(1, 1))
+
+```
+
+\newpage
+
+``` {r Figure5, fig.height = 8, fig.cap = "\\label{fig:Figure5} Plots of S\\&P 500 daily percent change against percent change of up to 5 days prior. Autocorrelation in daily percent change corresponding to 1-5 day lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
+
+# Plot percent change for given day against percent change up to five days ago
+# Also plot autocorrelation in percent change
+par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
+plot(SPDaily$PctChange, SPDaily$Lag1, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (1-Day Lag)")
+plot(SPDaily$PctChange, SPDaily$Lag2, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (2-Day Lag)")
+plot(SPDaily$PctChange, SPDaily$Lag3, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (3-Day Lag)")
+plot(SPDaily$PctChange, SPDaily$Lag4, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (4-Day Lag)")
+plot(SPDaily$PctChange, SPDaily$Lag5, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (5-Day Lag)")
+acf(SPDaily$PctChange, lag.max = 5, lwd = 4, main = NA, xlab = "Lag (Weeks)",
+    ylab = "Autocorrelation")
+par(mfrow = c(1, 1))
+
+```
+
+\newpage
+
+``` {r Figure6, fig.height = 8, fig.cap = "\\label{fig:Figure6} Plots of S\\&P 500 weekly volume against volume of up to 5 weeks prior. Autocorrelation in volume corresponding to 1-5 week lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
+
+# Plot volume for given week against volume up to five weeks ago
+# Also plot autocorrelation in volume
+par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
+plot(SPWeekly$BVolume, SPWeekly$VLag1, xlim = c(0, 40), xlab = "Volume", ylim = c(0, 40),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (1-Week Lag)")
+plot(SPWeekly$BVolume, SPWeekly$VLag2, xlim = c(0, 40), xlab = "Volume", ylim = c(0, 40),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (2-Week Lag)")
+plot(SPWeekly$BVolume, SPWeekly$VLag3, xlim = c(0, 40), xlab = "Volume", ylim = c(0, 40),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (3-Week Lag)")
+plot(SPWeekly$BVolume, SPWeekly$VLag4, xlim = c(0, 40), xlab = "Volume", ylim = c(0, 40),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (4-Week Lag)")
+plot(SPWeekly$BVolume, SPWeekly$VLag5, xlim = c(0, 40), xlab = "Volume", ylim = c(0, 40),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (5-Week Lag)")
+acf(SPWeekly$BVolume, lag.max = 5, lwd = 4, main = NA, xlab = "Lag (Weeks)",
+    ylab = "Autocorrelation")
+par(mfrow = c(1, 1))
+
+```
+
+\newpage
+
+``` {r Figure7, fig.height = 8, fig.cap = "\\label{fig:Figure7} Plots of S\\&P 500 daily volume against volume of up to 5 days prior. Autocorrelation in volume corresponding to 1-5 day lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
+
+# Plot volume for given day against volume up to five days ago
+# Also plot autocorrelation in volume
+par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
+plot(SPDaily$BVolume, SPDaily$VLag1, xlim = c(0, 12), xlab = "Volume", ylim = c(0, 12),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (1-Day Lag)")
+plot(SPDaily$BVolume, SPDaily$VLag2, xlim = c(0, 12), xlab = "Volume", ylim = c(0, 12),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (2-Day Lag)")
+plot(SPDaily$BVolume, SPDaily$VLag3, xlim = c(0, 12), xlab = "Volume", ylim = c(0, 12),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (3-Day Lag)")
+plot(SPDaily$BVolume, SPDaily$VLag4, xlim = c(0, 12), xlab = "Volume", ylim = c(0, 12),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (4-Day Lag)")
+plot(SPDaily$BVolume, SPDaily$VLag5, xlim = c(0, 12), xlab = "Volume", ylim = c(0, 12),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (5-Day Lag)")
+acf(SPDaily$BVolume, lag.max = 5, lwd = 4, main = NA, xlab = "Lag (Weeks)",
+    ylab = "Autocorrelation")
+par(mfrow = c(1, 1))
+
+```
+
+\newpage
+
+``` {r Figure8, fig.height = 8, fig.cap = "\\label{fig:Figure8} Plots of NASDAQ Composite weekly percent change against percent change of up to 5 weeks prior. Autocorrelation in weekly percent change corresponding to 1-5 week lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
+
+# Plot percent change for given week against percent change up to five weeks ago
+# Also plot autocorrelation in percent change
+par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
+plot(NDWeekly$PctChange, NDWeekly$Lag1, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (1-Week Lag)")
+plot(NDWeekly$PctChange, NDWeekly$Lag2, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (2-Week Lag)")
+plot(NDWeekly$PctChange, NDWeekly$Lag3, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (3-Week Lag)")
+plot(NDWeekly$PctChange, NDWeekly$Lag4, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (4-Week Lag)")
+plot(NDWeekly$PctChange, NDWeekly$Lag5, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (5-Week Lag)")
+acf(NDWeekly$PctChange, lag.max = 5, lwd = 4, main = NA, xlab = "Lag (Weeks)",
+    ylab = "Autocorrelation")
+par(mfrow = c(1, 1))
+
+```
+
+\newpage
+
+``` {r Figure9, fig.height = 8, fig.cap = "\\label{fig:Figure9} Plots of NASDAQ Composite daily percent change against percent change of up to 5 days prior. Autocorrelation in daily percent change corresponding to 1-5 day lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
+
+# Plot percent change for given day against percent change up to five days ago
+# Also plot autocorrelation in percent change
+par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
+plot(NDDaily$PctChange, NDDaily$Lag1, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (1-Day Lag)")
+plot(NDDaily$PctChange, NDDaily$Lag2, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (2-Day Lag)")
+plot(NDDaily$PctChange, NDDaily$Lag3, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (3-Day Lag)")
+plot(NDDaily$PctChange, NDDaily$Lag4, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (4-Day Lag)")
+plot(NDDaily$PctChange, NDDaily$Lag5, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (5-Day Lag)")
+acf(NDDaily$PctChange, lag.max = 5, lwd = 4, main = NA, xlab = "Lag (Weeks)",
+    ylab = "Autocorrelation")
+par(mfrow = c(1, 1))
+
+```
+
+\newpage
+
+``` {r Figure10, fig.height = 8, fig.cap = "\\label{fig:Figure10} Plots of NASDAQ Composite weekly volume against volume of up to 5 weeks prior. Autocorrelation in volume corresponding to 1-5 week lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
+
+# Plot volume for given week against volume up to five weeks ago
+# Also plot autocorrelation in volume
+par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
+plot(NDWeekly$BVolume, NDWeekly$VLag1, xlim = c(0, 28), xlab = "Volume", ylim = c(0, 28),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (1-Week Lag)")
+plot(NDWeekly$BVolume, NDWeekly$VLag2, xlim = c(0, 28), xlab = "Volume", ylim = c(0, 28),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (2-Week Lag)")
+plot(NDWeekly$BVolume, NDWeekly$VLag3, xlim = c(0, 28), xlab = "Volume", ylim = c(0, 28),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (3-Week Lag)")
+plot(NDWeekly$BVolume, NDWeekly$VLag4, xlim = c(0, 28), xlab = "Volume", ylim = c(0, 28),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (4-Week Lag)")
+plot(NDWeekly$BVolume, NDWeekly$VLag5, xlim = c(0, 28), xlab = "Volume", ylim = c(0, 28),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (5-Week Lag)")
+acf(NDWeekly$BVolume, lag.max = 5, lwd = 4, main = NA, xlab = "Lag (Weeks)",
+    ylab = "Autocorrelation")
+par(mfrow = c(1, 1))
+
+```
+
+\newpage
+
+``` {r Figure11, fig.height = 8, fig.cap = "\\label{fig:Figure11} Plots of NASDAQ Composite daily volume against volume of up to 5 days prior. Autocorrelation in volume corresponding to 1-5 day lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
+
+# Plot volume for given day against volume up to five days ago
+# Also plot autocorrelation in volume
+par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
+plot(NDDaily$BVolume, NDDaily$VLag1, xlim = c(0, 8), xlab = "Volume", ylim = c(0, 8),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (1-Day Lag)")
+plot(NDDaily$BVolume, NDDaily$VLag2, xlim = c(0, 8), xlab = "Volume", ylim = c(0, 8),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (2-Day Lag)")
+plot(NDDaily$BVolume, NDDaily$VLag3, xlim = c(0, 8), xlab = "Volume", ylim = c(0, 8),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (3-Day Lag)")
+plot(NDDaily$BVolume, NDDaily$VLag4, xlim = c(0, 8), xlab = "Volume", ylim = c(0, 8),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (4-Day Lag)")
+plot(NDDaily$BVolume, NDDaily$VLag5, xlim = c(0, 8), xlab = "Volume", ylim = c(0, 8),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (5-Day Lag)")
+acf(NDDaily$BVolume, lag.max = 5, lwd = 4, main = NA, xlab = "Lag (Weeks)",
+    ylab = "Autocorrelation")
+par(mfrow = c(1, 1))
+
+```
+
+\newpage
+
+``` {r Figure12, fig.height = 8, fig.cap = "\\label{fig:Figure12} Plots of Dow Jones Industrial Average weekly percent change against percent change of up to 5 weeks prior. Autocorrelation in weekly percent change corresponding to 1-5 week lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
+
+# Plot percent change for given week against percent change up to five weeks ago
+# Also plot autocorrelation in percent change
+par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
+plot(DJWeekly$PctChange, DJWeekly$Lag1, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (1-Week Lag)")
+plot(DJWeekly$PctChange, DJWeekly$Lag2, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (2-Week Lag)")
+plot(DJWeekly$PctChange, DJWeekly$Lag3, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (3-Week Lag)")
+plot(DJWeekly$PctChange, DJWeekly$Lag4, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (4-Week Lag)")
+plot(DJWeekly$PctChange, DJWeekly$Lag5, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (5-Week Lag)")
+acf(DJWeekly$PctChange, lag.max = 5, lwd = 4, main = NA, xlab = "Lag (Weeks)",
+    ylab = "Autocorrelation")
+par(mfrow = c(1, 1))
+
+```
+
+\newpage
+
+``` {r Figure13, fig.height = 8, fig.cap = "\\label{fig:Figure13} Plots of Dow Jones Industrial Average daily percent change against percent change of up to 5 days prior. Autocorrelation in daily percent change corresponding to 1-5 day lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
+
+# Plot percent change for given day against percent change up to five days ago
+# Also plot autocorrelation in percent change
+par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
+plot(DJDaily$PctChange, DJDaily$Lag1, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (1-Day Lag)")
+plot(DJDaily$PctChange, DJDaily$Lag2, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (2-Day Lag)")
+plot(DJDaily$PctChange, DJDaily$Lag3, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (3-Day Lag)")
+plot(DJDaily$PctChange, DJDaily$Lag4, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (4-Day Lag)")
+plot(DJDaily$PctChange, DJDaily$Lag5, xlim = c(-20, 20), xlab = "Percent Change", ylim = c(-20, 20),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Percent Change (5-Day Lag)")
+acf(DJDaily$PctChange, lag.max = 5, lwd = 4, main = NA, xlab = "Lag (Weeks)",
+    ylab = "Autocorrelation")
+par(mfrow = c(1, 1))
+
+```
+
+\newpage
+
+``` {r Figure14, fig.height = 8, fig.cap = "\\label{fig:Figure14} Plots of Dow Jones Industrial Average weekly volume against volume of up to 5 weeks prior. Autocorrelation in volume corresponding to 1-5 week lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
+
+# Plot volume for given week against volume up to five weeks ago
+# Also plot autocorrelation in volume
+par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
+plot(DJWeekly$BVolume, DJWeekly$VLag1, xlim = c(0, 0.04), xlab = "Volume", ylim = c(0, 0.04),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (1-Week Lag)")
+plot(DJWeekly$BVolume, DJWeekly$VLag2, xlim = c(0, 0.04), xlab = "Volume", ylim = c(0, 0.04),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (2-Week Lag)")
+plot(DJWeekly$BVolume, DJWeekly$VLag3, xlim = c(0, 0.04), xlab = "Volume", ylim = c(0, 0.04),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (3-Week Lag)")
+plot(DJWeekly$BVolume, DJWeekly$VLag4, xlim = c(0, 0.04), xlab = "Volume", ylim = c(0, 0.04),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (4-Week Lag)")
+plot(DJWeekly$BVolume, DJWeekly$VLag5, xlim = c(0, 0.04), xlab = "Volume", ylim = c(0, 0.04),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (5-Week Lag)")
+acf(DJWeekly$BVolume, lag.max = 5, lwd = 4, main = NA, xlab = "Lag (Weeks)",
+    ylab = "Autocorrelation")
+par(mfrow = c(1, 1))
+
+```
+
+\newpage
+
+``` {r Figure15, fig.height = 8, fig.cap = "\\label{fig:Figure15} Plots of Dow Jones Industrial Average daily volume against volume of up to 5 days prior. Autocorrelation in volume corresponding to 1-5 day lag times is shown in the bottom-right panel; dashed blue lines represent the 95\\% confidence interval for the autocorrelation."}
+
+# Plot volume for given day against volume up to five days ago
+# Also plot autocorrelation in volume
+par(mfrow = c(3, 2), mar = c(4, 4, 2, 2) + 0.1)
+plot(DJDaily$BVolume, DJDaily$VLag1, xlim = c(0, 0.008), xlab = "Volume", ylim = c(0, 0.008),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (1-Day Lag)")
+plot(DJDaily$BVolume, DJDaily$VLag2, xlim = c(0, 0.008), xlab = "Volume", ylim = c(0, 0.008),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (2-Day Lag)")
+plot(DJDaily$BVolume, DJDaily$VLag3, xlim = c(0, 0.008), xlab = "Volume", ylim = c(0, 0.008),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (3-Day Lag)")
+plot(DJDaily$BVolume, DJDaily$VLag4, xlim = c(0, 0.008), xlab = "Volume", ylim = c(0, 0.008),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (4-Day Lag)")
+plot(DJDaily$BVolume, DJDaily$VLag5, xlim = c(0, 0.008), xlab = "Volume", ylim = c(0, 0.008),
+     col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylab = "Volume (5-Day Lag)")
+acf(DJDaily$BVolume, lag.max = 5, lwd = 4, main = NA, xlab = "Lag (Weeks)",
+    ylab = "Autocorrelation")
+par(mfrow = c(1, 1))
+
+```
+
+\newpage
+
+``` {r Figure16, fig.height = 7.9, fig.cap = "\\label{fig:Figure16} Relative value of the S\\&P 500 over time compared to its 1986 value (top) and distribution of daily percent changes (bottom). Note that in the bottom panel, the leftmost bin represents all days with a percent change less than -5, and rightmost bin represents all days with a percent change greater than 5. Note that the top chart does not account for after-hours gains or losses."}
+
+# Plot value of S&P 500 over time relative to a 1986 baseline
+# Check this chart for accuracy, as it doesn't quite match up with the YF chart
+# Discrepancies possibly due to after-hours trading?
+par(mfrow = c(2, 1), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
+colourList <- replace(rep("green", nrow(SPWeekly)), which(SPWeekly$PctChange < 0), "red")
+barplot(abs(SPWeekly$PctChange), col = colourList, border = colourList, ylim = c(0, 50), axes = FALSE)
+par(new = TRUE)
+totalReturn <- c()
+for(i in 1:nrow(SPWeekly)){
+  totalReturn <- c(totalReturn, prod((SPWeekly$PctChange[1:i]/100)+1))}
+plot(1:nrow(SPWeekly), totalReturn, type = "l", ylim = c(0, 20), xaxt = "n", 
+     xlab = NA, ylab = "Proportion of Initial Value")
+axis(1, at = nrow(SPWeekly)*(0:7)/7, labels = seq(1986, 2021, length.out = 8))
+title(xlab = "Year")
+
+# Plot frequency of daily percent changes
+labelvec <- (-11:11)/2
+labelvec[labelvec %% 1 == 0.5] <- NA;
+SPDaily %>% mutate(PctChange = ifelse(PctChange < -5, -5.1,
+                                      ifelse(PctChange > 5, 5.1, PctChange))) %>%
+  select(PctChange) %>%
+  as.matrix() %>%
+  as.vector() %>% 
+  hist(x = ., breaks = (-11:11)/2, main = NA, xaxt = "n", xlab = "Daily Percent Change",
+       col = c(colorRampPalette(c("red4", "red"), 0.5)(11), colorRampPalette(c("green", "green4"))(11)))
+axis(1, at = (-11:11)/2, labels = labelvec)
+box()
+
+```
+
+\newpage
+
+``` {r Figure17, fig.height = 7.9, fig.cap = "\\label{fig:Figure17} Relative value of the NASDAQ Composite over time compared to its 1986 value (top) and distribution of daily percent changes (bottom). Note that in the bottom panel, the leftmost bin represents all days with a percent change less than -5, and rightmost bin represents all days with a percent change greater than 5. Note that the top chart does not account for after-hours gains or losses."}
+
+# Plot value of NASDAQ over time relative to a 1986 baseline
+# Check this chart for accuracy, as it doesn't quite match up with the YF chart
+# Discrepancies possibly due to after-hours trading?
+par(mfrow = c(2, 1), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
+colourList <- replace(rep("green", nrow(NDWeekly)), which(NDWeekly$PctChange < 0), "red")
+barplot(abs(NDWeekly$PctChange), col = colourList, border = colourList, ylim = c(0, 50), axes = FALSE)
+par(new = TRUE)
+totalReturn <- c()
+for(i in 1:nrow(NDWeekly)){
+  totalReturn <- c(totalReturn, prod((NDWeekly$PctChange[1:i]/100)+1))}
+plot(1:nrow(NDWeekly), totalReturn, type = "l", ylim = c(0, 12), xaxt = "n", 
+     xlab = NA, ylab = "Proportion of Initial Value")
+axis(1, at = nrow(NDWeekly)*(0:7)/7, labels = seq(1986, 2021, length.out = 8))
+title(xlab = "Year")
+
+# Plot frequency of daily percent changes
+labelvec <- (-11:11)/2
+labelvec[labelvec %% 1 == 0.5] <- NA;
+NDDaily %>% mutate(PctChange = ifelse(PctChange < -5, -5.1,
+                                      ifelse(PctChange > 5, 5.1, PctChange))) %>%
+  select(PctChange) %>%
+  as.matrix() %>%
+  as.vector() %>% 
+  hist(x = ., breaks = (-11:11)/2, main = NA, xaxt = "n", xlab = "Daily Percent Change",
+       col = c(colorRampPalette(c("red4", "red"), 0.5)(11), colorRampPalette(c("green", "green4"))(11)))
+axis(1, at = (-11:11)/2, labels = labelvec)
+box()
+
+```
+
+\newpage
+
+``` {r Figure18, fig.height = 7.9, fig.cap = "\\label{fig:Figure18} Relative value of the Dow Jones Industrial Average over time compared to its 1992 value (top) and distribution of daily percent changes (bottom). Note that in the bottom panel, the leftmost bin represents all days with a percent change less than -5, and rightmost bin represents all days with a percent change greater than 5. Note that the top chart does not account for after-hours gains or losses."}
+
+# Plot value of Dow Jones over time relative to a 1986 baseline
+# Check this chart for accuracy, as it doesn't quite match up with the YF chart
+# Discrepancies possibly due to after-hours trading?
+par(mfrow = c(2, 1), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
+colourList <- replace(rep("green", nrow(DJWeekly)), which(DJWeekly$PctChange < 0), "red")
+barplot(abs(c(rep(0, 316), DJWeekly$PctChange)), col = colourList, border = colourList, ylim = c(0, 50), axes = FALSE)
+par(new = TRUE)
+totalReturn <- c()
+for(i in 1:nrow(DJWeekly)){
+  totalReturn <- c(totalReturn, prod((DJWeekly$PctChange[1:i]/100)+1))}
+plot((nrow(SPWeekly) - nrow(DJWeekly) + 1):nrow(SPWeekly), totalReturn, type = "l", xlim = c(0, 1825), ylim = c(0, 12), xaxt = "n", 
+     xlab = NA, ylab = "Proportion of Initial Value")
+axis(1, at = nrow(SPWeekly)*(0:7)/7, labels = seq(1986, 2021, length.out = 8))
+title(xlab = "Year")
+
+# Plot frequency of daily percent changes
+labelvec <- (-11:11)/2
+labelvec[labelvec %% 1 == 0.5] <- NA;
+DJDaily %>% mutate(PctChange = ifelse(PctChange < -5, -5.1,
+                                      ifelse(PctChange > 5, 5.1, PctChange))) %>%
+  select(PctChange) %>%
+  as.matrix() %>%
+  as.vector() %>% 
+  hist(x = ., breaks = (-11:11)/2, main = NA, xaxt = "n", xlab = "Daily Percent Change",
+       col = c(colorRampPalette(c("red4", "red"), 0.5)(11), colorRampPalette(c("green", "green4"))(11)))
+axis(1, at = (-11:11)/2, labels = labelvec)
+box()
+
+```
+
+\newpage
+
+``` {r Figure19, fig.height = 8.3, warning = FALSE, message = FALSE, fig.cap = "\\label{fig:Figure19} ROC curves for the logistic regression models selected by maximising accuracy. Accuracy, positive predictive value (PPV), and area under the curve (AUC) are listed for each plot; the red dot represents model sensitivity and specificity."}
+
+par(mfrow = c(3, 2))
+
+for(i in c(1, 3, 4)){
+  
+  if(i == 1){j <- 1}
+  if(i == 3){j <- 2}
+  if(i == 4){j <- 3}
+  
+  glm.stats <- sapply(c("accuracy", "sensitivity", "specificity", "ppv"),
+                      FUN = logreg, formula = SPWeeklyLMod[[i]], dataTrain = SPWeeklyTrain)
+  glm.fit <- glm(SPWeeklyLMod[[i]], data = SPWeeklyTrain, family = "binomial")
+  glm.probs <- predict(glm.fit, SPWeeklyTrain, type = "response")
+  auc <- roc(SPWeeklyTrain$Direction, glm.probs, direction = "<")$auc
+  roc(SPWeeklyTrain$Direction, glm.probs, plot = TRUE, direction = "<", mar = c(4, 4, 1, 2) + 0.1)
+  text(x = rep(1.1, 3)[j], y = rep(0.98, 3)[j],
+       labels = c("Model 1: Train", "Model 3: Train", "Model 4: Train")[j], adj = 0)
+  text(x = rep(1.1, 3), y = c(0.9, 0.83, 0.76), labels = c("Acc:", "PPV:", "AUC:"), adj = 0)
+  text(x = rep(0.94, 3), y = c(0.9, 0.83, 0.76), labels = round(as.numeric(c(glm.stats[c(1, 4)], auc)), 4), adj = 0)
+  points(x = glm.stats[3], y = glm.stats[2], col = "red", pch = 16)
+  
+  glm.stats <- sapply(c("accuracy", "sensitivity", "specificity", "ppv"),
+                      FUN = logreg, formula = SPWeeklyLMod[[i]], dataTrain = SPWeeklyTest)
+  glm.fit <- glm(SPWeeklyLMod[[i]], data = SPWeeklyTest, family = "binomial")
+  glm.probs <- predict(glm.fit, SPWeeklyTest, type = "response")
+  auc <- roc(SPWeeklyTest$Direction, glm.probs, direction = "<")$auc
+  roc(SPWeeklyTest$Direction, glm.probs, plot = TRUE, direction = "<", mar = c(4, 4, 1, 2) + 0.1)
+  text(x = rep(1.1, 3)[j], y = rep(0.98, 3)[j],
+       labels = c("Model 1: Test", "Model 3: Test", "Model 4: Test")[j], adj = 0)
+  text(x = rep(1.1, 3), y = c(0.9, 0.83, 0.76), labels = c("Acc:", "PPV:", "AUC:"), adj = 0)
+  text(x = rep(0.94, 3), y = c(0.9, 0.83, 0.76), labels = round(as.numeric(c(glm.stats[c(1, 4)], auc)), 4), adj = 0)
+  points(x = glm.stats[3], y = glm.stats[2], col = "red", pch = 16)}
+
+```
+
+\newpage
+
+``` {r Figure20, fig.height = 8.3, warning = FALSE, message = FALSE, fig.cap = "\\label{fig:Figure20} ROC curves for the logistic regression models selected by maximising PPV. Accuracy, positive predictive value (PPV), and area under the curve (AUC) are listed for each plot; the red dot represents model sensitivity and specificity."}
+
+par(mfrow = c(3, 2))
+
+for(i in c(2, 5, 6)){
+  
+  if(i == 2){j <- 1}
+  if(i == 5){j <- 2}
+  if(i == 6){j <- 3}
+  
+  glm.stats <- sapply(c("accuracy", "sensitivity", "specificity", "ppv"),
+                      FUN = logreg, formula = SPWeeklyLMod[[i]], dataTrain = SPWeeklyTrain)
+  glm.fit <- glm(SPWeeklyLMod[[i]], data = SPWeeklyTrain, family = "binomial")
+  glm.probs <- predict(glm.fit, SPWeeklyTrain, type = "response")
+  auc <- roc(SPWeeklyTrain$Direction, glm.probs, direction = "<")$auc
+  roc(SPWeeklyTrain$Direction, glm.probs, plot = TRUE, direction = "<", mar = c(4, 4, 1, 2) + 0.1)
+  text(x = rep(1.1, 3)[j], y = rep(0.98, 3)[j],
+       labels = c("Model 2: Train", "Model 5: Train", "Model 6: Train")[j], adj = 0)
+  text(x = rep(1.1, 3), y = c(0.9, 0.83, 0.76), labels = c("Acc:", "PPV:", "AUC:"), adj = 0)
+  text(x = rep(0.94, 3), y = c(0.9, 0.83, 0.76), labels = round(as.numeric(c(glm.stats[c(1, 4)], auc)), 4), adj = 0)
+  points(x = glm.stats[3], y = glm.stats[2], col = "red", pch = 16)
+  
+  glm.stats <- sapply(c("accuracy", "sensitivity", "specificity", "ppv"),
+                      FUN = logreg, formula = SPWeeklyLMod[[i]], dataTrain = SPWeeklyTest)
+  glm.fit <- glm(SPWeeklyLMod[[i]], data = SPWeeklyTest, family = "binomial")
+  glm.probs <- predict(glm.fit, SPWeeklyTest, type = "response")
+  auc <- roc(SPWeeklyTest$Direction, glm.probs, direction = "<")$auc
+  roc(SPWeeklyTest$Direction, glm.probs, plot = TRUE, direction = "<", mar = c(4, 4, 1, 2) + 0.1)
+  text(x = rep(1.1, 3)[j], y = rep(0.98, 3)[j],
+       labels = c("Model 2: Test", "Model 5: Test", "Model 6: Test")[j], adj = 0)
+  text(x = rep(1.1, 3), y = c(0.9, 0.83, 0.76), labels = c("Acc:", "PPV:", "AUC:"), adj = 0)
+  text(x = rep(0.94, 3), y = c(0.9, 0.83, 0.76), labels = round(as.numeric(c(glm.stats[c(1, 4)], auc)), 4), adj = 0)
+  points(x = glm.stats[3], y = glm.stats[2], col = "red", pch = 16)}
+
+```
+
+\newpage
+
+``` {r Figure21, fig.height = 8, warning = FALSE, fig.cap = "\\label{fig:Figure21} Standardised deviance residuals (left) and standardised Pearson residuals (right) for logistic regression models selected using accuracy. Solid red lines represent a loess fit to the residuals and should be approximately horizontal at zero; dotted red lines represent $\\pm$ 2 standard deviations on the residuals."}
+
+# Re-fit top models to get residuals
+SPWeeklyLModList <- lapply(SPWeeklyLMod, FUN = glm, data = SPWeeklyTrain, family = "binomial")
+
+# Generate residual plots
+par(mfrow = c(3, 2), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
+for(i in c(1, 3, 4)){
+  
+  # Offset numbers for indexing purposes
+  if(i == 1){j <- 1}
+  if(i == 3){j <- 2}
+  if(i == 4){j <- 3}
+  
+  # Calculate leverage and residuals
+  hvals <- influence(SPWeeklyLModList[[i]])$hat
+  SRDeviance <- rstandard(SPWeeklyLModList[[i]])
+  SRPearson <- residuals(SPWeeklyLModList[[i]], "pearson")/sqrt(1 - hvals)
+  
+  # Plot standardised deviance residuals
+  plot(predict(SPWeeklyLModList[[i]], type = "response"), SRDeviance, xlab = "Fitted Probability",
+       col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylim = c(-3, 3),
+       ylab = "Standardised Deviance Residuals", xlim = if(i == 4){c(0.3, 0.8)})
+  lines(lowess(predict(SPWeeklyLModList[[i]]), residuals(SPWeeklyLModList[[i]])), col = "red", lwd = 1.5)
+  abline(h = c(-2, 2), col = "red", lty = 3, lwd = 1.5)
+  text(x = c(0.294, 0.021, 0.29)[j], y = rep(2.85, 3)[j], labels = c("Model 1", "Model 3", "Model 4")[j], adj = 0)
+
+  # Plot standardised Pearson residuals
+  plot(predict(SPWeeklyLModList[[i]], type = "response"), SRPearson, xlab = "Fitted Probability",
+       col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylim = c(-3, 3),
+       ylab = "Pearson Deviance Residuals", xlim = if(i == 4){c(0.3, 0.8)})
+  lines(lowess(predict(SPWeeklyLModList[[i]]), residuals(SPWeeklyLModList[[i]], "pearson")), col = "red", lwd = 1.5)
+  abline(h = c(-2, 2), col = "red", lty = 3, lwd = 1.5)
+  text(x = c(0.294, 0.021, 0.29)[j], y = rep(2.85, 3)[j], labels = c("Model 1", "Model 3", "Model 4")[j], adj = 0)}
+
+```
+
+\newpage
+
+``` {r Figure22, fig.height = 8, warning = FALSE, fig.cap = "\\label{fig:Figure22} Standardised deviance residuals (left) and standardised Pearson residuals (right) for logistic regression models selected using PPV. Solid red lines represent a loess fit to the residuals and should be approximately horizontal at zero; dotted red lines represent $\\pm$ 2 standard deviations on the residuals."}
+
+# Re-fit top models to get residuals
+SPWeeklyLModList <- lapply(SPWeeklyLMod, FUN = glm, data = SPWeeklyTrain, family = "binomial")
+
+# Generate residual plots
+par(mfrow = c(3, 2), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
+for(i in c(2, 5, 6)){
+  
+  # Offset numbers for indexing purposes
+  if(i == 2){j <- 1}
+  if(i == 5){j <- 2}
+  if(i == 6){j <- 3}
+  
+  # Calculate leverage and residuals
+  hvals <- influence(SPWeeklyLModList[[i]])$hat
+  SRDeviance <- rstandard(SPWeeklyLModList[[i]])
+  SRPearson <- residuals(SPWeeklyLModList[[i]], "pearson")/sqrt(1 - hvals)
+  
+  # Plot standardised deviance residuals
+  plot(predict(SPWeeklyLModList[[i]], type = "response"), SRDeviance, xlab = "Fitted Probability",
+       col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylim = c(-3, 3),
+       ylab = "Standardised Deviance Residuals", xlim = if(i %in% c(2, 6)){
+                                                            if(i == 2){c(0.3, 0.8)} else {c(0.2, 1)}})
+  lines(lowess(predict(SPWeeklyLModList[[i]]), residuals(SPWeeklyLModList[[i]])), col = "red", lwd = 1.5)
+  abline(h = c(-2, 2), col = "red", lty = 3, lwd = 1.5)
+  text(x = c(0.293, 0.003, 0.19)[j], y = rep(2.85, 3)[j], labels = c("Model 2", "Model 5", "Model 6")[j], adj = 0)
+
+  # Plot standardised Pearson residuals
+  plot(predict(SPWeeklyLModList[[i]], type = "response"), SRPearson, xlab = "Fitted Probability",
+       col = rgb(red = 0, green = 0, blue = 0, alpha = 0.3), pch = 16, ylim = c(-3, 3),
+       ylab = "Pearson Deviance Residuals", xlim = if(i %in% c(2, 6)){
+                                                       if(i == 2){c(0.3, 0.8)} else {c(0.2, 1)}})
+  lines(lowess(predict(SPWeeklyLModList[[i]]), residuals(SPWeeklyLModList[[i]], "pearson")), col = "red", lwd = 1.5)
+  abline(h = c(-2, 2), col = "red", lty = 3, lwd = 1.5)
+  text(x = c(0.293, 0.003, 0.19)[j], y = rep(2.85, 3)[j], labels = c("Model 2", "Model 5", "Model 6")[j], adj = 0)}
+
+```
+
+\newpage
+
+``` {r Figure23, fig.height = 7.8, warning = FALSE, fig.cap = "\\label{fig:Figure23} Relative value of the S\\&P 500 from 2011-2021 (left) and percent change for weeks in 2011-2021 for which an increase was not predicted (right) based on logistic regression models fit to the 1986-2010 data; the three models here were selected using overall accuracy. The black line represents a buy-and-hold strategy, while the blue line represents a strategy of selling all assets before a predicted decrease and then purchasing them back the next time there is a predicted increase. The purple line represents a less risky strategy of only selling 35\\% of assets before a predicted decrease and then purchasing them back the next time there is a predicted increase."}
+
+# Generate plots
+par(mfrow = c(3, 2), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
+for(i in c(1, 3, 4)){
+  
+  # Offset numbers for indexing purposes
+  if(i == 1){j <- 1}
+  if(i == 3){j <- 2}
+  if(i == 4){j <- 3}
+  
+  # Plot returns
+  plot(returns.logreg(SPWeeklyLMod[[i]], data = SPWeeklyTest), type = "l", col = "blue", xaxt = "n",
+       xlab = "Year", ylab = "Proportion of Initial Value", ylim = c(0, 8))
+  axis(1, at = nrow(SPWeeklyTest)*(0:5)/5, labels = seq(2011, 2021, length.out = 6), cex.axis = 0.85)
+  lines(returns.logreg(SPWeeklyLMod[[i]], data = SPWeeklyTest, lrisk = TRUE), col = "purple")
+  lines(returns.logreg("none", data = SPWeeklyTest))
+  text(x = rep(-8, 3)[j], y = rep(7.8, 3)[j], labels = c("Model 1", "Model 3", "Model 4")[j], adj = 0)
+  
+  # Plot increases/decreases on weeks when mode predicts a decrease
+  glm.fit <- glm(SPWeeklyLMod[[i]], data = SPWeeklyTest, family = "binomial")
+  glm.probs <- predict(glm.fit, SPWeeklyTest, type = "response")
+  glm.pred <- rep("Down", length(glm.probs))
+  glm.pred[glm.probs >= 0.5] <- "Up"
+  plotdat <- data.frame(glm.pred, SPWeeklyTest$Direction, SPWeeklyTest$PctChange)
+  plotdat <- subset(plotdat, glm.pred == "Down")
+  plot(as.numeric(rownames(plotdat)), plotdat$SPWeeklyTest.PctChange, pch = 16, xaxt = "n",
+       xlim = c(0, nrow(SPWeeklyTest)), col = ifelse(plotdat$SPWeeklyTest.PctChange < 0, "red", "green"),
+       xlab = "Year", ylab = "Weekly Percent Change", ylim = c(-16, 16), cex.axis = 0.9)
+  axis(1, at = nrow(SPWeeklyTest)*(0:5)/5, labels = seq(2011, 2021, length.out = 6), cex.axis = 0.85)
+  abline(h = mean(plotdat$SPWeeklyTest.PctChange[plotdat$SPWeeklyTest.PctChange < 0]), lty = 2, col = "red")
+  abline(h = mean(plotdat$SPWeeklyTest.PctChange[plotdat$SPWeeklyTest.PctChange > 0]), lty = 2, col = "green")
+  text(x = rep(-8, 3)[j], y = rep(15, 3)[j], labels = c("Model 1", "Model 3", "Model 4")[j], adj = 0)
+  text(x = rep(110, 3)[j], y = rep(15, 3)[j], labels = as.numeric(table(plotdat$SPWeeklyTest.Direction)[1]),
+       col = "red", adj = 0)
+  text(x = rep(140, 3)[j], y = rep(15, 3)[j], labels = "/", adj = 0)
+  text(x = rep(150, 3)[j], y = rep(15, 3)[j], labels = as.numeric(table(plotdat$SPWeeklyTest.Direction)[2]),
+       col = "green", adj = 0)}
+
+```
+
+\newpage
+
+``` {r Figure24, fig.height = 7.8, warning = FALSE, fig.cap = "\\label{fig:Figure24} Relative value of the S\\&P 500 from 2011-2021 (left) and percent change for weeks in 2011-2021 for which an increase was not predicted (right) based on logistic regression models fit to the 1986-2010 data; the three models here were selected using PPV. The black line represents a buy-and-hold strategy, while the blue line represents a strategy of selling all assets before a predicted decrease and then purchasing them back the next time there is a predicted increase. The purple line represents a less risky strategy of only selling 35\\% of assets before a predicted decrease and then purchasing them back the next time there is a predicted increase."}
+
+# Generate plots
+par(mfrow = c(3, 2), mar = c(5, 4, 0.2, 2) + 0.1, mgp = c(2.3, 0.6, 0))
+for(i in c(2, 5, 6)){
+  
+  # Offset numbers for indexing purposes
+  if(i == 2){j <- 1}
+  if(i == 5){j <- 2}
+  if(i == 6){j <- 3}
+  
+  # Plot returns
+  plot(returns.logreg(SPWeeklyLMod[[i]], data = SPWeeklyTest), type = "l", col = "blue", xaxt = "n",
+       xlab = "Year", ylab = "Proportion of Initial Value", ylim = c(0, 8))
+  axis(1, at = nrow(SPWeeklyTest)*(0:5)/5, labels = seq(2011, 2021, length.out = 6), cex.axis = 0.85)
+  lines(returns.logreg(SPWeeklyLMod[[i]], data = SPWeeklyTest, lrisk = TRUE), col = "purple")
+  lines(returns.logreg("none", data = SPWeeklyTest))
+  text(x = rep(-8, 3)[j], y = rep(7.8, 3)[j], labels = c("Model 2", "Model 5", "Model 6")[j], adj = 0)
+  
+  # Plot increases/decreases on weeks when mode predicts a decrease
+  glm.fit <- glm(SPWeeklyLMod[[i]], data = SPWeeklyTest, family = "binomial")
+  glm.probs <- predict(glm.fit, SPWeeklyTest, type = "response")
+  glm.pred <- rep("Down", length(glm.probs))
+  glm.pred[glm.probs >= 0.5] <- "Up"
+  plotdat <- data.frame(glm.pred, SPWeeklyTest$Direction, SPWeeklyTest$PctChange)
+  plotdat <- subset(plotdat, glm.pred == "Down")
+  plot(as.numeric(rownames(plotdat)), plotdat$SPWeeklyTest.PctChange, pch = 16, xaxt = "n",
+       xlim = c(0, nrow(SPWeeklyTest)), col = ifelse(plotdat$SPWeeklyTest.PctChange < 0, "red", "green"),
+       xlab = "Year", ylab = "Weekly Percent Change", ylim = c(-16, 16), cex.axis = 0.9)
+  axis(1, at = nrow(SPWeeklyTest)*(0:5)/5, labels = seq(2011, 2021, length.out = 6), cex.axis = 0.85)
+  abline(h = mean(plotdat$SPWeeklyTest.PctChange[plotdat$SPWeeklyTest.PctChange < 0]), lty = 2, col = "red")
+  abline(h = mean(plotdat$SPWeeklyTest.PctChange[plotdat$SPWeeklyTest.PctChange > 0]), lty = 2, col = "green")
+  text(x = rep(-8, 3)[j], y = rep(15, 3)[j], labels = c("Model 2", "Model 5", "Model 6")[j], adj = 0)
+  text(x = rep(110, 3)[j], y = rep(15, 3)[j], labels = as.numeric(table(plotdat$SPWeeklyTest.Direction)[1]),
+       col = "red", adj = 0)
+  text(x = rep(140, 3)[j], y = rep(15, 3)[j], labels = "/", adj = 0)
+  text(x = rep(150, 3)[j], y = rep(15, 3)[j], labels = as.numeric(table(plotdat$SPWeeklyTest.Direction)[2]),
+       col = "green", adj = 0)}
+
+```
+
+\newpage
+
 ``` {r Figure25, fig.height = 8.3, warning = FALSE, message = FALSE, fig.cap = "\\label{fig:Figure25} ROC curves for the LDA models selected by maximising accuracy. Accuracy, positive predictive value (PPV), and area under the curve (AUC) are listed for each plot; the red dot represents model sensitivity and specificity."}
 
 par(mfrow = c(3, 2))
@@ -1667,6 +1737,8 @@ for(i in c(1, 5, 6)){
   points(x = da.stats[3], y = da.stats[2], col = "red", pch = 16)}
 
 ```
+
+\newpage
 
 ``` {r Figure26, fig.height = 8.3, warning = FALSE, message = FALSE, fig.cap = "\\label{fig:Figure26} ROC curves for the QDA models selected by maximising accuracy. Accuracy, positive predictive value (PPV), and area under the curve (AUC) are listed for each plot; the red dot represents model sensitivity and specificity."}
 
@@ -1704,6 +1776,8 @@ for(i in c(2, 7, 8)){
 
 ```
 
+\newpage
+
 ``` {r Figure27, fig.height = 8.3, warning = FALSE, message = FALSE, fig.cap = "\\label{fig:Figure27} ROC curves for the LDA models selected by maximising PPV. Accuracy, positive predictive value (PPV), and area under the curve (AUC) are listed for each plot; the red dot represents model sensitivity and specificity."}
 
 par(mfrow = c(3, 2))
@@ -1740,6 +1814,8 @@ for(i in c(3, 9, 10)){
 
 ```
 
+\newpage
+
 ``` {r Figure28, fig.height = 8.3, warning = FALSE, message = FALSE, fig.cap = "\\label{fig:Figure28} ROC curves for the QDA models selected by maximising PPV. Accuracy, positive predictive value (PPV), and area under the curve (AUC) are listed for each plot; the red dot represents model sensitivity and specificity."}
 
 par(mfrow = c(3, 2))
@@ -1775,6 +1851,8 @@ for(i in c(4, 11, 12)){
   points(x = da.stats[3], y = da.stats[2], col = "red", pch = 16)}
 
 ```
+
+\newpage
 
 ``` {r Figure29, fig.height = 7.8, warning = FALSE, fig.cap = "\\label{fig:Figure29} Relative value of the S\\&P 500 from 2011-2021 (left) and percent change for weeks in 2011-2021 for which an increase was not predicted (right) based on LDA models fit to the 1986-2010 data; the three models here were selected using accuracy. The black line represents a buy-and-hold strategy, while the blue line represents a strategy of selling all assets before a predicted decrease and then purchasing them back the next time there is a predicted increase. The purple line represents a less risky strategy of only selling 35\\% of assets before a predicted decrease and then purchasing them back the next time there is a predicted increase."}
 
@@ -1815,6 +1893,8 @@ for(i in c(1, 5, 6)){
 
 ```
 
+\newpage
+
 ``` {r Figure30, fig.height = 7.8, warning = FALSE, fig.cap = "\\label{fig:Figure30} Relative value of the S\\&P 500 from 2011-2021 (left) and percent change for weeks in 2011-2021 for which an increase was not predicted (right) based on QDA models fit to the 1986-2010 data; the three models here were selected using accuracy. The black line represents a buy-and-hold strategy, while the blue line represents a strategy of selling all assets before a predicted decrease and then purchasing them back the next time there is a predicted increase. The purple line represents a less risky strategy of only selling 35\\% of assets before a predicted decrease and then purchasing them back the next time there is a predicted increase."}
 
 # Generate plots
@@ -1853,6 +1933,8 @@ for(i in c(2, 7, 8)){
        col = "green", adj = 0)}
 
 ```
+
+\newpage
 
 ``` {r Figure31, fig.height = 7.8, warning = FALSE, fig.cap = "\\label{fig:Figure31} Relative value of the S\\&P 500 from 2011-2021 (left) and percent change for weeks in 2011-2021 for which an increase was not predicted (right) based on LDA models fit to the 1986-2010 data; the three models here were selected using PPV. The black line represents a buy-and-hold strategy, while the blue line represents a strategy of selling all assets before a predicted decrease and then purchasing them back the next time there is a predicted increase. The purple line represents a less risky strategy of only selling 35\\% of assets before a predicted decrease and then purchasing them back the next time there is a predicted increase."}
 
@@ -1893,6 +1975,8 @@ for(i in c(3, 9, 10)){
 
 ```
 
+\newpage
+
 ``` {r Figure32, fig.height = 7.8, warning = FALSE, fig.cap = "\\label{fig:Figure32} Relative value of the S\\&P 500 from 2011-2021 (left) and percent change for weeks in 2011-2021 for which an increase was not predicted (right) based on QDA models fit to the 1986-2010 data; the three models here were selected using PPV. The black line represents a buy-and-hold strategy, while the blue line represents a strategy of selling all assets before a predicted decrease and then purchasing them back the next time there is a predicted increase. The purple line represents a less risky strategy of only selling 35\\% of assets before a predicted decrease and then purchasing them back the next time there is a predicted increase."}
 
 # Generate plots
@@ -1932,14 +2016,3 @@ for(i in c(4, 11, 12)){
 
 ```
 
-\newpage
-
-## Support Vector Machines
-
-## Decision Trees
-
-## Advanced Methods
-
-# Conclusions
-
-# Figures
