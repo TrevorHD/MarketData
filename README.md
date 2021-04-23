@@ -11,9 +11,9 @@ An exploration of using machine learning for predictive modelling on stocks and 
 
 ## Scripts
 
-**YFanalysis** *(.Rmd)* Markdown for generating figures and rendering output to PDF.
+**YFAnalysis** *(.Rmd)* Markdown for generating figures and rendering output to PDF.
 
-**YFanalysis** *(.R)* Script for conducting analyses.
+**YFAnalysis** *(.R)* Script for conducting analyses.
 
 **YFData** *(.py)* - Script that extracts index data from Yahoo Finance, adds lag variables, and saves it as a CSV file.
 
