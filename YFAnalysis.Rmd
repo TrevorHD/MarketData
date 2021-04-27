@@ -1,6 +1,6 @@
 ---
-title: 'Machine Learning and Stock Market Data'
-subtitle: \textit{An Exercise In Predictive Modelling}
+title: 'Machine Learning and Market Indices'
+subtitle: \textit{An Exercise In Modelling Stock Market Data}
 author: "Trevor H. Drees"
 output:
   pdf_document:
