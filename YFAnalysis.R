@@ -603,3 +603,70 @@ for(i in c(1, 3, 5, 6, 9, 10)){
 for(i in c(2, 4, 7, 8, 11, 12)){
   print(returns.damod(formula(SPWeeklyDMod[[i]]), data = SPWeeklyTest, daType = "qda", final = TRUE))}
 
+
+
+
+
+##### Other models ----------------------------------------------------------------------------------------
+
+# Re-fit model using all previous trading weeks for the ith week
+returns.logreg.iter <- function(formula, data, final = FALSE, lrisk = FALSE){
+  if(formula != "none"){
+    for(i in 0:(nrow(SPWeeklyTest) - 1)){
+      dataTrain <- rbind(SPWeeklyTrain, SPWeeklyTest[0:i, ])
+      glm.fit <- glm(formula = formula, data = dataTrain, family = "binomial")
+      glm.probs <- predict(glm.fit, data, type = "response")
+      glm.pred.i <- ifelse(glm.probs[i + 1] >= 0.5, "Up", "Down")
+      if(i == 0){
+        glm.pred <- c()}
+      glm.pred <- c(glm.pred, glm.pred.i)}
+    pcts <- data$PctChange
+    if(lrisk == FALSE){
+      pcts[glm.pred == "Down"] <- 0}
+    if(lrisk == TRUE){
+      pcts[glm.pred == "Down"] <- pcts[glm.pred == "Down"]*0.65}
+    totalReturn <- c()
+    for(j in 1:length(pcts)){
+      totalReturn <- c(totalReturn, prod((pcts[1:j]/100) + 1))}}
+  if(formula == "none"){
+    totalReturn <- c()
+    for(j in 1:nrow(data)){
+      totalReturn <- c(totalReturn, prod((data$PctChange[1:j]/100)+1))}}
+  ifelse(final == TRUE, return(totalReturn[length(totalReturn)]), return(totalReturn))}
+
+# Compare lifetime returns; use loop since sapply doesn't work for some reason
+for(i in 1:6){
+  print(returns.logreg.iter(SPWeeklyLMod[[i]], data = SPWeeklyTest, final = TRUE))}
+
+# Re-fit model using all previous trading weeks for the ith week over a 10-year moving window
+returns.logreg.iter2 <- function(formula, data, final = FALSE, lrisk = FALSE){
+  windowSize <- 525
+  traindat.upper <- nrow(SPWeeklyTest)
+  traindat.lower <- traindat.upper - windowSize
+  if(formula != "none"){
+    for(i in 0:(nrow(SPWeeklyTest) - 1)){
+      dataTrain <- rbind(SPWeeklyTrain[(traindat.lower + i):traindat.upper, ], SPWeeklyTest[0:i, ])
+      glm.fit <- glm(formula = formula, data = dataTrain, family = "binomial")
+      glm.probs <- predict(glm.fit, data, type = "response")
+      glm.pred.i <- ifelse(glm.probs[i + 1] >= 0.5, "Up", "Down")
+      if(i == 0){
+        glm.pred <- c()}
+      glm.pred <- c(glm.pred, glm.pred.i)}
+    pcts <- data$PctChange
+    if(lrisk == FALSE){
+      pcts[glm.pred == "Down"] <- 0}
+    if(lrisk == TRUE){
+      pcts[glm.pred == "Down"] <- pcts[glm.pred == "Down"]*0.65}
+    totalReturn <- c()
+    for(j in 1:length(pcts)){
+      totalReturn <- c(totalReturn, prod((pcts[1:j]/100) + 1))}}
+  if(formula == "none"){
+    totalReturn <- c()
+    for(j in 1:nrow(data)){
+      totalReturn <- c(totalReturn, prod((data$PctChange[1:j]/100)+1))}}
+  ifelse(final == TRUE, return(totalReturn[length(totalReturn)]), return(totalReturn))}
+
+# Compare lifetime returns; use loop since sapply doesn't work for some reason
+for(i in 1:6){
+  print(returns.logreg.iter2(SPWeeklyLMod[[i]], data = SPWeeklyTest, final = TRUE))}
+
