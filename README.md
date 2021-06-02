@@ -2,16 +2,15 @@
 
 An exploration of using machine learning for predictive modelling on stocks and ETFs, using the S&P 500 (GSPC) as an example. Includes methods such as support vector machines, discriminant analysis, decision trees, logistic regression, and more. Data for the NASDAQ Composite (IXIC) and Dow Jones Industrial Average (DJIA) are also included, though while not used in the analyses, can easily be accommodated using the existing code.
 
+<br/>
+
 # Files
 
 ## Data
 
-
-**SPWeekly** *(.csv)* - Weekly percent change for the S&P 500, calculated from the Yahoo Finance data [here](https://finance.yahoo.com/quote/%5EGSPC/history?p=%5EGSPC).
+**SPWeekly** *(.csv)* - Weekly percent change and volume for the S&P 500, calculated from the Yahoo Finance data [here](https://finance.yahoo.com/quote/%5EGSPC/history?p=%5EGSPC).
 
 ## Scripts
-
-**YFAnalysis** *(.Rmd)* Markdown for generating figures and rendering output to PDF.
 
 **YFAnalysis** *(.R)* Script for conducting analyses.
 
@@ -19,16 +18,24 @@ An exploration of using machine learning for predictive modelling on stocks and 
 
 **YFData** *(.R)* - Script that cleans the index data prior to analysis.
 
+## Other
+
+**YFAnalysis** *(.Rmd)* Markdown for generating figures and rendering output to PDF.
+
+**YFAnalysis** *(.pdf)* PDF report of the analyses.
+
+**Header** *(.tex)* A TeX file with header specifications.
+
 ## Extras
 
 *Note: these files are not used in the analysis, but the code can be easily extended to accommodate them.*
 
-**DJDaily** *(.csv)* - Daily percent change for the Dow Jones Industrial Average, calculated from the Yahoo Finance data [here](https://finance.yahoo.com/quote/%5EDJI/history?p=%5EDJI).
+**DJDaily** *(.csv)* - Daily percent change and volume for the Dow Jones Industrial Average, calculated from the Yahoo Finance data [here](https://finance.yahoo.com/quote/%5EDJI/history?p=%5EDJI).
 
-**DJWeekly** *(.csv)* - Weekly percent change for the Dow Jones Industrial Average, calculated from the Yahoo Finance data [here](https://finance.yahoo.com/quote/%5EDJI/history?p=%5EDJI).
+**DJWeekly** *(.csv)* - Weekly percent change and volume for the Dow Jones Industrial Average, calculated from the Yahoo Finance data [here](https://finance.yahoo.com/quote/%5EDJI/history?p=%5EDJI).
 
-**NDDaily** *(.csv)* - Daily percent change for the NASDAQ Composite, calculated from the Yahoo Finance data [here](https://finance.yahoo.com/quote/%5EIXIC/history?p=%5EIXIC).
+**NDDaily** *(.csv)* - Daily percent change and volume for the NASDAQ Composite, calculated from the Yahoo Finance data [here](https://finance.yahoo.com/quote/%5EIXIC/history?p=%5EIXIC).
 
-**NDWeekly** *(.csv)* - Weekly percent change for the NASDAQ Composite, calculated from the Yahoo Finance data [here](https://finance.yahoo.com/quote/%5EIXIC/history?p=%5EIXIC).
+**NDWeekly** *(.csv)* - Weekly percent change and volume for the NASDAQ Composite, calculated from the Yahoo Finance data [here](https://finance.yahoo.com/quote/%5EIXIC/history?p=%5EIXIC).
 
-**SPDaily** *(.csv)* - Daily percent change for the S&P 500, calculated from the Yahoo Finance data [here](https://finance.yahoo.com/quote/%5EGSPC/history?p=%5EGSPC).
+**SPDaily** *(.csv)* - Daily percent change and volume for the S&P 500, calculated from the Yahoo Finance data [here](https://finance.yahoo.com/quote/%5EGSPC/history?p=%5EGSPC).
