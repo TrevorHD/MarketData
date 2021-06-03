@@ -18,9 +18,9 @@ An exploration of using machine learning for predictive modelling on stocks and 
 
 **YFData** *(.R)* - Script that cleans the index data prior to analysis.
 
-## Other
-
 **YFAnalysis** *(.Rmd)* Markdown for generating figures and rendering output to PDF.
+
+## Other
 
 **YFAnalysis** *(.pdf)* PDF report of the analyses.
 
